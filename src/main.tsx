@@ -8,12 +8,15 @@ import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
 import './styles/base.css';
 
-import { App } from './App';
+import { App } from './app/App';
+import { AppProviders } from './app/providers/AppProviders';
 
 setupIonicReact();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <AppProviders>
+      <App />
+    </AppProviders>
   </React.StrictMode>,
 );
