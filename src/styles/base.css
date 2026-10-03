@@ -35,10 +35,19 @@ body,
   min-height: 100%;
   place-items: center;
   padding: 1.5rem;
+  align-content: center;
+  gap: 1.5rem;
 }
 
 .app-home h1 {
   margin: 0;
   font-size: clamp(2.5rem, 12vw, 5rem);
   letter-spacing: -0.05em;
+}
+
+.language-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }

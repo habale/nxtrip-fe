@@ -1,0 +1,7 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "network": "Check your connection and try again.",
+  "notFound": "We couldn't find what you're looking for.",
+  "unauthorized": "You don't have permission to do that.",
+  "validation": "Check the information you entered and try again."
+}

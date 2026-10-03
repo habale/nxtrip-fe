@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "SxTrip"
+  },
+  "language": {
+    "label": "Interface language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "actions": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "retry": "Try again",
+    "save": "Save"
+  },
+  "states": {
+    "empty": "Nothing here yet.",
+    "loading": "Loading…"
+  }
+}

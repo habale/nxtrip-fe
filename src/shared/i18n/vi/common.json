@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "SxTrip"
+  },
+  "language": {
+    "label": "Ngôn ngữ giao diện",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  },
+  "actions": {
+    "back": "Quay lại",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "delete": "Xóa",
+    "retry": "Thử lại",
+    "save": "Lưu"
+  },
+  "states": {
+    "empty": "Chưa có nội dung.",
+    "loading": "Đang tải…"
+  }
+}
