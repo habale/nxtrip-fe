@@ -60,6 +60,30 @@
     "noFilteredTrips": "Không có chuyến đi phù hợp",
     "showAll": "Hiện tất cả chuyến đi"
   },
+  "createTrip": {
+    "eyebrow": "Chuyến phiêu lưu mới",
+    "title": "Tạo chuyến đi",
+    "name": "Tên chuyến đi",
+    "namePlaceholder": "Ví dụ: Mùa hè ở Nhật Bản",
+    "description": "Mô tả (không bắt buộc)",
+    "descriptionPlaceholder": "Bạn đang cùng nhau lên kế hoạch gì?",
+    "datesTitle": "Ngày đi",
+    "datesDescription": "Ngày đi không bắt buộc và có thể thay đổi sau.",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "timezone": "Múi giờ",
+    "timezoneHelp": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh.",
+    "defaultCurrency": "Tiền tệ mặc định",
+    "submit": "Tạo chuyến đi",
+    "creating": "Đang tạo chuyến đi…",
+    "validation": {
+      "required": "Trường này là bắt buộc.",
+      "tooLong": "Tên chuyến đi không được vượt quá 160 ký tự.",
+      "endBeforeStart": "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.",
+      "invalidTimezone": "Nhập múi giờ IANA hợp lệ.",
+      "invalidCurrency": "Nhập mã tiền tệ gồm ba chữ cái hợp lệ."
+    }
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

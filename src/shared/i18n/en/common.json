@@ -61,6 +61,30 @@
     "noFilteredTrips": "No trips match this filter",
     "showAll": "Show all trips"
   },
+  "createTrip": {
+    "eyebrow": "New adventure",
+    "title": "Create a trip",
+    "name": "Trip name",
+    "namePlaceholder": "e.g. Summer in Japan",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "What are you planning together?",
+    "datesTitle": "Trip dates",
+    "datesDescription": "Dates are optional and can be changed later.",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "timezone": "Timezone",
+    "timezoneHelp": "Use an IANA timezone such as Asia/Ho_Chi_Minh.",
+    "defaultCurrency": "Default currency",
+    "submit": "Create trip",
+    "creating": "Creating trip…",
+    "validation": {
+      "required": "This field is required.",
+      "tooLong": "Trip name must be 160 characters or fewer.",
+      "endBeforeStart": "End date must be on or after the start date.",
+      "invalidTimezone": "Enter a valid IANA timezone.",
+      "invalidCurrency": "Enter a valid three-letter currency code."
+    }
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",

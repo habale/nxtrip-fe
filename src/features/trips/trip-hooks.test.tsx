@@ -71,6 +71,7 @@ describe('trip list hook', () => {
   it('loads accessible trips for the authenticated user', async () => {
     const repository = {
       listAccessible: vi.fn(async () => [tripItem]),
+      create: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {
@@ -84,6 +85,7 @@ describe('trip list hook', () => {
   it('supports an empty trip list', async () => {
     const repository = {
       listAccessible: vi.fn(async () => []),
+      create: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {

@@ -1,0 +1,127 @@
+.create-trip-page {
+  min-height: 100%;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.create-trip-header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: grid;
+  min-height: 6rem;
+  grid-template-columns: 3.5rem 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: env(safe-area-inset-top) 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.create-trip-header .ui-button {
+  width: 3rem;
+  min-height: 3rem;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.create-trip-header h1,
+.create-trip-header p,
+.create-trip-section-heading h2,
+.create-trip-section-heading p,
+.create-trip-field-error,
+.create-trip-submit-error {
+  margin: 0;
+}
+
+.create-trip-header h1 {
+  font-size: clamp(1.65rem, 6vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+.create-trip-header p {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.create-trip-form {
+  display: grid;
+  width: min(100%, 46rem);
+  margin: 0 auto;
+  gap: 1.25rem;
+  padding: 1.5rem 1rem max(3rem, env(safe-area-inset-bottom));
+}
+
+.create-trip-card {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.create-trip-section-heading {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.create-trip-section-heading h2 {
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+}
+
+.create-trip-section-heading p,
+.create-trip-field-error {
+  color: var(--color-ink-muted);
+  font-size: 0.875rem;
+}
+
+.create-trip-dates {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.create-trip-dates > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.create-trip-dates > div > span {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.create-trip-field-error,
+.create-trip-submit-error {
+  color: var(--color-negative);
+}
+
+.create-trip-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 0.75rem;
+}
+
+.create-trip-actions .ui-button {
+  min-height: 3.5rem;
+}
+
+@media (min-width: 700px) {
+  .create-trip-form {
+    padding-top: 2.5rem;
+  }
+
+  .create-trip-dates,
+  .create-trip-settings {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .create-trip-section-heading {
+    grid-column: 1 / -1;
+  }
+}

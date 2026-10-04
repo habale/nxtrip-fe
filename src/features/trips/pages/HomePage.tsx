@@ -66,7 +66,7 @@ export function HomePage() {
           <div>
             <h1>{t('home.greeting', { name: firstName })}</h1>
           </div>
-          <Button disabled>
+          <Button href={routes.newTrip} navigationDirection="forward">
             <span className="home-new-trip">
               <Icon name="add" />
               {t('home.newTrip')}

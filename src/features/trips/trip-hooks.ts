@@ -1,7 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '../auth/auth-context';
-import { getTripRepository, type TripRepository } from './trip-repository';
+import {
+  getTripRepository,
+  type CreateTripInput,
+  type TripRepository,
+} from './trip-repository';
 
 export const tripKeys = {
   all: ['trips'] as const,
@@ -16,5 +20,24 @@ export function useTripList(repository?: TripRepository) {
     enabled: Boolean(user),
     queryFn: () =>
       (repository ?? getTripRepository()).listAccessible(user?.id ?? ''),
+  });
+}
+
+export function useCreateTrip(repository?: TripRepository) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: Omit<CreateTripInput, 'createdBy'>) => {
+      if (!user) throw new Error('Authentication is required.');
+
+      return (repository ?? getTripRepository()).create({
+        ...input,
+        createdBy: user.id,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tripKeys.all });
+    },
   });
 }
