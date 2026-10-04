@@ -23,6 +23,15 @@ export function useTripList(repository?: TripRepository) {
   });
 }
 
+export function useTripDetail(tripId: string, repository?: TripRepository) {
+  return useQuery({
+    queryKey: [...tripKeys.all, 'detail', tripId],
+    enabled: Boolean(tripId),
+    queryFn: () =>
+      (repository ?? getTripRepository()).getAccessibleById(tripId),
+  });
+}
+
 export function useCreateTrip(repository?: TripRepository) {
   const { user } = useAuth();
   const queryClient = useQueryClient();

@@ -5,8 +5,9 @@ import { Navigate, Route } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { SettingsPage } from '../features/profile/pages/SettingsPage';
-import { HomePage } from '../features/trips/pages/HomePage';
 import { CreateTripPage } from '../features/trips/pages/CreateTripPage';
+import { HomePage } from '../features/trips/pages/HomePage';
+import { TripDetailPage } from '../features/trips/pages/TripDetailPage';
 import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
 import { ROUTE_PATHS } from './routes';
 import { NotFoundPage, PlaceholderPage } from './shell/PlaceholderPage';
@@ -76,53 +77,11 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         }
       />
       <Route
-        path={ROUTE_PATHS.trip}
+        path={ROUTE_PATHS.tripSection}
         element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.trip.title"
-            descriptionKey="pages.trip.description"
-          />
-        }
-      />
-      <Route
-        path={ROUTE_PATHS.tripInfo}
-        element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.tripInfo.title"
-            descriptionKey="pages.tripInfo.description"
-          />
-        }
-      />
-      <Route
-        path={ROUTE_PATHS.tripItinerary}
-        element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.tripItinerary.title"
-            descriptionKey="pages.tripItinerary.description"
-          />
-        }
-      />
-      <Route
-        path={ROUTE_PATHS.tripLedger}
-        element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.tripLedger.title"
-            descriptionKey="pages.tripLedger.description"
-          />
-        }
-      />
-      <Route
-        path={ROUTE_PATHS.tripAttachments}
-        element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.tripAttachments.title"
-            descriptionKey="pages.tripAttachments.description"
-          />
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <TripDetailPage />
+          </ProtectedRoute>
         }
       />
       <Route

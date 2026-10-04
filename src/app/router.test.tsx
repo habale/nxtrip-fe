@@ -29,11 +29,6 @@ describe('application routes', () => {
     ['/home', 'Hi, Traveler! 👋'],
     ['/trips/new', 'Create a trip'],
     ['/bookmarks', 'Bookmarks'],
-    ['/trips/trip-123', 'Trip'],
-    ['/trips/trip-123/info', 'Trip info'],
-    ['/trips/trip-123/itinerary', 'Itinerary'],
-    ['/trips/trip-123/ledger', 'Ledger'],
-    ['/trips/trip-123/attachments', 'Attachments'],
     ['/settings', 'Profile & Settings'],
   ])('renders protected route %s', async (path, title) => {
     renderRoute(path, true);

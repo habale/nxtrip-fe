@@ -85,6 +85,29 @@
       "invalidCurrency": "Enter a valid three-letter currency code."
     }
   },
+  "tripDetail": {
+    "navigation": "Trip sections",
+    "moreActions": "More trip actions — coming soon",
+    "sections": {
+      "info": "Info",
+      "itinerary": "Itinerary",
+      "ledger": "Ledger",
+      "attachments": "Attachments",
+      "bookmarks": "Bookmarks"
+    },
+    "placeholders": {
+      "info": "Trip details and members arrive in the next phase.",
+      "itinerary": "Your itinerary will appear here.",
+      "ledger": "Shared expenses and balances will appear here.",
+      "attachments": "Trip files and photos will appear here.",
+      "bookmarks": "Saved places for this trip will appear here."
+    },
+    "notFoundTitle": "Trip not found",
+    "notFoundDescription": "This trip may have been removed, or you may not have access to it.",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedDescription": "You don't have permission to view this trip.",
+    "backToTrips": "Back to trips"
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",

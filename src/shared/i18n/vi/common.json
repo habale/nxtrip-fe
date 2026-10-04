@@ -84,6 +84,29 @@
       "invalidCurrency": "Nhập mã tiền tệ gồm ba chữ cái hợp lệ."
     }
   },
+  "tripDetail": {
+    "navigation": "Các mục chuyến đi",
+    "moreActions": "Thao tác khác — sắp ra mắt",
+    "sections": {
+      "info": "Thông tin",
+      "itinerary": "Lịch trình",
+      "ledger": "Sổ chi tiêu",
+      "attachments": "Tệp đính kèm",
+      "bookmarks": "Địa điểm đã lưu"
+    },
+    "placeholders": {
+      "info": "Chi tiết và thành viên chuyến đi sẽ được thêm ở giai đoạn tiếp theo.",
+      "itinerary": "Lịch trình của bạn sẽ hiển thị tại đây.",
+      "ledger": "Chi phí chung và số dư sẽ hiển thị tại đây.",
+      "attachments": "Tệp và ảnh chuyến đi sẽ hiển thị tại đây.",
+      "bookmarks": "Các địa điểm đã lưu cho chuyến đi sẽ hiển thị tại đây."
+    },
+    "notFoundTitle": "Không tìm thấy chuyến đi",
+    "notFoundDescription": "Chuyến đi có thể đã bị xóa hoặc bạn không có quyền truy cập.",
+    "accessDeniedTitle": "Không có quyền truy cập",
+    "accessDeniedDescription": "Bạn không có quyền xem chuyến đi này.",
+    "backToTrips": "Quay lại danh sách"
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

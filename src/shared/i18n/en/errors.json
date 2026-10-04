@@ -7,6 +7,7 @@
   "codes": {
     "AUTH_REQUIRED": "Sign in to continue.",
     "USER_PROFILE_NOT_FOUND": "We couldn't find your profile.",
+    "TRIP_NOT_FOUND": "We couldn't find this trip.",
     "TRIP_ACCESS_DENIED": "You don't have access to this trip.",
     "TRIP_INVITE_UNAVAILABLE": "This trip invitation is invalid, expired, or no longer available.",
     "LEDGER_NOT_EDITABLE": "This trip ledger can no longer be changed.",

@@ -18,6 +18,7 @@ export * from './SearchField';
 export * from './Segment';
 export * from './Select';
 export * from './Spinner';
+export * from './TabLink';
 export * from './TextArea';
 export * from './TextInput';
 export * from './Toggle';

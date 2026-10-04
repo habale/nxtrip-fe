@@ -1,3 +1,4 @@
+import { AppError } from '../../shared/api/app-error';
 import type { Database } from '../../shared/api/database.types';
 import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
@@ -26,6 +27,7 @@ export type CreateTripInput = {
 
 export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
+  getAccessibleById: (tripId: string) => Promise<Trip>;
   create: (input: CreateTripInput) => Promise<string>;
 };
 
@@ -85,6 +87,23 @@ export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
 
   return {
+    async getAccessibleById(tripId) {
+      const { data, error } = await client
+        .from('trips')
+        .select('*')
+        .eq('id', tripId)
+        .is('deleted_at', null)
+        .maybeSingle();
+
+      if (error) {
+        if (error.code === '42501') throw new AppError('TRIP_ACCESS_DENIED');
+        throw mapSupabaseError(error);
+      }
+      if (!data) throw new AppError('TRIP_NOT_FOUND');
+
+      return data;
+    },
+
     async create(input) {
       const tripId = crypto.randomUUID();
       const { error } = await client
