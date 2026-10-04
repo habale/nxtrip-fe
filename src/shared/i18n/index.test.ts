@@ -4,6 +4,7 @@ import {
   FALLBACK_LANGUAGE,
   LANGUAGE_STORAGE_KEY,
 } from '.';
+import { APP_ERROR_CODES } from '../api/app-error';
 
 describe('i18n', () => {
   it('resolves English and Vietnamese translations across namespaces', () => {
@@ -33,5 +34,15 @@ describe('i18n', () => {
     expect(detectLanguage()).toBe('vi');
 
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+  });
+
+  it('provides English and Vietnamese copy for every application error', () => {
+    const english = createI18n('en');
+    const vietnamese = createI18n('vi');
+
+    for (const code of APP_ERROR_CODES) {
+      expect(english.exists(`codes.${code}`, { ns: 'errors' })).toBe(true);
+      expect(vietnamese.exists(`codes.${code}`, { ns: 'errors' })).toBe(true);
+    }
   });
 });

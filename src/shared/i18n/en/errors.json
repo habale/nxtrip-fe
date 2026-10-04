@@ -3,5 +3,29 @@
   "network": "Check your connection and try again.",
   "notFound": "We couldn't find what you're looking for.",
   "unauthorized": "You don't have permission to do that.",
-  "validation": "Check the information you entered and try again."
+  "validation": "Check the information you entered and try again.",
+  "codes": {
+    "AUTH_REQUIRED": "Sign in to continue.",
+    "USER_PROFILE_NOT_FOUND": "We couldn't find your profile.",
+    "TRIP_ACCESS_DENIED": "You don't have access to this trip.",
+    "TRIP_INVITE_UNAVAILABLE": "This trip invitation is invalid, expired, or no longer available.",
+    "LEDGER_NOT_EDITABLE": "This trip ledger can no longer be changed.",
+    "EXPENSE_AMOUNT_INVALID": "Enter an expense amount greater than zero.",
+    "EXPENSE_TITLE_REQUIRED": "Enter a title for the expense.",
+    "EXPENSE_MEMBERS_REQUIRED": "Select at least one member for this expense.",
+    "EXPENSE_SPLIT_DUPLICATE_MEMBER": "Each member can appear only once in an expense split.",
+    "EXPENSE_MEMBER_INVALID": "One or more selected members can no longer be used.",
+    "EXPENSE_PAYER_CONFIGURATION_INVALID": "Choose one valid payment source for this expense.",
+    "EXPENSE_PAYER_MEMBER_INVALID": "The selected paying member can no longer be used.",
+    "EXPENSE_PAYER_FUND_INVALID": "The selected group fund is unavailable or uses a different currency.",
+    "EXPENSE_SPLIT_METHOD_UNSUPPORTED": "Choose a supported expense split method.",
+    "EXPENSE_NOT_FOUND": "This expense could not be found.",
+    "EXPENSE_TRIP_MISMATCH": "This expense does not belong to the selected trip.",
+    "EXPENSE_SHARE_AMOUNT_INVALID": "Each expense share must be zero or greater.",
+    "EXPENSE_SHARE_MISMATCH": "The expense shares must add up to the total amount.",
+    "ITINERARY_NODE_INVALID": "The selected itinerary item is unavailable.",
+    "SETTLEMENT_NOT_FOUND": "This settlement could not be found.",
+    "SETTLEMENT_MARK_FORBIDDEN": "You don't have permission to update this settlement.",
+    "SETTLEMENT_ALREADY_DONE": "This settlement is already marked as done."
+  }
 }

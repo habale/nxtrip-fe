@@ -3,5 +3,29 @@
   "network": "Hãy kiểm tra kết nối và thử lại.",
   "notFound": "Không tìm thấy nội dung bạn cần.",
   "unauthorized": "Bạn không có quyền thực hiện thao tác này.",
-  "validation": "Hãy kiểm tra thông tin đã nhập và thử lại."
+  "validation": "Hãy kiểm tra thông tin đã nhập và thử lại.",
+  "codes": {
+    "AUTH_REQUIRED": "Hãy đăng nhập để tiếp tục.",
+    "USER_PROFILE_NOT_FOUND": "Không tìm thấy hồ sơ của bạn.",
+    "TRIP_ACCESS_DENIED": "Bạn không có quyền truy cập chuyến đi này.",
+    "TRIP_INVITE_UNAVAILABLE": "Lời mời tham gia chuyến đi không hợp lệ, đã hết hạn hoặc không còn khả dụng.",
+    "LEDGER_NOT_EDITABLE": "Không thể thay đổi sổ chi tiêu của chuyến đi này nữa.",
+    "EXPENSE_AMOUNT_INVALID": "Hãy nhập số tiền chi tiêu lớn hơn 0.",
+    "EXPENSE_TITLE_REQUIRED": "Hãy nhập tiêu đề cho khoản chi.",
+    "EXPENSE_MEMBERS_REQUIRED": "Hãy chọn ít nhất một thành viên cho khoản chi này.",
+    "EXPENSE_SPLIT_DUPLICATE_MEMBER": "Mỗi thành viên chỉ được xuất hiện một lần khi chia khoản chi.",
+    "EXPENSE_MEMBER_INVALID": "Một hoặc nhiều thành viên đã chọn không còn khả dụng.",
+    "EXPENSE_PAYER_CONFIGURATION_INVALID": "Hãy chọn một nguồn thanh toán hợp lệ cho khoản chi này.",
+    "EXPENSE_PAYER_MEMBER_INVALID": "Thành viên thanh toán đã chọn không còn khả dụng.",
+    "EXPENSE_PAYER_FUND_INVALID": "Quỹ nhóm đã chọn không khả dụng hoặc sử dụng loại tiền khác.",
+    "EXPENSE_SPLIT_METHOD_UNSUPPORTED": "Hãy chọn phương thức chia khoản chi được hỗ trợ.",
+    "EXPENSE_NOT_FOUND": "Không tìm thấy khoản chi này.",
+    "EXPENSE_TRIP_MISMATCH": "Khoản chi này không thuộc chuyến đi đã chọn.",
+    "EXPENSE_SHARE_AMOUNT_INVALID": "Mỗi phần chia khoản chi phải bằng hoặc lớn hơn 0.",
+    "EXPENSE_SHARE_MISMATCH": "Tổng các phần chia phải bằng tổng số tiền của khoản chi.",
+    "ITINERARY_NODE_INVALID": "Mục lịch trình đã chọn không còn khả dụng.",
+    "SETTLEMENT_NOT_FOUND": "Không tìm thấy khoản quyết toán này.",
+    "SETTLEMENT_MARK_FORBIDDEN": "Bạn không có quyền cập nhật khoản quyết toán này.",
+    "SETTLEMENT_ALREADY_DONE": "Khoản quyết toán này đã được đánh dấu hoàn tất."
+  }
 }
