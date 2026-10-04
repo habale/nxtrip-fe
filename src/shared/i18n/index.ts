@@ -3,8 +3,10 @@ import { initReactI18next } from 'react-i18next';
 
 import enCommon from './en/common.json';
 import enErrors from './en/errors.json';
+import enNavigation from './en/navigation.json';
 import viCommon from './vi/common.json';
 import viErrors from './vi/errors.json';
+import viNavigation from './vi/navigation.json';
 
 export const SUPPORTED_LANGUAGES = ['en', 'vi'] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -13,8 +15,8 @@ export const FALLBACK_LANGUAGE: SupportedLanguage = 'en';
 export const LANGUAGE_STORAGE_KEY = 'sxtrip.language';
 
 const resources = {
-  en: { common: enCommon, errors: enErrors },
-  vi: { common: viCommon, errors: viErrors },
+  en: { common: enCommon, errors: enErrors, navigation: enNavigation },
+  vi: { common: viCommon, errors: viErrors, navigation: viNavigation },
 } as const;
 
 function toSupportedLanguage(value: string | null | undefined) {
@@ -57,7 +59,7 @@ export function createI18n(language: string = detectLanguage()): I18nInstance {
     lng: language,
     fallbackLng: FALLBACK_LANGUAGE,
     supportedLngs: SUPPORTED_LANGUAGES,
-    ns: ['common', 'errors'],
+    ns: ['common', 'errors', 'navigation'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false,

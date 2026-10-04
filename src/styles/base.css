@@ -51,3 +51,19 @@ body,
   justify-content: center;
   gap: 0.5rem;
 }
+
+.route-placeholder {
+  display: grid;
+  width: min(100%, 40rem);
+  min-height: 100%;
+  margin: 0 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.route-placeholder h1,
+.route-placeholder p {
+  margin: 0;
+}

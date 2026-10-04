@@ -1,0 +1,47 @@
+{
+  "pages": {
+    "login": {
+      "title": "Sign in",
+      "description": "Authentication will be connected in the next implementation phase."
+    },
+    "home": {
+      "title": "Trips",
+      "description": "Your trip list will appear here."
+    },
+    "bookmarks": {
+      "title": "Bookmarks",
+      "description": "Your saved places will appear here."
+    },
+    "trip": {
+      "title": "Trip",
+      "description": "The trip overview will appear here."
+    },
+    "tripInfo": {
+      "title": "Trip info",
+      "description": "Trip details and members will appear here."
+    },
+    "tripItinerary": {
+      "title": "Itinerary",
+      "description": "The trip itinerary will appear here."
+    },
+    "tripLedger": {
+      "title": "Ledger",
+      "description": "Trip expenses and balances will appear here."
+    },
+    "tripAttachments": {
+      "title": "Attachments",
+      "description": "Trip files and images will appear here."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Account and application preferences will appear here."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you requested does not exist."
+    }
+  },
+  "actions": {
+    "goHome": "Go to trips"
+  }
+}

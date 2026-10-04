@@ -1,0 +1,47 @@
+{
+  "pages": {
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Tính năng xác thực sẽ được kết nối trong giai đoạn triển khai tiếp theo."
+    },
+    "home": {
+      "title": "Chuyến đi",
+      "description": "Danh sách chuyến đi của bạn sẽ hiển thị tại đây."
+    },
+    "bookmarks": {
+      "title": "Địa điểm đã lưu",
+      "description": "Các địa điểm bạn đã lưu sẽ hiển thị tại đây."
+    },
+    "trip": {
+      "title": "Chuyến đi",
+      "description": "Tổng quan chuyến đi sẽ hiển thị tại đây."
+    },
+    "tripInfo": {
+      "title": "Thông tin chuyến đi",
+      "description": "Chi tiết và thành viên chuyến đi sẽ hiển thị tại đây."
+    },
+    "tripItinerary": {
+      "title": "Lịch trình",
+      "description": "Lịch trình chuyến đi sẽ hiển thị tại đây."
+    },
+    "tripLedger": {
+      "title": "Sổ chi tiêu",
+      "description": "Các khoản chi và số dư của chuyến đi sẽ hiển thị tại đây."
+    },
+    "tripAttachments": {
+      "title": "Tệp đính kèm",
+      "description": "Tệp và hình ảnh của chuyến đi sẽ hiển thị tại đây."
+    },
+    "settings": {
+      "title": "Cài đặt",
+      "description": "Tùy chọn tài khoản và ứng dụng sẽ hiển thị tại đây."
+    },
+    "notFound": {
+      "title": "Không tìm thấy trang",
+      "description": "Trang bạn yêu cầu không tồn tại."
+    }
+  },
+  "actions": {
+    "goHome": "Đi đến chuyến đi"
+  }
+}
