@@ -61,6 +61,29 @@
     "noFilteredTrips": "No trips match this filter",
     "showAll": "Show all trips"
   },
+  "addTrip": {
+    "title": "Add or Join Trip",
+    "heading": "Ready for your next journey?",
+    "description": "Start fresh with a blank canvas or jump into an existing crew itinerary.",
+    "createTitle": "Start a New Trip",
+    "createDescription": "Set dates, pin must-visit spots, organize shared day-by-day itineraries, and effortlessly balance group expenses.",
+    "createAction": "Create New Trip",
+    "or": "OR",
+    "joinTitle": "Join Existing Trip",
+    "joinDescription": "Enter the trip code from your friend to join the itinerary instantly.",
+    "pasteCode": "Paste Code",
+    "codeLabel": "Trip code",
+    "codePlaceholder": "Trip Code, e.g. ABC123",
+    "joinAction": "Join Trip",
+    "joining": "Joining…",
+    "pendingInvites": "Pending Invites",
+    "pendingCount": "{{count}} pending invitations",
+    "noPendingInvites": "You have no pending invitations.",
+    "validation": {
+      "required": "Enter a trip code.",
+      "invalid": "Enter a valid trip code."
+    }
+  },
   "createTrip": {
     "eyebrow": "New adventure",
     "title": "Create a trip",

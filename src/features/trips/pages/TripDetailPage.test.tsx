@@ -37,6 +37,7 @@ function createRepository(
     getAccessibleById,
     listAccessible: vi.fn(async () => []),
     create: vi.fn(async () => 'trip-new'),
+    joinByCode: vi.fn(async () => 'trip-joined'),
     updateMetadata: vi.fn(async () => trip),
     updateCover: vi.fn(async () => trip),
     removeCover: vi.fn(async () => trip),

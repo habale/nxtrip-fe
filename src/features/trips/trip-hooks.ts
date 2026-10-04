@@ -165,3 +165,15 @@ export function useCreateTrip(repository?: TripRepository) {
     },
   });
 }
+
+export function useJoinTrip(repository?: TripRepository) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (code: string) =>
+      (repository ?? getTripRepository()).joinByCode(code),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tripKeys.all });
+    },
+  });
+}

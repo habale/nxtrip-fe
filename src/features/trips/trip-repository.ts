@@ -1,6 +1,7 @@
 import { AppError } from '../../shared/api/app-error';
 import type { Database } from '../../shared/api/database.types';
 import { mapSupabaseError } from '../../shared/api/error-mapper';
+import { createRequestId } from '../../shared/api/request-id';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
 
 export type Trip = Database['public']['Tables']['trips']['Row'];
@@ -80,6 +81,7 @@ export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
   getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
   create: (input: CreateTripInput) => Promise<string>;
+  joinByCode: (code: string) => Promise<string>;
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
   updateCover: (input: UpdateTripCoverInput) => Promise<Trip>;
   removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
@@ -156,6 +158,17 @@ export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
 
   return {
+    async joinByCode(code) {
+      const requestId = createRequestId();
+      const { data, error } = await client.rpc('join_trip_by_code', {
+        p_code: code.trim(),
+        p_request_id: requestId,
+      });
+
+      if (error) throw mapSupabaseError(error, requestId);
+      return data;
+    },
+
     async listMembers(tripId) {
       const [membersResult, membershipsResult] = await Promise.all([
         client

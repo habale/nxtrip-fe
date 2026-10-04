@@ -6,6 +6,7 @@ import { Navigate, Route } from 'react-router-dom';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { SettingsPage } from '../features/profile/pages/SettingsPage';
 import { CreateTripPage } from '../features/trips/pages/CreateTripPage';
+import { AddTripPage } from '../features/trips/pages/AddTripPage';
 import { HomePage } from '../features/trips/pages/HomePage';
 import { TripDetailPage } from '../features/trips/pages/TripDetailPage';
 import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
@@ -55,6 +56,14 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTE_PATHS.addTrip}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <AddTripPage />
           </ProtectedRoute>
         }
       />

@@ -60,6 +60,29 @@
     "noFilteredTrips": "Không có chuyến đi phù hợp",
     "showAll": "Hiện tất cả chuyến đi"
   },
+  "addTrip": {
+    "title": "Thêm hoặc tham gia chuyến đi",
+    "heading": "Sẵn sàng cho hành trình tiếp theo?",
+    "description": "Bắt đầu một kế hoạch mới hoặc tham gia hành trình hiện có của nhóm.",
+    "createTitle": "Bắt đầu chuyến đi mới",
+    "createDescription": "Chọn ngày, lưu địa điểm, sắp xếp lịch trình theo ngày và dễ dàng cân đối chi phí nhóm.",
+    "createAction": "Tạo chuyến đi mới",
+    "or": "HOẶC",
+    "joinTitle": "Tham gia chuyến đi",
+    "joinDescription": "Nhập mã chuyến đi từ bạn bè để tham gia hành trình.",
+    "pasteCode": "Dán mã",
+    "codeLabel": "Mã chuyến đi",
+    "codePlaceholder": "Mã chuyến đi, ví dụ ABC123",
+    "joinAction": "Tham gia",
+    "joining": "Đang tham gia…",
+    "pendingInvites": "Lời mời đang chờ",
+    "pendingCount": "{{count}} lời mời đang chờ",
+    "noPendingInvites": "Bạn không có lời mời nào đang chờ.",
+    "validation": {
+      "required": "Nhập mã chuyến đi.",
+      "invalid": "Nhập mã chuyến đi hợp lệ."
+    }
+  },
   "createTrip": {
     "eyebrow": "Chuyến phiêu lưu mới",
     "title": "Tạo chuyến đi",

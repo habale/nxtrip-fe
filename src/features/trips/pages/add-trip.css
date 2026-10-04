@@ -1,0 +1,189 @@
+.add-trip-page {
+  min-height: 100%;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.add-trip-header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: grid;
+  min-height: 5.5rem;
+  grid-template-columns: 3.5rem 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: env(safe-area-inset-top) 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.add-trip-header .ui-button {
+  width: 3rem;
+  min-height: 3rem;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.add-trip-header h1,
+.add-trip-intro h2,
+.add-trip-intro p,
+.add-trip-card h2,
+.add-trip-card p,
+.pending-invites h2,
+.pending-invites p {
+  margin: 0;
+}
+
+.add-trip-header h1 {
+  font-size: clamp(1.55rem, 6vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.add-trip-content {
+  display: grid;
+  width: min(100%, 46rem);
+  margin: 0 auto;
+  gap: 1.25rem;
+  padding: 2rem 1rem max(3rem, env(safe-area-inset-bottom));
+}
+
+.add-trip-intro {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.add-trip-intro h2 {
+  max-width: 14ch;
+  font-size: clamp(2rem, 9vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+
+.add-trip-intro p,
+.add-trip-card > p {
+  color: var(--color-ink-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.add-trip-card {
+  display: grid;
+  overflow: hidden;
+  gap: 1rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.add-trip-card--create {
+  background:
+    radial-gradient(
+      circle at 100% 100%,
+      rgb(172 248 71 / 30%),
+      transparent 42%
+    ),
+    var(--color-surface);
+}
+
+.add-trip-card h2 {
+  font-size: clamp(1.45rem, 6vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.add-trip-card > .ui-button {
+  min-height: 3.5rem;
+}
+
+.add-trip-button-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.add-trip-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  color: var(--color-ink-muted);
+}
+
+.add-trip-divider::before,
+.add-trip-divider::after {
+  height: 1px;
+  background: var(--color-border);
+  content: '';
+}
+
+.add-trip-divider span {
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-soft);
+  font-weight: 600;
+}
+
+.add-trip-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.add-trip-card-heading .ui-button {
+  flex: 0 0 auto;
+  margin: 0;
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+}
+
+.add-trip-error {
+  color: var(--color-negative) !important;
+  font-size: 0.875rem !important;
+}
+
+.pending-invites {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.pending-invites__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pending-invites__heading h2 {
+  font-size: 1.25rem;
+}
+
+.pending-invites__heading span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  color: var(--color-secondary-strong);
+  font-weight: 800;
+}
+
+.pending-invites__empty {
+  padding: 1.25rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+@media (min-width: 700px) {
+  .add-trip-content {
+    padding-top: 3rem;
+  }
+}
