@@ -28,9 +28,9 @@ export function Page({
       {!hideHeader && (
         <IonHeader>
           <IonToolbar>
-            {headerStart}
+            {headerStart && <div slot="start">{headerStart}</div>}
             <IonTitle>{title}</IonTitle>
-            {headerEnd}
+            {headerEnd && <div slot="end">{headerEnd}</div>}
           </IonToolbar>
         </IonHeader>
       )}

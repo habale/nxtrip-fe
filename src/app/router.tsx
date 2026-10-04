@@ -3,10 +3,10 @@ import { IonReactRouter } from '@ionic/react-router';
 import type { ReactNode } from 'react';
 import { Navigate, Route } from 'react-router-dom';
 
-import { SignOutButton } from '../features/auth/components/SignOutButton';
 import { LoginPage } from '../features/auth/pages/LoginPage';
+import { SettingsPage } from '../features/profile/pages/SettingsPage';
+import { HomePage } from '../features/trips/pages/HomePage';
 import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
-import { LanguageSwitcher } from '../shared/ui/LanguageSwitcher';
 import { ROUTE_PATHS } from './routes';
 import { NotFoundPage, PlaceholderPage } from './shell/PlaceholderPage';
 import { ProtectedRoute } from './shell/ProtectedRoute';
@@ -51,11 +51,9 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
       <Route
         path={ROUTE_PATHS.home}
         element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.home.title"
-            descriptionKey="pages.home.description"
-          />
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <HomePage />
+          </ProtectedRoute>
         }
       />
       <Route
@@ -121,14 +119,9 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
       <Route
         path={ROUTE_PATHS.settings}
         element={
-          <ProtectedPage
-            isAuthenticated={isAuthenticated}
-            titleKey="pages.settings.title"
-            descriptionKey="pages.settings.description"
-          >
-            <LanguageSwitcher />
-            <SignOutButton />
-          </ProtectedPage>
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <SettingsPage />
+          </ProtectedRoute>
         }
       />
       <Route path={ROUTE_PATHS.uiKit} element={<UiShowcasePage />} />

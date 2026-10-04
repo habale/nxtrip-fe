@@ -33,7 +33,7 @@ describe('application routes', () => {
     ['/trips/trip-123/itinerary', 'Itinerary'],
     ['/trips/trip-123/ledger', 'Ledger'],
     ['/trips/trip-123/attachments', 'Attachments'],
-    ['/settings', 'Settings'],
+    ['/settings', 'Profile & Settings'],
   ])('renders protected route %s', async (path, title) => {
     renderRoute(path, true);
 
@@ -46,12 +46,7 @@ describe('application routes', () => {
     renderRoute('/settings', false);
 
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
-    expect(
-      await screen.findByRole('heading', {
-        level: 1,
-        name: 'Plan trips together, split bills effortlessly.',
-      }),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText('NxTrip')).toBeInTheDocument();
     expect(screen.getByText('Access as Guest')).toBeInTheDocument();
   });
 
@@ -62,6 +57,15 @@ describe('application routes', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Trips' }),
     ).toBeInTheDocument();
+  });
+
+  it('links the home avatar to profile and settings', async () => {
+    renderRoute('/home', true);
+
+    const profileAction = await screen.findByLabelText(
+      'Open profile and settings',
+    );
+    expect(profileAction).toHaveAttribute('router-link', '/settings');
   });
 
   it('renders a localized not-found page', async () => {
@@ -94,12 +98,7 @@ describe('application routes', () => {
 
     await user.click(await screen.findByText('Tiếng Việt'));
 
-    expect(
-      await screen.findByRole('heading', {
-        level: 1,
-        name: 'Cùng lên kế hoạch, chia chi phí thật dễ dàng.',
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Tiếp tục với Google')).toBeInTheDocument();
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('vi');
   });
 

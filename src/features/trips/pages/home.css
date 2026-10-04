@@ -1,0 +1,17 @@
+.home-profile-action {
+  display: grid;
+  padding-right: 0.5rem;
+  place-items: center;
+}
+
+.home-profile-action .ui-button {
+  width: 3rem;
+  min-height: 3rem;
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+}
+
+.home-profile-action .ui-avatar {
+  border: 2px solid var(--color-primary);
+  font-size: 0.8rem;
+}

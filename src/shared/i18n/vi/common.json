@@ -17,6 +17,18 @@
     "english": "English",
     "vietnamese": "Tiếng Việt"
   },
+  "settings": {
+    "title": "Hồ sơ & Cài đặt",
+    "openProfile": "Mở hồ sơ và cài đặt",
+    "profile": "Hồ sơ",
+    "preferences": "Tùy chọn ứng dụng",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Ngôn ngữ mặc định khi du lịch",
+    "englishOption": "English",
+    "vietnameseOption": "Tiếng Việt",
+    "savingLanguage": "Đang lưu tùy chọn ngôn ngữ…",
+    "changePhotoComingSoon": "Đổi ảnh hồ sơ — sắp ra mắt"
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

@@ -4,6 +4,7 @@ export type IconName =
   | 'back'
   | 'bookmark'
   | 'calendar'
+  | 'camera'
   | 'check'
   | 'close'
   | 'document'
@@ -16,6 +17,7 @@ export type IconName =
   | 'search'
   | 'settings'
   | 'trash'
+  | 'tune'
   | 'wallet';
 
 export type IconProps = {
@@ -30,6 +32,7 @@ const materialSymbolByName: Record<IconName, string> = {
   back: 'arrow_back',
   bookmark: 'bookmark',
   calendar: 'calendar_month',
+  camera: 'photo_camera',
   check: 'check',
   close: 'close',
   document: 'description',
@@ -42,6 +45,7 @@ const materialSymbolByName: Record<IconName, string> = {
   search: 'search',
   settings: 'settings',
   trash: 'delete',
+  tune: 'tune',
   wallet: 'account_balance_wallet',
 };
 

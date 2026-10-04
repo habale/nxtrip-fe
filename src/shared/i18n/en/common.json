@@ -17,6 +17,18 @@
     "english": "English",
     "vietnamese": "Tiếng Việt"
   },
+  "settings": {
+    "title": "Profile & Settings",
+    "openProfile": "Open profile and settings",
+    "profile": "Profile",
+    "preferences": "App Preferences",
+    "language": "Language",
+    "languageDescription": "Default travel locale",
+    "englishOption": "English",
+    "vietnameseOption": "Tiếng Việt",
+    "savingLanguage": "Saving language preference…",
+    "changePhotoComingSoon": "Change profile photo — coming soon"
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",
