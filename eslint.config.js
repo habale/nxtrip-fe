@@ -30,5 +30,26 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: [
+      'src/app/**/*.{ts,tsx}',
+      'src/features/**/components/**/*.{ts,tsx}',
+      'src/features/**/pages/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/shared/api/supabase-client'],
+              message:
+                'Presentation code must access Supabase through a repository or API module.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettierConfig,
 );
