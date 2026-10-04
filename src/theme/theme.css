@@ -1,7 +1,7 @@
 :root {
   /* NxTrip brand palette */
   --color-primary: #1d4ed8;
-  --color-strong: #153eae;
+  --color-strong: #1e3a8a;
   --color-soft: #e7edff;
   --color-secondary: #acf847;
   --color-secondary-strong: #143c16;
@@ -113,6 +113,29 @@
   --padding-end: 1.35rem;
 }
 
+.ui-button--filter {
+  --background: #eaedff;
+  --background-activated: #eaedff;
+  --background-hover: #eaedff;
+  --box-shadow: none;
+  --color: var(--color-ink);
+  font-weight: 500;
+}
+
+.ui-button--filter.ui-button--selected {
+  --color: var(--color-primary);
+  font-weight: 700;
+}
+
+.ui-button--filter::part(native) {
+  background: #eaedff;
+  color: var(--color-ink);
+}
+
+.ui-button--filter.ui-button--selected::part(native) {
+  color: var(--color-primary);
+}
+
 .ui-icon-button {
   width: var(--control-min-height);
   height: var(--control-min-height);
@@ -154,8 +177,8 @@
 .ui-avatar {
   display: grid;
   place-items: center;
-  background: var(--color-primary);
-  color: var(--color-surface);
+  background: #F1F5F9;
+  color: var(--color-ink);
   font-weight: 800;
 }
 

@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "SxTrip"
+    "name": "NxTrip"
   },
   "auth": {
     "signIn": "Sign in",
@@ -28,6 +28,38 @@
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Saving language preference…",
     "changePhotoComingSoon": "Change profile photo — coming soon"
+  },
+  "home": {
+    "traveler": "Traveler",
+    "greeting": "Hi, {{name}}! 👋",
+    "newTrip": "New Trip",
+    "filterLabel": "Filter trips",
+    "filterAriaLabel": "{{filter}}, {{count}} trips",
+    "filters": {
+      "all": "All Trips",
+      "ongoing": "Ongoing",
+      "planning": "Planning",
+      "pending_settlement": "To Settle",
+      "completed": "Completed"
+    },
+    "status": {
+      "ongoing": "Ongoing",
+      "planning": "Planning",
+      "pending_settlement": "To Settle",
+      "completed": "Completed"
+    },
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "noMembers": "No members",
+    "openTrip": "Open Trip",
+    "viewRecap": "View Recap",
+    "tripListLabel": "Your trips",
+    "loadErrorTitle": "Trips are taking a detour",
+    "loadErrorDescription": "We couldn't load your trips. Check your connection and try again.",
+    "emptyTitle": "Your next adventure starts here",
+    "emptyDescription": "Create a trip to start planning together.",
+    "noFilteredTrips": "No trips match this filter",
+    "showAll": "Show all trips"
   },
   "actions": {
     "back": "Back",

@@ -33,7 +33,10 @@ describe('App', () => {
     );
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Trips' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Hey, Traveler! 👋',
+      }),
     ).toBeInTheDocument();
   });
 

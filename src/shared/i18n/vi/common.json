@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "SxTrip"
+    "name": "NxTrip"
   },
   "auth": {
     "signIn": "Đăng nhập",
@@ -28,6 +28,37 @@
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Đang lưu tùy chọn ngôn ngữ…",
     "changePhotoComingSoon": "Đổi ảnh hồ sơ — sắp ra mắt"
+  },
+  "home": {
+    "traveler": "Bạn",
+    "greeting": "Chào {{name}}! 👋",
+    "newTrip": "Chuyến đi mới",
+    "filterLabel": "Lọc chuyến đi",
+    "filterAriaLabel": "{{filter}}, {{count}} chuyến đi",
+    "filters": {
+      "all": "Tất cả",
+      "ongoing": "Đang đi",
+      "planning": "Đang lên kế hoạch",
+      "pending_settlement": "Chờ quyết toán",
+      "completed": "Đã hoàn thành"
+    },
+    "status": {
+      "ongoing": "Đang đi",
+      "planning": "Đang lên kế hoạch",
+      "pending_settlement": "Chờ quyết toán",
+      "completed": "Đã hoàn thành"
+    },
+    "memberCount": "{{count}} thành viên",
+    "noMembers": "Chưa có thành viên",
+    "openTrip": "Mở chuyến đi",
+    "viewRecap": "Xem tổng kết",
+    "tripListLabel": "Chuyến đi của bạn",
+    "loadErrorTitle": "Chuyến đi đang bị gián đoạn",
+    "loadErrorDescription": "Không thể tải các chuyến đi. Hãy kiểm tra kết nối và thử lại.",
+    "emptyTitle": "Chuyến phiêu lưu tiếp theo bắt đầu tại đây",
+    "emptyDescription": "Tạo một chuyến đi để bắt đầu cùng nhau lên kế hoạch.",
+    "noFilteredTrips": "Không có chuyến đi phù hợp",
+    "showAll": "Hiện tất cả chuyến đi"
   },
   "actions": {
     "back": "Quay lại",

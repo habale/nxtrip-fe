@@ -62,6 +62,11 @@ describe('shared UI components', () => {
         <Icon name="location" label="Location" />
         <IconButton icon="add" label="Add item" />
         <Avatar name="Nolan" />
+        <Avatar name="Alex Morgan" initialCount={2} />
+        <Avatar name="Nolan" initialCount={2} />
+        <Button selected variant="filter">
+          Selected filter
+        </Button>
         <List>
           <ListItem title="Tokyo" description="Upcoming trip" />
         </List>
@@ -83,6 +88,12 @@ describe('shared UI components', () => {
     );
 
     expect(screen.getByText('Trip card')).toBeInTheDocument();
+    expect(screen.getByText('AM')).toBeInTheDocument();
+    expect(screen.getByText('NO')).toBeInTheDocument();
+    expect(screen.getByText('Selected filter')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
     expect(container.querySelector('ion-segment')).toBeInTheDocument();
     expect(container.querySelector('ion-datetime')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Location' })).toHaveTextContent(

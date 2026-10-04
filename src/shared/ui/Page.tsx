@@ -29,7 +29,7 @@ export function Page({
         <IonHeader>
           <IonToolbar>
             {headerStart && <div slot="start">{headerStart}</div>}
-            <IonTitle>{title}</IonTitle>
+            {title && <IonTitle>{title}</IonTitle>}
             {headerEnd && <div slot="end">{headerEnd}</div>}
           </IonToolbar>
         </IonHeader>

@@ -26,7 +26,7 @@ describe('application routes', () => {
   });
 
   it.each([
-    ['/home', 'Trips'],
+    ['/home', 'Hey, Traveler! 👋'],
     ['/bookmarks', 'Bookmarks'],
     ['/trips/trip-123', 'Trip'],
     ['/trips/trip-123/info', 'Trip info'],
@@ -55,7 +55,10 @@ describe('application routes', () => {
 
     await waitFor(() => expect(window.location.pathname).toBe('/home'));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Trips' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Hey, Traveler! 👋',
+      }),
     ).toBeInTheDocument();
   });
 

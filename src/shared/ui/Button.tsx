@@ -1,7 +1,8 @@
 import { IonButton } from '@ionic/react';
 import type { PropsWithChildren } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'danger';
+export type ButtonVariant =
+  'primary' | 'secondary' | 'tertiary' | 'quiet' | 'danger' | 'filter';
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 export type ButtonProps = PropsWithChildren<{
@@ -10,6 +11,7 @@ export type ButtonProps = PropsWithChildren<{
   block?: boolean;
   disabled?: boolean;
   loading?: boolean;
+  selected?: boolean;
   type?: 'button' | 'submit' | 'reset';
   href?: string;
   navigationDirection?: 'forward' | 'back' | 'root';
@@ -20,8 +22,10 @@ export type ButtonProps = PropsWithChildren<{
 const appearanceByVariant = {
   primary: { color: 'primary', fill: 'solid' },
   secondary: { color: 'secondary', fill: 'solid' },
+  tertiary: { color: 'tertiary', fill: 'solid' },
   quiet: { color: 'primary', fill: 'clear' },
   danger: { color: 'danger', fill: 'solid' },
+  filter: { color: undefined, fill: 'solid' },
 } as const;
 
 export function Button({
@@ -31,6 +35,7 @@ export function Button({
   block = false,
   disabled = false,
   loading = false,
+  selected = false,
   type = 'button',
   href,
   navigationDirection,
@@ -42,7 +47,10 @@ export function Button({
   return (
     <IonButton
       aria-label={ariaLabel}
-      className="ui-button"
+      aria-pressed={
+        variant === 'filter' ? (selected ? 'true' : 'false') : undefined
+      }
+      className={`ui-button ui-button--${variant}${selected ? ' ui-button--selected' : ''}`}
       color={appearance.color}
       disabled={disabled || loading}
       expand={block ? 'block' : undefined}
