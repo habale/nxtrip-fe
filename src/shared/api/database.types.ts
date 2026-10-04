@@ -1,4 +1,4 @@
-// Derived from nxtrip_initial_schema.sql, schema revision 1.1.
+// Derived from nxtrip_initial_schema_V2.sql, schema revision 1.3.
 // Replace this file with Supabase CLI output after the schema is deployed.
 
 export type Json =
@@ -91,24 +91,17 @@ type ItineraryNodeRow = {
   id: string;
   trip_id: string;
   node_type: string;
-  template_key: string;
   title: string;
-  notes: string | null;
+  additional_data: Json;
   local_date: string | null;
   start_at: string | null;
   end_at: string | null;
   timezone: string | null;
   all_day: boolean;
+  duration_minutes: number | null;
   sort_key: string;
-  place_name: string | null;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  place_provider: string | null;
-  provider_place_id: string | null;
-  source_url: string | null;
+  google_maps_url: string | null;
   icon_key: string | null;
-  template_data: Json;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -122,8 +115,12 @@ type ItineraryNodeActionRow = {
   node_id: string;
   action_type: string;
   label: string;
+  icon_key: string | null;
+  is_primary: boolean;
   sort_order: number;
-  config: Json;
+  action_data: Json;
+  created_by: string | null;
+  updated_by: string | null;
   created_at: string;
   updated_at: string;
   version: number;
@@ -169,13 +166,18 @@ type AttachmentRow = {
   deleted_at: string | null;
 };
 type ItineraryNodeAttachmentRow = {
+  id: string;
   trip_id: string;
   node_id: string;
   attachment_id: string;
   role: string;
   sort_order: number;
-  caption: string | null;
+  label: string | null;
+  created_by: string | null;
   created_at: string;
+  updated_at: string;
+  version: number;
+  deleted_at: string | null;
 };
 type TripFundRow = {
   id: string;
@@ -330,7 +332,7 @@ export type Database = {
       trip_invites: DatabaseTable<TripInviteRow, 'trip_id' | 'code'>;
       itinerary_nodes: DatabaseTable<
         ItineraryNodeRow,
-        'trip_id' | 'node_type' | 'template_key' | 'sort_key'
+        'trip_id' | 'node_type' | 'sort_key'
       >;
       itinerary_node_actions: DatabaseTable<
         ItineraryNodeActionRow,

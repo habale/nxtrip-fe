@@ -31,7 +31,7 @@
   },
   "home": {
     "traveler": "Traveler",
-    "greeting": "Hi, {{name}}! 👋",
+    "greeting": "Hi, {{name}}!",
     "newTrip": "New Trip",
     "filterLabel": "Filter trips",
     "filterAriaLabel": "{{filter}}, {{count}} trips",

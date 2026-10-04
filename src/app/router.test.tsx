@@ -54,7 +54,7 @@ describe('application routes', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Hi, Traveler! 👋',
+        name: 'Hi, Traveler!',
       }),
     ).toBeInTheDocument();
   });

@@ -159,20 +159,18 @@ export function TripMembersPanel({
 
   return (
     <section className="trip-members-panel">
-      <div>
-        <div className="trip-members-panel__heading">
-          <h2>{t('tripMembers.title', { count: members.length })}</h2>
-        </div>
-
-        {members.length > 0 && (
-          <SearchField
-            label={t('tripMembers.search')}
-            placeholder={t('tripMembers.searchPlaceholder')}
-            value={search}
-            onValueChange={setSearch}
-          />
-        )}
+      <div className="trip-members-panel__heading">
+        <h2>{t('tripMembers.title', { count: members.length })}</h2>
       </div>
+
+      {members.length > 0 && (
+        <SearchField
+          label={t('tripMembers.search')}
+          placeholder={t('tripMembers.searchPlaceholder')}
+          value={search}
+          onValueChange={setSearch}
+        />
+      )}
 
       {membersQuery.isPending ? (
         <div
