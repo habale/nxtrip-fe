@@ -9,6 +9,7 @@ export const ROUTE_PATHS = {
   tripLedger: '/trips/:tripId/ledger',
   tripAttachments: '/trips/:tripId/attachments',
   settings: '/settings',
+  uiKit: '/ui-kit',
 } as const;
 
 function tripPath(tripId: string, suffix = '') {
@@ -20,6 +21,7 @@ export const routes = {
   home: ROUTE_PATHS.home,
   bookmarks: ROUTE_PATHS.bookmarks,
   settings: ROUTE_PATHS.settings,
+  uiKit: ROUTE_PATHS.uiKit,
   trip: (tripId: string) => tripPath(tripId),
   tripInfo: (tripId: string) => tripPath(tripId, '/info'),
   tripItinerary: (tripId: string) => tripPath(tripId, '/itinerary'),

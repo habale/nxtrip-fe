@@ -71,6 +71,19 @@ describe('application routes', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders the shared UI showcase', async () => {
+    renderRoute(routes.uiKit, false);
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Shared components',
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Button variants')).toBeInTheDocument();
+    expect(screen.getByText('Material Symbols')).toBeInTheDocument();
+  });
+
   it('keeps the language switcher available on the public shell', async () => {
     const user = userEvent.setup();
     renderRoute('/login', false);

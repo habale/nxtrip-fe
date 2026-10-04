@@ -6,6 +6,7 @@ import '@ionic/react/css/core.css';
 import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
+import './theme/theme.css';
 import './styles/base.css';
 
 import { App } from './app/App';

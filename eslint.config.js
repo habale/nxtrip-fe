@@ -51,5 +51,31 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: [
+      'src/app/shell/**/*.{ts,tsx}',
+      'src/features/**/components/**/*.{ts,tsx}',
+      'src/features/**/pages/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@ionic/react', '@ionic/react/*'],
+              message:
+                'Presentation code must use the app-owned components from shared/ui.',
+            },
+            {
+              group: ['**/shared/api/supabase-client'],
+              message:
+                'Presentation code must access Supabase through a repository or API module.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   prettierConfig,
 );

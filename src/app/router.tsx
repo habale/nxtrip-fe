@@ -3,6 +3,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import type { ReactNode } from 'react';
 import { Navigate, Route } from 'react-router-dom';
 
+import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
 import { LanguageSwitcher } from '../shared/ui/LanguageSwitcher';
 import { ROUTE_PATHS } from './routes';
 import { NotFoundPage, PlaceholderPage } from './shell/PlaceholderPage';
@@ -132,6 +133,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
           </ProtectedPage>
         }
       />
+      <Route path={ROUTE_PATHS.uiKit} element={<UiShowcasePage />} />
       <Route
         path={ROUTE_PATHS.root}
         element={
