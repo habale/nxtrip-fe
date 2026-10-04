@@ -134,6 +134,30 @@
       "size": "Cover images must be 10 MB or smaller."
     }
   },
+  "tripMembers": {
+    "title": "Members ({{count}})",
+    "search": "Search members",
+    "searchPlaceholder": "Search members…",
+    "addGuest": "Add guest",
+    "addGuestTitle": "Add a guest member",
+    "addGuestDescription": "Add someone to the trip without requiring an NxTrip account.",
+    "displayName": "Display name",
+    "email": "Email (optional)",
+    "note": "Note (optional)",
+    "adding": "Adding…",
+    "owner": "Owner",
+    "linked": "Linked",
+    "guest": "Guest",
+    "inactive": "Inactive",
+    "empty": "No trip members yet.",
+    "noResults": "No members match your search.",
+    "loadError": "We couldn't load the trip members.",
+    "validation": {
+      "required": "Display name is required.",
+      "tooLong": "Display name must be 120 characters or fewer.",
+      "invalidEmail": "Enter a valid email address."
+    }
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",

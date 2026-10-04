@@ -158,6 +158,140 @@
   z-index: 1;
 }
 
+.trip-members-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.trip-members-panel__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.trip-members-panel__heading h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  letter-spacing: -0.045em;
+}
+
+.trip-members-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.trip-members-panel .ui-search {
+  padding: 0;
+  --background: var(--color-surface);
+  --border-radius: var(--radius-control);
+  --box-shadow: none;
+}
+
+.trip-members-panel__list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.trip-member-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.trip-member-card--inactive {
+  opacity: 0.62;
+}
+
+.trip-member-card .ui-avatar {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: var(--color-soft);
+  color: var(--color-ink);
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.trip-member-card__details {
+  min-width: 0;
+}
+
+.trip-member-card__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.trip-member-card h3,
+.trip-member-card p,
+.trip-member-card small,
+.trip-members-panel__state,
+.trip-member-form p {
+  margin: 0;
+}
+
+.trip-member-card h3 {
+  overflow: hidden;
+  font-size: 1.05rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-member-card p,
+.trip-member-card small {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.25rem;
+  color: var(--color-ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-member-card__link-state {
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.trip-members-panel__state {
+  padding: 1.5rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.trip-member-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.trip-member-form > p:not(.trip-member-form__error) {
+  color: var(--color-ink-muted);
+  line-height: 1.6;
+}
+
+.trip-member-form__error {
+  color: var(--color-negative);
+}
+
+.trip-member-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
 .trip-cover__actions {
   display: flex;
   flex-wrap: wrap;

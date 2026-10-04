@@ -4,6 +4,7 @@ import { useAuth } from '../auth/auth-context';
 import {
   getTripRepository,
   type CreateTripInput,
+  type AddGuestMemberInput,
   type RemoveTripCoverInput,
   type TripDetail,
   type TripRepository,
@@ -15,6 +16,7 @@ export const tripKeys = {
   all: ['trips'] as const,
   list: (userId: string) => [...tripKeys.all, 'list', userId] as const,
   detail: (tripId: string) => [...tripKeys.all, 'detail', tripId] as const,
+  members: (tripId: string) => [...tripKeys.all, 'members', tripId] as const,
 };
 
 export function useTripList(repository?: TripRepository) {
@@ -39,6 +41,34 @@ export function useTripDetail(tripId: string, repository?: TripRepository) {
         tripId,
         user?.id ?? '',
       ),
+  });
+}
+
+export function useTripMembers(tripId: string, repository?: TripRepository) {
+  return useQuery({
+    queryKey: tripKeys.members(tripId),
+    enabled: Boolean(tripId),
+    queryFn: () => (repository ?? getTripRepository()).listMembers(tripId),
+  });
+}
+
+export function useAddGuestMember(repository?: TripRepository) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: Omit<AddGuestMemberInput, 'createdBy'>) => {
+      if (!user) throw new Error('Authentication is required.');
+      return (repository ?? getTripRepository()).addGuestMember({
+        ...input,
+        createdBy: user.id,
+      });
+    },
+    onSuccess: async (member) => {
+      await queryClient.invalidateQueries({
+        queryKey: tripKeys.members(member.member.trip_id),
+      });
+    },
   });
 }
 

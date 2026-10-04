@@ -76,6 +76,8 @@ describe('trip list hook', () => {
       updateMetadata: vi.fn(),
       updateCover: vi.fn(),
       removeCover: vi.fn(),
+      listMembers: vi.fn(),
+      addGuestMember: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {
@@ -94,6 +96,8 @@ describe('trip list hook', () => {
       updateMetadata: vi.fn(),
       updateCover: vi.fn(),
       removeCover: vi.fn(),
+      listMembers: vi.fn(),
+      addGuestMember: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {

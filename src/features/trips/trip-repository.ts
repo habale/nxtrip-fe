@@ -9,6 +9,13 @@ export type TripMember = Pick<
   'id' | 'trip_id' | 'display_name' | 'avatar_url'
 >;
 
+export type TripMemberDetail = {
+  member: Database['public']['Tables']['trip_members']['Row'];
+  linkedUserId: string | null;
+  role: Database['public']['Enums']['access_role'] | null;
+  accessStatus: Database['public']['Enums']['access_status'] | null;
+};
+
 export type TripListItem = {
   trip: Trip;
   members: TripMember[];
@@ -51,6 +58,14 @@ export type RemoveTripCoverInput = Pick<
   'tripId' | 'version' | 'currentImagePath' | 'currentThumbnailPath'
 >;
 
+export type AddGuestMemberInput = {
+  tripId: string;
+  displayName: string;
+  email: string;
+  note: string;
+  createdBy: string;
+};
+
 export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
   getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
@@ -58,6 +73,8 @@ export type TripRepository = {
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
   updateCover: (input: UpdateTripCoverInput) => Promise<Trip>;
   removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
+  listMembers: (tripId: string) => Promise<TripMemberDetail[]>;
+  addGuestMember: (input: AddGuestMemberInput) => Promise<TripMemberDetail>;
 };
 
 function zonedDateToIso(date: string, timezone: string) {
@@ -123,6 +140,71 @@ export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
 
   return {
+    async listMembers(tripId) {
+      const [membersResult, membershipsResult] = await Promise.all([
+        client
+          .from('trip_members')
+          .select('*')
+          .eq('trip_id', tripId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: true }),
+        client
+          .from('trip_access_memberships')
+          .select('trip_member_id, user_id, role, status')
+          .eq('trip_id', tripId),
+      ]);
+
+      if (membersResult.error) throw mapSupabaseError(membersResult.error);
+      if (membershipsResult.error) {
+        throw mapSupabaseError(membershipsResult.error);
+      }
+
+      const membershipByMember = new Map(
+        membershipsResult.data.flatMap((membership) =>
+          membership.trip_member_id
+            ? [[membership.trip_member_id, membership] as const]
+            : [],
+        ),
+      );
+
+      return membersResult.data
+        .map((member) => {
+          const membership = membershipByMember.get(member.id);
+          return {
+            member,
+            linkedUserId: membership?.user_id ?? null,
+            role: membership?.role ?? null,
+            accessStatus: membership?.status ?? null,
+          };
+        })
+        .sort(
+          (left, right) =>
+            Number(right.member.is_active) - Number(left.member.is_active),
+        );
+    },
+
+    async addGuestMember(input) {
+      const { data, error } = await client
+        .from('trip_members')
+        .insert({
+          trip_id: input.tripId,
+          display_name: input.displayName.trim(),
+          email: input.email.trim() || null,
+          note: input.note.trim() || null,
+          created_by: input.createdBy,
+        })
+        .select('*')
+        .single();
+
+      if (error) throw mapSupabaseError(error);
+      return {
+        member: data,
+        linkedUserId: null,
+        role: null,
+        accessStatus: null,
+      };
+    },
+
     async getAccessibleById(tripId, userId) {
       const { data: membership, error: membershipError } = await client
         .from('trip_access_memberships')

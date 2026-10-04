@@ -131,6 +131,30 @@
       "size": "Ảnh bìa phải có dung lượng không quá 10 MB."
     }
   },
+  "tripMembers": {
+    "title": "Thành viên ({{count}})",
+    "search": "Tìm thành viên",
+    "searchPlaceholder": "Tìm thành viên…",
+    "addGuest": "Thêm khách",
+    "addGuestTitle": "Thêm thành viên khách",
+    "addGuestDescription": "Thêm một người vào chuyến đi mà không yêu cầu tài khoản NxTrip.",
+    "displayName": "Tên hiển thị",
+    "email": "Email (không bắt buộc)",
+    "note": "Ghi chú (không bắt buộc)",
+    "adding": "Đang thêm…",
+    "owner": "Chủ chuyến đi",
+    "linked": "Đã liên kết",
+    "guest": "Khách",
+    "inactive": "Không hoạt động",
+    "empty": "Chưa có thành viên chuyến đi.",
+    "noResults": "Không có thành viên phù hợp.",
+    "loadError": "Không thể tải thành viên chuyến đi.",
+    "validation": {
+      "required": "Tên hiển thị là bắt buộc.",
+      "tooLong": "Tên hiển thị không được vượt quá 120 ký tự.",
+      "invalidEmail": "Nhập địa chỉ email hợp lệ."
+    }
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

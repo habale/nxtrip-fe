@@ -6,6 +6,7 @@ import { AppError } from '../../../shared/api/app-error';
 import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
 import { TripCover } from '../components/TripCover';
 import { TripInfoPanel } from '../components/TripInfoPanel';
+import { TripMembersPanel } from '../components/TripMembersPanel';
 import { formatTripDateRange } from '../trip-date';
 import { useTripDetail } from '../trip-hooks';
 import type { TripRepository } from '../trip-repository';
@@ -174,6 +175,7 @@ export function TripDetailPage({
                   locale={locale}
                   repository={repository}
                 />
+                <TripMembersPanel repository={repository} tripId={trip.id} />
               </>
             ) : (
               <section className="trip-detail-placeholder">

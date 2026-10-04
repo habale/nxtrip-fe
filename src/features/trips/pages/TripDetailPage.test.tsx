@@ -6,7 +6,11 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AppError } from '../../../shared/api/app-error';
 import { AuthContext, type AuthContextValue } from '../../auth/auth-context';
 import { TripDetailPage } from './TripDetailPage';
-import type { Trip, TripRepository } from '../trip-repository';
+import type {
+  Trip,
+  TripMemberDetail,
+  TripRepository,
+} from '../trip-repository';
 
 const trip: Trip = {
   id: 'trip-123',
@@ -36,6 +40,8 @@ function createRepository(
     updateMetadata: vi.fn(async () => trip),
     updateCover: vi.fn(async () => trip),
     removeCover: vi.fn(async () => trip),
+    listMembers: vi.fn(async () => []),
+    addGuestMember: vi.fn(),
   };
 }
 
@@ -122,6 +128,67 @@ describe('TripDetailPage', () => {
     ).toBeInTheDocument();
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Add cover')).not.toBeInTheDocument();
+  });
+
+  it('shows linked, guest, and inactive member states', async () => {
+    const repository = createRepository(
+      vi.fn(async () => ({
+        trip,
+        role: 'owner' as const,
+        coverImageUrl: null,
+        coverThumbnailUrl: null,
+      })),
+    );
+    const members: TripMemberDetail[] = [
+      {
+        member: {
+          id: 'member-owner',
+          trip_id: trip.id,
+          display_name: 'Liam Tran',
+          email: 'liam@example.com',
+          avatar_url: null,
+          note: null,
+          is_active: true,
+          created_by: 'user-123',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          version: 1,
+          deleted_at: null,
+        },
+        linkedUserId: 'user-123',
+        role: 'owner',
+        accessStatus: 'active',
+      },
+      {
+        member: {
+          id: 'member-guest',
+          trip_id: trip.id,
+          display_name: 'Kenji Mori',
+          email: null,
+          avatar_url: null,
+          note: 'Vegetarian',
+          is_active: false,
+          created_by: 'user-123',
+          created_at: '2026-01-02T00:00:00.000Z',
+          updated_at: '2026-01-02T00:00:00.000Z',
+          version: 1,
+          deleted_at: null,
+        },
+        linkedUserId: null,
+        role: null,
+        accessStatus: null,
+      },
+    ];
+    repository.listMembers = vi.fn(async () => members);
+    renderPage('info', repository);
+
+    expect(await screen.findByText('Members (2)')).toBeInTheDocument();
+    expect(screen.getByText('Liam Tran')).toBeInTheDocument();
+    expect(screen.getByText('Owner')).toBeInTheDocument();
+    expect(screen.getByText('Linked')).toBeInTheDocument();
+    expect(screen.getByText('Kenji Mori')).toBeInTheDocument();
+    expect(screen.getByText('Guest')).toBeInTheDocument();
+    expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 
   it('renders the not-found state without exposing protected trip data', async () => {
