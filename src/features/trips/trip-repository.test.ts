@@ -1,4 +1,4 @@
-import { mapCreateTripInput } from './trip-repository';
+import { mapCreateTripInput, mapUpdateTripInput } from './trip-repository';
 
 describe('trip repository create mapping', () => {
   it('normalizes optional values and maps local dates in the trip timezone', () => {
@@ -35,5 +35,27 @@ describe('trip repository create mapping', () => {
     });
 
     expect(mapped).toMatchObject({ start_at: null, end_at: null });
+  });
+
+  it('maps editable metadata without changing ownership', () => {
+    expect(
+      mapUpdateTripInput({
+        tripId: 'trip-123',
+        version: 4,
+        name: ' Updated trip ',
+        description: 'Notes',
+        startDate: '',
+        endDate: '',
+        timezone: 'UTC',
+        defaultCurrency: 'usd',
+      }),
+    ).toEqual({
+      name: 'Updated trip',
+      description: 'Notes',
+      start_at: null,
+      end_at: null,
+      timezone: 'UTC',
+      default_currency: 'USD',
+    });
   });
 });

@@ -4,12 +4,15 @@ import { useAuth } from '../auth/auth-context';
 import {
   getTripRepository,
   type CreateTripInput,
+  type TripDetail,
   type TripRepository,
+  type UpdateTripInput,
 } from './trip-repository';
 
 export const tripKeys = {
   all: ['trips'] as const,
   list: (userId: string) => [...tripKeys.all, 'list', userId] as const,
+  detail: (tripId: string) => [...tripKeys.all, 'detail', tripId] as const,
 };
 
 export function useTripList(repository?: TripRepository) {
@@ -24,11 +27,32 @@ export function useTripList(repository?: TripRepository) {
 }
 
 export function useTripDetail(tripId: string, repository?: TripRepository) {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: [...tripKeys.all, 'detail', tripId],
-    enabled: Boolean(tripId),
+    queryKey: tripKeys.detail(tripId),
+    enabled: Boolean(tripId && user),
     queryFn: () =>
-      (repository ?? getTripRepository()).getAccessibleById(tripId),
+      (repository ?? getTripRepository()).getAccessibleById(
+        tripId,
+        user?.id ?? '',
+      ),
+  });
+}
+
+export function useUpdateTripMetadata(repository?: TripRepository) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateTripInput) =>
+      (repository ?? getTripRepository()).updateMetadata(input),
+    onSuccess: async (trip) => {
+      queryClient.setQueryData<TripDetail>(
+        tripKeys.detail(trip.id),
+        (current) => (current ? { ...current, trip } : current),
+      );
+      await queryClient.invalidateQueries({ queryKey: tripKeys.all });
+    },
   });
 }
 

@@ -3,14 +3,8 @@ import { useParams } from 'react-router-dom';
 
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
-import {
-  Badge,
-  Button,
-  Icon,
-  Page,
-  Skeleton,
-  TabLink,
-} from '../../../shared/ui';
+import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
+import { TripInfoPanel } from '../components/TripInfoPanel';
 import { formatTripDateRange } from '../trip-date';
 import { useTripDetail } from '../trip-hooks';
 import type { TripRepository } from '../trip-repository';
@@ -52,7 +46,8 @@ export function TripDetailPage({
   const section =
     sectionOverride ?? (isTripSection(routeSection) ? routeSection : 'info');
   const tripQuery = useTripDetail(tripId, repository);
-  const trip = tripQuery.data;
+  const detail = tripQuery.data;
+  const trip = detail?.trip;
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
   const sections: TripSection[] = [
     'info',
@@ -170,25 +165,19 @@ export function TripDetailPage({
           </nav>
 
           <main className="trip-detail-content">
-            <section className="trip-detail-summary">
-              <Badge tone={trip.status === 'ongoing' ? 'info' : 'brand'}>
-                {t(`home.status.${trip.status}`)}
-              </Badge>
-              <h2>{trip.name}</h2>
-              {dateRange && (
-                <p className="trip-detail-date">
-                  <Icon name="calendar" />
-                  {dateRange}
-                </p>
-              )}
-              {trip.description && <p>{trip.description}</p>}
-            </section>
-
-            <section className="trip-detail-placeholder">
-              <Icon name={sectionIcons[section]} size="large" />
-              <h2>{t(`tripDetail.sections.${section}`)}</h2>
-              <p>{t(`tripDetail.placeholders.${section}`)}</p>
-            </section>
+            {section === 'info' ? (
+              <TripInfoPanel
+                detail={detail}
+                locale={locale}
+                repository={repository}
+              />
+            ) : (
+              <section className="trip-detail-placeholder">
+                <Icon name={sectionIcons[section]} size="large" />
+                <h2>{t(`tripDetail.sections.${section}`)}</h2>
+                <p>{t(`tripDetail.placeholders.${section}`)}</p>
+              </section>
+            )}
           </main>
         </div>
       </div>

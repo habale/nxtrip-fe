@@ -107,6 +107,17 @@
     "accessDeniedDescription": "Bạn không có quyền xem chuyến đi này.",
     "backToTrips": "Quay lại danh sách"
   },
+  "tripInfo": {
+    "edit": "Chỉnh sửa",
+    "editTitle": "Chỉnh sửa thông tin chuyến đi",
+    "ownerOnly": "Quyền của chủ chuyến đi",
+    "version": "Phiên bản {{version}}",
+    "timezone": "Múi giờ",
+    "defaultCurrency": "Tiền tệ mặc định",
+    "dayCount": "{{count}} ngày",
+    "nightCount": "{{count}} đêm",
+    "saving": "Đang lưu…"
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

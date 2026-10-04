@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { User } from '@supabase/supabase-js';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { AppError } from '../../../shared/api/app-error';
+import { AuthContext, type AuthContextValue } from '../../auth/auth-context';
 import { TripDetailPage } from './TripDetailPage';
 import type { Trip, TripRepository } from '../trip-repository';
 
@@ -31,6 +33,7 @@ function createRepository(
     getAccessibleById,
     listAccessible: vi.fn(async () => []),
     create: vi.fn(async () => 'trip-new'),
+    updateMetadata: vi.fn(async () => trip),
   };
 }
 
@@ -41,32 +44,45 @@ function renderPage(
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  const auth: AuthContextValue = {
+    session: null,
+    user: { id: 'user-123' } as User,
+    status: 'ready',
+    error: null,
+    signInWithGoogle: vi.fn(),
+    signOut: vi.fn(),
+  };
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[`/trips/${trip.id}/${section}`]}>
-        <Routes>
-          <Route
-            path="/trips/:tripId/:section"
-            element={
-              <TripDetailPage repository={repository} section={section} />
-            }
-          />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <AuthContext.Provider value={auth}>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[`/trips/${trip.id}/${section}`]}>
+          <Routes>
+            <Route
+              path="/trips/:tripId/:section"
+              element={
+                <TripDetailPage repository={repository} section={section} />
+              }
+            />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    </AuthContext.Provider>,
   );
 }
 
 describe('TripDetailPage', () => {
   it('renders the shared shell and all section links', async () => {
-    const repository = createRepository(vi.fn(async () => trip));
+    const repository = createRepository(
+      vi.fn(async () => ({ trip, role: 'owner' as const })),
+    );
     renderPage('info', repository);
 
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Thailand' }),
     ).toBeInTheDocument();
     expect(screen.getAllByText('Oct 15 – Oct 18, 2026')).toHaveLength(2);
+    expect(screen.getByText(/4 days 3 nights/)).toBeInTheDocument();
     expect(screen.getByLabelText('Attachments')).toHaveAttribute(
       'router-link',
       '/trips/trip-123/attachments',
@@ -79,6 +95,19 @@ describe('TripDetailPage', () => {
       'aria-current',
       'page',
     );
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+
+  it('keeps metadata editing hidden from non-owners', async () => {
+    const repository = createRepository(
+      vi.fn(async () => ({ trip, role: 'member' as const })),
+    );
+    renderPage('info', repository);
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Thailand' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument();
   });
 
   it('renders the not-found state without exposing protected trip data', async () => {

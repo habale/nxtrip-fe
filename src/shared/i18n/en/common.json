@@ -108,6 +108,19 @@
     "accessDeniedDescription": "You don't have permission to view this trip.",
     "backToTrips": "Back to trips"
   },
+  "tripInfo": {
+    "edit": "Edit",
+    "editTitle": "Edit trip information",
+    "ownerOnly": "Owner controls",
+    "version": "Version {{version}}",
+    "timezone": "Timezone",
+    "defaultCurrency": "Default currency",
+    "dayCount_one": "{{count}} day",
+    "dayCount_other": "{{count}} days",
+    "nightCount_one": "{{count}} night",
+    "nightCount_other": "{{count}} nights",
+    "saving": "Saving…"
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",

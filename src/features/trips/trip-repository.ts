@@ -15,6 +15,11 @@ export type TripListItem = {
   coverThumbnailUrl: string | null;
 };
 
+export type TripDetail = {
+  trip: Trip;
+  role: Database['public']['Enums']['access_role'];
+};
+
 export type CreateTripInput = {
   name: string;
   description: string;
@@ -25,10 +30,16 @@ export type CreateTripInput = {
   createdBy: string;
 };
 
+export type UpdateTripInput = Omit<CreateTripInput, 'createdBy'> & {
+  tripId: string;
+  version: number;
+};
+
 export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
-  getAccessibleById: (tripId: string) => Promise<Trip>;
+  getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
   create: (input: CreateTripInput) => Promise<string>;
+  updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
 };
 
 function zonedDateToIso(date: string, timezone: string) {
@@ -83,11 +94,29 @@ export function mapCreateTripInput(input: CreateTripInput) {
   };
 }
 
+export function mapUpdateTripInput(input: UpdateTripInput) {
+  const mapped = mapCreateTripInput({ ...input, createdBy: '' });
+  const { created_by: _, ...metadata } = mapped;
+  void _;
+  return metadata;
+}
+
 export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
 
   return {
-    async getAccessibleById(tripId) {
+    async getAccessibleById(tripId, userId) {
+      const { data: membership, error: membershipError } = await client
+        .from('trip_access_memberships')
+        .select('role')
+        .eq('trip_id', tripId)
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (membershipError) throw mapSupabaseError(membershipError);
+      if (!membership) throw new AppError('TRIP_NOT_FOUND');
+
       const { data, error } = await client
         .from('trips')
         .select('*')
@@ -100,6 +129,24 @@ export function createTripRepository(): TripRepository {
         throw mapSupabaseError(error);
       }
       if (!data) throw new AppError('TRIP_NOT_FOUND');
+
+      return { trip: data, role: membership.role };
+    },
+
+    async updateMetadata(input) {
+      const { data, error } = await client
+        .from('trips')
+        .update(mapUpdateTripInput(input))
+        .eq('id', input.tripId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error) {
+        if (error.code === '42501') throw new AppError('TRIP_ACCESS_DENIED');
+        throw mapSupabaseError(error);
+      }
+      if (!data) throw new AppError('UNKNOWN');
 
       return data;
     },
