@@ -16,6 +16,7 @@ export type IconName =
   | 'more'
   | 'person'
   | 'paste'
+  | 'previous'
   | 'search'
   | 'settings'
   | 'trash'
@@ -46,6 +47,7 @@ const materialSymbolByName: Record<IconName, string> = {
   more: 'more_horiz',
   person: 'person',
   paste: 'content_paste',
+  previous: 'chevron_left',
   search: 'search',
   settings: 'settings',
   trash: 'delete',

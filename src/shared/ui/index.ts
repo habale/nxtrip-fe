@@ -5,6 +5,7 @@ export * from './Card';
 export * from './Checkbox';
 export * from './Chip';
 export * from './DatePicker';
+export * from './DateRangePicker';
 export * from './Feedback';
 export * from './Icon';
 export * from './IconButton';

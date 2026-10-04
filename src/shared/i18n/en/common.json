@@ -187,12 +187,25 @@
       "invalidEmail": "Enter a valid email address."
     }
   },
+  "dateRange": {
+    "placeholder": "Select trip dates",
+    "selectedRange": "{{start}} – {{end}}",
+    "duration": "{{days}} days · {{nights}} nights",
+    "start": "Start",
+    "end": "End",
+    "selectStart": "Choose your departure date.",
+    "selectEnd": "Now choose your return date.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month"
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",
     "close": "Close",
     "confirm": "Confirm",
     "delete": "Delete",
+    "clear": "Clear",
+    "apply": "Apply",
     "retry": "Try again",
     "save": "Save"
   },

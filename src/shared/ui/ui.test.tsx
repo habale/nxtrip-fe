@@ -10,6 +10,7 @@ import {
   Chip,
   ConfirmDialog,
   DatePicker,
+  DateRangePicker,
   Icon,
   IconButton,
   List,
@@ -42,6 +43,11 @@ describe('shared UI components', () => {
           options={[{ value: 'VND', label: 'Vietnamese đồng' }]}
         />
         <DatePicker label="Start date" />
+        <DateRangePicker
+          endDate="2026-10-08"
+          label="Trip dates"
+          startDate="2026-10-03"
+        />
         <Segment
           label="Trip section"
           options={[
@@ -96,6 +102,7 @@ describe('shared UI components', () => {
     );
     expect(container.querySelector('ion-segment')).toBeInTheDocument();
     expect(container.querySelector('ion-datetime')).toBeInTheDocument();
+    expect(screen.getByText('Oct 3 – Oct 8, 2026')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Location' })).toHaveTextContent(
       'location_on',
     );

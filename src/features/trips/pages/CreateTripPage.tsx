@@ -6,7 +6,7 @@ import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
 import {
   Button,
-  DatePicker,
+  DateRangePicker,
   Icon,
   Page,
   TextArea,
@@ -103,34 +103,19 @@ export function CreateTripPage() {
               <h2>{t('createTrip.datesTitle')}</h2>
               <p>{t('createTrip.datesDescription')}</p>
             </div>
-            <div className="create-trip-dates">
-              <div>
-                <span>{t('createTrip.startDate')}</span>
-                <DatePicker
-                  label={t('createTrip.startDate')}
-                  value={values.startDate || undefined}
-                  onValueChange={(value) =>
-                    update('startDate', value.slice(0, 10))
-                  }
-                />
-              </div>
-              <div>
-                <span>{t('createTrip.endDate')}</span>
-                <DatePicker
-                  label={t('createTrip.endDate')}
-                  min={values.startDate || undefined}
-                  value={values.endDate || undefined}
-                  onValueChange={(value) =>
-                    update('endDate', value.slice(0, 10))
-                  }
-                />
-                {errorText('endDate') && (
-                  <p className="create-trip-field-error">
-                    {errorText('endDate')}
-                  </p>
-                )}
-              </div>
-            </div>
+            <DateRangePicker
+              endDate={values.endDate}
+              errorText={errorText('endDate')}
+              label={t('createTrip.datesTitle')}
+              startDate={values.startDate}
+              onValueChange={({ startDate, endDate }) =>
+                setValues((current) => ({
+                  ...current,
+                  startDate,
+                  endDate,
+                }))
+              }
+            />
           </section>
 
           <section className="create-trip-card create-trip-settings">

@@ -31,7 +31,7 @@
   },
   "home": {
     "traveler": "Bạn",
-    "greeting": "Chào {{name}}! 👋",
+    "greeting": "Chào {{name}}!",
     "newTrip": "Chuyến đi mới",
     "filterLabel": "Lọc chuyến đi",
     "filterAriaLabel": "{{filter}}, {{count}} chuyến đi",
@@ -184,12 +184,25 @@
       "invalidEmail": "Nhập địa chỉ email hợp lệ."
     }
   },
+  "dateRange": {
+    "placeholder": "Chọn ngày chuyến đi",
+    "selectedRange": "{{start}} – {{end}}",
+    "duration": "{{days}} ngày · {{nights}} đêm",
+    "start": "Bắt đầu",
+    "end": "Kết thúc",
+    "selectStart": "Chọn ngày khởi hành.",
+    "selectEnd": "Bây giờ chọn ngày trở về.",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau"
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",
     "close": "Đóng",
     "confirm": "Xác nhận",
     "delete": "Xóa",
+    "clear": "Xóa ngày",
+    "apply": "Áp dụng",
     "retry": "Thử lại",
     "save": "Lưu"
   },
