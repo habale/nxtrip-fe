@@ -66,6 +66,16 @@ export type AddGuestMemberInput = {
   createdBy: string;
 };
 
+export type UpdateGuestMemberInput = Omit<AddGuestMemberInput, 'createdBy'> & {
+  memberId: string;
+  version: number;
+};
+
+export type DeactivateGuestMemberInput = Pick<
+  UpdateGuestMemberInput,
+  'tripId' | 'memberId' | 'version'
+>;
+
 export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
   getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
@@ -75,6 +85,12 @@ export type TripRepository = {
   removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
   listMembers: (tripId: string) => Promise<TripMemberDetail[]>;
   addGuestMember: (input: AddGuestMemberInput) => Promise<TripMemberDetail>;
+  updateGuestMember: (
+    input: UpdateGuestMemberInput,
+  ) => Promise<TripMemberDetail>;
+  deactivateGuestMember: (
+    input: DeactivateGuestMemberInput,
+  ) => Promise<TripMemberDetail>;
 };
 
 function zonedDateToIso(date: string, timezone: string) {
@@ -197,6 +213,50 @@ export function createTripRepository(): TripRepository {
         .single();
 
       if (error) throw mapSupabaseError(error);
+      return {
+        member: data,
+        linkedUserId: null,
+        role: null,
+        accessStatus: null,
+      };
+    },
+
+    async updateGuestMember(input) {
+      const { data, error } = await client
+        .from('trip_members')
+        .update({
+          display_name: input.displayName.trim(),
+          email: input.email.trim() || null,
+          note: input.note.trim() || null,
+        })
+        .eq('trip_id', input.tripId)
+        .eq('id', input.memberId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new AppError('UNKNOWN');
+      return {
+        member: data,
+        linkedUserId: null,
+        role: null,
+        accessStatus: null,
+      };
+    },
+
+    async deactivateGuestMember(input) {
+      const { data, error } = await client
+        .from('trip_members')
+        .update({ is_active: false })
+        .eq('trip_id', input.tripId)
+        .eq('id', input.memberId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new AppError('UNKNOWN');
       return {
         member: data,
         linkedUserId: null,

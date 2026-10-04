@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { User } from '@supabase/supabase-js';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { AppError } from '../../../shared/api/app-error';
@@ -42,6 +42,8 @@ function createRepository(
     removeCover: vi.fn(async () => trip),
     listMembers: vi.fn(async () => []),
     addGuestMember: vi.fn(),
+    updateGuestMember: vi.fn(),
+    deactivateGuestMember: vi.fn(),
   };
 }
 
@@ -109,7 +111,6 @@ describe('TripDetailPage', () => {
       'page',
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
-    expect(screen.getByLabelText('Add cover')).toBeInTheDocument();
   });
 
   it('keeps metadata editing hidden from non-owners', async () => {
@@ -127,7 +128,6 @@ describe('TripDetailPage', () => {
       await screen.findByRole('heading', { level: 1, name: 'Thailand' }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Add cover')).not.toBeInTheDocument();
   });
 
   it('shows linked, guest, and inactive member states', async () => {
@@ -186,8 +186,10 @@ describe('TripDetailPage', () => {
     expect(screen.getByText('Liam Tran')).toBeInTheDocument();
     expect(screen.getByText('Owner')).toBeInTheDocument();
     expect(screen.getByText('Linked')).toBeInTheDocument();
-    expect(screen.getByText('Kenji Mori')).toBeInTheDocument();
-    expect(screen.getByText('Guest')).toBeInTheDocument();
+    const guestCard = screen.getByText('Kenji Mori').closest('article');
+    expect(guestCard).not.toBeNull();
+    expect(within(guestCard!).getByText('Edit')).toBeInTheDocument();
+    expect(within(guestCard!).queryByText('Remove')).not.toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 

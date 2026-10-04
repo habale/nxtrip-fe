@@ -101,7 +101,7 @@
 
 .trip-detail-content {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
   padding: 1.25rem 1rem max(3rem, env(safe-area-inset-bottom));
 }
 
@@ -262,6 +262,20 @@
   color: var(--color-primary);
   font-size: 0.75rem;
   font-weight: 750;
+}
+
+.trip-member-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.trip-member-card__actions .ui-button {
+  min-height: 2.25rem;
+  --padding-start: 0.65rem;
+  --padding-end: 0.65rem;
 }
 
 .trip-members-panel__state {

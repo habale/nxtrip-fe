@@ -2,7 +2,13 @@ import { IonButton } from '@ionic/react';
 import type { PropsWithChildren } from 'react';
 
 export type ButtonVariant =
-  'primary' | 'secondary' | 'tertiary' | 'quiet' | 'danger' | 'filter';
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'quiet'
+  | 'danger'
+  | 'danger-text'
+  | 'filter';
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 export type ButtonProps = PropsWithChildren<{
@@ -25,6 +31,7 @@ const appearanceByVariant = {
   tertiary: { color: 'tertiary', fill: 'solid' },
   quiet: { color: 'primary', fill: 'clear' },
   danger: { color: 'danger', fill: 'solid' },
+  'danger-text': { color: 'danger', fill: 'clear' },
   filter: { color: undefined, fill: 'solid' },
 } as const;
 

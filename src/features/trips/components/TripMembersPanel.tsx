@@ -6,6 +6,7 @@ import {
   Avatar,
   Badge,
   Button,
+  ConfirmDialog,
   Icon,
   Modal,
   SearchField,
@@ -17,11 +18,18 @@ import {
   type GuestMemberFormValues,
   validateGuestMemberForm,
 } from '../guest-member-form';
-import { useAddGuestMember, useTripMembers } from '../trip-hooks';
-import type { TripRepository } from '../trip-repository';
+import { getMemberManagementPermissions } from '../member-permissions';
+import {
+  useAddGuestMember,
+  useDeactivateGuestMember,
+  useTripMembers,
+  useUpdateGuestMember,
+} from '../trip-hooks';
+import type { TripMemberDetail, TripRepository } from '../trip-repository';
 
 type TripMembersPanelProps = {
   tripId: string;
+  viewerRole: 'owner' | 'member';
   repository?: TripRepository;
 };
 
@@ -33,15 +41,23 @@ const emptyValues: GuestMemberFormValues = {
 
 export function TripMembersPanel({
   tripId,
+  viewerRole,
   repository,
 }: TripMembersPanelProps) {
   const { t } = useTranslation('common');
   const membersQuery = useTripMembers(tripId, repository);
   const addGuest = useAddGuestMember(repository);
+  const updateGuest = useUpdateGuestMember(repository);
+  const deactivateGuest = useDeactivateGuestMember(repository);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [values, setValues] = useState(emptyValues);
+  const [editTarget, setEditTarget] = useState<TripMemberDetail | null>(null);
+  const [editSubmitted, setEditSubmitted] = useState(false);
+  const [editValues, setEditValues] = useState(emptyValues);
+  const [deactivateTarget, setDeactivateTarget] =
+    useState<TripMemberDetail | null>(null);
   const errors = submitted ? validateGuestMemberForm(values) : {};
   const members = membersQuery.data ?? [];
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -57,6 +73,31 @@ export function TripMembersPanel({
     value: GuestMemberFormValues[Field],
   ) {
     setValues((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateEdit<Field extends keyof GuestMemberFormValues>(
+    field: Field,
+    value: GuestMemberFormValues[Field],
+  ) {
+    setEditValues((current) => ({ ...current, [field]: value }));
+  }
+
+  function openEdit(target: TripMemberDetail) {
+    setEditTarget(target);
+    setEditSubmitted(false);
+    setEditValues({
+      displayName: target.member.display_name,
+      email: target.member.email ?? '',
+      note: target.member.note ?? '',
+    });
+    updateGuest.reset();
+  }
+
+  function closeEdit() {
+    if (updateGuest.isPending) return;
+    setEditTarget(null);
+    setEditSubmitted(false);
+    updateGuest.reset();
   }
 
   function closeModal() {
@@ -77,31 +118,61 @@ export function TripMembersPanel({
     if (member) closeModal();
   }
 
+  async function submitEdit() {
+    if (!editTarget) return;
+    setEditSubmitted(true);
+    if (Object.keys(validateGuestMemberForm(editValues)).length > 0) return;
+
+    const member = await updateGuest
+      .mutateAsync({
+        tripId,
+        memberId: editTarget.member.id,
+        version: editTarget.member.version,
+        ...editValues,
+      })
+      .catch(() => undefined);
+    if (member) closeEdit();
+  }
+
+  async function deactivate() {
+    if (!deactivateTarget) return;
+    const target = deactivateTarget;
+    setDeactivateTarget(null);
+    await deactivateGuest
+      .mutateAsync({
+        tripId,
+        memberId: target.member.id,
+        version: target.member.version,
+      })
+      .catch(() => undefined);
+  }
+
   const errorText = (field: keyof GuestMemberFormValues) => {
     const code = errors[field];
+    return code ? t(`tripMembers.validation.${code}`) : undefined;
+  };
+  const editErrors = editSubmitted ? validateGuestMemberForm(editValues) : {};
+  const editErrorText = (field: keyof GuestMemberFormValues) => {
+    const code = editErrors[field];
     return code ? t(`tripMembers.validation.${code}`) : undefined;
   };
 
   return (
     <section className="trip-members-panel">
-      <div className="trip-members-panel__heading">
-        <h2>{t('tripMembers.title', { count: members.length })}</h2>
-        <Button onClick={() => setModalOpen(true)}>
-          <span className="trip-members-add">
-            <Icon name="add" />
-            {t('tripMembers.addGuest')}
-          </span>
-        </Button>
-      </div>
+      <div>
+        <div className="trip-members-panel__heading">
+          <h2>{t('tripMembers.title', { count: members.length })}</h2>
+        </div>
 
-      {members.length > 0 && (
-        <SearchField
-          label={t('tripMembers.search')}
-          placeholder={t('tripMembers.searchPlaceholder')}
-          value={search}
-          onValueChange={setSearch}
-        />
-      )}
+        {members.length > 0 && (
+          <SearchField
+            label={t('tripMembers.search')}
+            placeholder={t('tripMembers.searchPlaceholder')}
+            value={search}
+            onValueChange={setSearch}
+          />
+        )}
+      </div>
 
       {membersQuery.isPending ? (
         <div
@@ -126,8 +197,14 @@ export function TripMembersPanel({
         </p>
       ) : (
         <div className="trip-members-panel__list">
-          {filteredMembers.map(
-            ({ member, linkedUserId, role, accessStatus }) => (
+          {filteredMembers.map((target) => {
+            const { member, linkedUserId, role, accessStatus } = target;
+            const permissions = getMemberManagementPermissions(
+              viewerRole,
+              target,
+            );
+
+            return (
               <article
                 key={member.id}
                 className={`trip-member-card${member.is_active ? '' : ' trip-member-card--inactive'}`}
@@ -150,16 +227,43 @@ export function TripMembersPanel({
                   {member.email && <p>{member.email}</p>}
                   {member.note && <small>{member.note}</small>}
                 </div>
-                {linkedUserId && accessStatus === 'active' && (
-                  <span className="trip-member-card__link-state">
-                    {t('tripMembers.linked')}
-                  </span>
-                )}
+                <div className="trip-member-card__actions">
+                  {linkedUserId && accessStatus === 'active' && (
+                    <span className="trip-member-card__link-state">
+                      {t('tripMembers.linked')}
+                    </span>
+                  )}
+                  {permissions.canDeactivate && (
+                    <Button
+                      size="small"
+                      variant="danger-text"
+                      onClick={() => setDeactivateTarget(target)}
+                    >
+                      {t('tripMembers.deactivate')}
+                    </Button>
+                  )}
+                  {permissions.canEdit && (
+                    <Button
+                      size="small"
+                      variant="quiet"
+                      onClick={() => openEdit(target)}
+                    >
+                      {t('tripMembers.edit')}
+                    </Button>
+                  )}
+                </div>
               </article>
-            ),
-          )}
+            );
+          })}
         </div>
       )}
+
+      <Button variant="quiet" onClick={() => setModalOpen(true)}>
+        <span className="trip-members-add">
+          <Icon name="add" />
+          {t('tripMembers.addGuest')}
+        </span>
+      </Button>
 
       <Modal
         open={modalOpen}
@@ -214,6 +318,84 @@ export function TripMembersPanel({
           </div>
         </div>
       </Modal>
+
+      <Modal
+        open={Boolean(editTarget)}
+        title={t('tripMembers.editGuestTitle')}
+        onDismiss={closeEdit}
+      >
+        <div className="trip-member-form">
+          <TextInput
+            required
+            errorText={editErrorText('displayName')}
+            label={t('tripMembers.displayName')}
+            maxlength={120}
+            value={editValues.displayName}
+            onValueChange={(value) => updateEdit('displayName', value)}
+          />
+          <TextInput
+            errorText={editErrorText('email')}
+            label={t('tripMembers.email')}
+            type="email"
+            value={editValues.email}
+            onValueChange={(value) => updateEdit('email', value)}
+          />
+          <TextArea
+            label={t('tripMembers.note')}
+            rows={3}
+            value={editValues.note}
+            onValueChange={(value) => updateEdit('note', value)}
+          />
+          {updateGuest.error && (
+            <p className="trip-member-form__error" role="alert">
+              {t(
+                updateGuest.error instanceof AppError
+                  ? updateGuest.error.translationKey
+                  : 'errors:generic',
+              )}
+            </p>
+          )}
+          <div className="trip-member-form__actions">
+            <Button
+              disabled={updateGuest.isPending}
+              variant="quiet"
+              onClick={closeEdit}
+            >
+              {t('actions.cancel')}
+            </Button>
+            <Button
+              loading={updateGuest.isPending}
+              onClick={() => void submitEdit()}
+            >
+              {updateGuest.isPending
+                ? t('tripMembers.saving')
+                : t('actions.save')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {deactivateGuest.error && (
+        <p className="trip-member-form__error" role="alert">
+          {t(
+            deactivateGuest.error instanceof AppError
+              ? deactivateGuest.error.translationKey
+              : 'errors:generic',
+          )}
+        </p>
+      )}
+      <ConfirmDialog
+        destructive
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('tripMembers.deactivate')}
+        message={t('tripMembers.deactivateDescription', {
+          name: deactivateTarget?.member.display_name ?? '',
+        })}
+        open={Boolean(deactivateTarget)}
+        title={t('tripMembers.deactivateTitle')}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={() => void deactivate()}
+      />
     </section>
   );
 }

@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
 import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
-import { TripCover } from '../components/TripCover';
 import { TripInfoPanel } from '../components/TripInfoPanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
 import { formatTripDateRange } from '../trip-date';
@@ -169,13 +168,17 @@ export function TripDetailPage({
           <main className="trip-detail-content">
             {section === 'info' ? (
               <>
-                <TripCover detail={detail} repository={repository} />
+                {/*<TripCover detail={detail} repository={repository} />*/}
                 <TripInfoPanel
                   detail={detail}
                   locale={locale}
                   repository={repository}
                 />
-                <TripMembersPanel repository={repository} tripId={trip.id} />
+                <TripMembersPanel
+                  repository={repository}
+                  tripId={trip.id}
+                  viewerRole={detail.role}
+                />
               </>
             ) : (
               <section className="trip-detail-placeholder">

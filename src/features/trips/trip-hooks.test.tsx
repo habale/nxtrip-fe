@@ -78,6 +78,8 @@ describe('trip list hook', () => {
       removeCover: vi.fn(),
       listMembers: vi.fn(),
       addGuestMember: vi.fn(),
+      updateGuestMember: vi.fn(),
+      deactivateGuestMember: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {
@@ -98,6 +100,8 @@ describe('trip list hook', () => {
       removeCover: vi.fn(),
       listMembers: vi.fn(),
       addGuestMember: vi.fn(),
+      updateGuestMember: vi.fn(),
+      deactivateGuestMember: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {

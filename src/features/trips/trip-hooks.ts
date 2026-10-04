@@ -5,11 +5,13 @@ import {
   getTripRepository,
   type CreateTripInput,
   type AddGuestMemberInput,
+  type DeactivateGuestMemberInput,
   type RemoveTripCoverInput,
   type TripDetail,
   type TripRepository,
   type UpdateTripCoverInput,
   type UpdateTripInput,
+  type UpdateGuestMemberInput,
 } from './trip-repository';
 
 export const tripKeys = {
@@ -69,6 +71,32 @@ export function useAddGuestMember(repository?: TripRepository) {
         queryKey: tripKeys.members(member.member.trip_id),
       });
     },
+  });
+}
+
+function useRefreshMembers() {
+  const queryClient = useQueryClient();
+  return (tripId: string) =>
+    queryClient.invalidateQueries({ queryKey: tripKeys.members(tripId) });
+}
+
+export function useUpdateGuestMember(repository?: TripRepository) {
+  const refreshMembers = useRefreshMembers();
+
+  return useMutation({
+    mutationFn: (input: UpdateGuestMemberInput) =>
+      (repository ?? getTripRepository()).updateGuestMember(input),
+    onSuccess: (member) => refreshMembers(member.member.trip_id),
+  });
+}
+
+export function useDeactivateGuestMember(repository?: TripRepository) {
+  const refreshMembers = useRefreshMembers();
+
+  return useMutation({
+    mutationFn: (input: DeactivateGuestMemberInput) =>
+      (repository ?? getTripRepository()).deactivateGuestMember(input),
+    onSuccess: (member) => refreshMembers(member.member.trip_id),
   });
 }
 
