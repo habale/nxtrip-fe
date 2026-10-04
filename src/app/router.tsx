@@ -3,6 +3,8 @@ import { IonReactRouter } from '@ionic/react-router';
 import type { ReactNode } from 'react';
 import { Navigate, Route } from 'react-router-dom';
 
+import { SignOutButton } from '../features/auth/components/SignOutButton';
+import { LoginPage } from '../features/auth/pages/LoginPage';
 import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
 import { LanguageSwitcher } from '../shared/ui/LanguageSwitcher';
 import { ROUTE_PATHS } from './routes';
@@ -42,12 +44,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         path={ROUTE_PATHS.login}
         element={
           <PublicRouteShell isAuthenticated={isAuthenticated}>
-            <PlaceholderPage
-              titleKey="pages.login.title"
-              descriptionKey="pages.login.description"
-            >
-              <LanguageSwitcher />
-            </PlaceholderPage>
+            <LoginPage />
           </PublicRouteShell>
         }
       />
@@ -130,6 +127,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
             descriptionKey="pages.settings.description"
           >
             <LanguageSwitcher />
+            <SignOutButton />
           </ProtectedPage>
         }
       />

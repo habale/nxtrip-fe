@@ -47,8 +47,12 @@ describe('application routes', () => {
 
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Sign in' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Plan trips together, split bills effortlessly.',
+      }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Access as Guest')).toBeInTheDocument();
   });
 
   it('redirects authenticated users away from login', async () => {
@@ -91,7 +95,10 @@ describe('application routes', () => {
     await user.click(await screen.findByText('Tiếng Việt'));
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Đăng nhập' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Cùng lên kế hoạch, chia chi phí thật dễ dàng.',
+      }),
     ).toBeInTheDocument();
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('vi');
   });

@@ -1,15 +1,19 @@
 import { IonApp } from '@ionic/react';
 
+import { useAuth } from '../features/auth/auth-context';
+import { AuthLoadingPage } from '../features/auth/components/AuthLoadingPage';
 import { AppRouter } from './router';
 
-const mockAuthenticationState = {
-  isAuthenticated: true,
-} as const;
-
 export function App() {
+  const { session, status } = useAuth();
+
   return (
     <IonApp>
-      <AppRouter isAuthenticated={mockAuthenticationState.isAuthenticated} />
+      {status === 'loading' ? (
+        <AuthLoadingPage />
+      ) : (
+        <AppRouter isAuthenticated={Boolean(session)} />
+      )}
     </IonApp>
   );
 }

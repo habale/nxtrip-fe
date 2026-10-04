@@ -8,6 +8,7 @@ import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
 import './theme/theme.css';
 import './styles/base.css';
+import './features/auth/auth.css';
 
 import { App } from './app/App';
 import { AppProviders } from './app/providers/AppProviders';

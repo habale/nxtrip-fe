@@ -1,0 +1,229 @@
+.auth-page {
+  position: relative;
+  display: grid;
+  min-height: 100dvh;
+  overflow: hidden;
+  place-items: center;
+  padding: max(3.5rem, env(safe-area-inset-top)) 1.5rem
+    max(2rem, env(safe-area-inset-bottom));
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.auth-layout {
+  display: grid;
+  width: min(100%, 43rem);
+  justify-items: stretch;
+  gap: clamp(1.25rem, 3.5vh, 2.5rem);
+  text-align: center;
+}
+
+.auth-brand {
+  color: var(--color-surface);
+  font-size: clamp(3.5rem, 12vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.auth-illustration {
+  display: block;
+  width: min(100%, 31rem);
+  max-height: 46dvh;
+  margin: -0.5rem auto;
+  object-fit: contain;
+}
+
+.auth-layout h1 {
+  max-width: 15ch;
+  margin: 0 auto;
+  color: var(--color-surface);
+  font-size: clamp(2rem, 7.25vw, 3.25rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+.auth-login-actions,
+.auth-actions {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.auth-google-button .ui-button,
+.auth-guest-button .ui-button {
+  width: 100%;
+  min-height: 3.5rem;
+  font-size: clamp(1rem, 4vw, 1rem);
+}
+
+.auth-google-button .ui-button {
+  color: var(--color-ink);
+  --background: var(--color-surface);
+  --background-activated: var(--color-soft);
+  --background-hover: var(--color-soft);
+  --color: var(--color-ink);
+  --box-shadow: 0 1rem 2rem rgb(9 32 100 / 24%);
+  --padding-start: 0.75rem;
+  --padding-end: 0.75rem;
+}
+
+.auth-google-button .ui-button::part(native) {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: 10px;
+}
+
+.auth-google-content {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-google-mark {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  justify-self: center;
+  object-fit: contain;
+}
+
+.auth-arrow {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.auth-guest-button .ui-button {
+  color: var(--color-surface);
+  opacity: 1 !important;
+  --background: rgb(255 255 255 / 13%);
+  --border-color: rgb(255 255 255 / 28%);
+  --border-style: solid;
+  --border-width: 1px;
+  --color: var(--color-surface);
+}
+
+.auth-guest-button .ui-button::part(native) {
+  border: 1px solid rgb(255 255 255 / 28%);
+  background: rgb(255 255 255 / 13%);
+  color: var(--color-surface);
+  opacity: 1;
+}
+
+.auth-guest-button .ui-button.button-disabled {
+  opacity: 1 !important;
+}
+
+.auth-language {
+  position: absolute;
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+  z-index: 1;
+}
+
+.auth-language .language-switcher {
+  gap: 0.125rem;
+}
+
+.auth-language .ui-button {
+  min-height: 2rem;
+  font-size: 0.75rem;
+  --background: transparent;
+  --background-activated: rgb(255 255 255 / 16%);
+  --background-hover: rgb(255 255 255 / 12%);
+  --color: var(--color-surface);
+  --padding-start: 0.65rem;
+  --padding-end: 0.65rem;
+}
+
+.auth-error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-control);
+  background: var(--color-negative-soft);
+  color: var(--color-negative);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.auth-loading {
+  display: grid;
+  width: min(100%, 30rem);
+  min-height: 100%;
+  margin: 0 auto;
+  place-content: center;
+  justify-items: center;
+  gap: 1.25rem;
+  color: var(--color-ink-muted);
+}
+
+.auth-loading p {
+  margin: 0;
+}
+
+@media (max-height: 760px) {
+  .auth-page {
+    padding-top: 2.75rem;
+  }
+
+  .auth-layout {
+    gap: 0.9rem;
+  }
+
+  .auth-brand {
+    font-size: 3.25rem;
+  }
+
+  .auth-illustration {
+    max-height: 35dvh;
+  }
+
+  .auth-google-button .ui-button,
+  .auth-guest-button .ui-button {
+    min-height: 3.75rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .auth-layout {
+    width: min(100%, 68rem);
+    grid-template-columns: minmax(20rem, 1fr) minmax(24rem, 0.85fr);
+    align-items: center;
+    column-gap: 5rem;
+  }
+
+  .auth-brand,
+  .auth-illustration {
+    grid-column: 1;
+  }
+
+  .auth-brand {
+    align-self: end;
+  }
+
+  .auth-illustration {
+    grid-row: 2 / span 2;
+    max-height: 62dvh;
+  }
+
+  .auth-layout h1,
+  .auth-login-actions {
+    grid-column: 2;
+  }
+
+  .auth-layout h1 {
+    align-self: end;
+  }
+
+  .auth-login-actions {
+    align-self: start;
+  }
+}

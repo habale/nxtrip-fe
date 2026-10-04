@@ -2,6 +2,16 @@
   "app": {
     "name": "SxTrip"
   },
+  "auth": {
+    "signIn": "Sign in",
+    "description": "Keep every stop, shared expense, and trip detail in one place.",
+    "continueWithGoogle": "Continue with Google",
+    "accessAsGuest": "Access as Guest",
+    "comingSoon": "Coming soon",
+    "restoringSession": "Restoring your session…",
+    "signOut": "Sign out",
+    "unexpectedError": "An unexpected authentication error occurred."
+  },
   "language": {
     "label": "Interface language",
     "english": "English",

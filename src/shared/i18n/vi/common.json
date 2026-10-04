@@ -2,6 +2,16 @@
   "app": {
     "name": "SxTrip"
   },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "description": "Lưu mọi điểm đến, chi phí chung và thông tin chuyến đi tại một nơi.",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "accessAsGuest": "Truy cập với tư cách khách",
+    "comingSoon": "Sắp ra mắt",
+    "restoringSession": "Đang khôi phục phiên đăng nhập…",
+    "signOut": "Đăng xuất",
+    "unexpectedError": "Đã xảy ra lỗi xác thực không mong muốn."
+  },
   "language": {
     "label": "Ngôn ngữ giao diện",
     "english": "English",

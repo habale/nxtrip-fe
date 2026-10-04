@@ -53,7 +53,7 @@ export function Button({
       type={type}
       onClick={onClick}
     >
-      {loading ? <span aria-live="polite">…</span> : children}
+      {children}
     </IonButton>
   );
 }
