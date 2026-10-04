@@ -131,6 +131,19 @@
     "accessDeniedDescription": "You don't have permission to view this trip.",
     "backToTrips": "Back to trips"
   },
+  "itinerary": {
+    "dayLabel": "Itinerary Day {{day}}",
+    "dayOption": "Day {{day}}, {{date}}",
+    "directions": "Directions",
+    "move": "Travel",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "untitledStop": "Untitled stop",
+    "emptyDayTitle": "A free day",
+    "emptyDayDescription": "Nothing is planned for this day yet.",
+    "loadErrorTitle": "The itinerary took a detour",
+    "loadErrorDescription": "We couldn't load this part of the itinerary."
+  },
   "tripInfo": {
     "edit": "Edit",
     "editTitle": "Edit trip information",

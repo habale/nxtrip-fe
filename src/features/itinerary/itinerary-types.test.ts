@@ -1,5 +1,5 @@
 import type { Database } from '../../shared/api/database.types';
-import { mapItineraryNode, mapNodeAction } from './itinerary-types';
+import { mapItineraryNode } from './itinerary-types';
 
 type NodeRow = Database['public']['Tables']['itinerary_nodes']['Row'];
 
@@ -63,32 +63,6 @@ describe('itinerary domain mapping', () => {
     ).toMatchObject({
       nodeType: 'unknown',
       sourceNodeType: 'future-node',
-    });
-  });
-
-  it('maps V2 action metadata', () => {
-    expect(
-      mapNodeAction({
-        id: 'action-1',
-        trip_id: 'trip-1',
-        node_id: 'node-1',
-        action_type: 'url',
-        label: 'Booking',
-        icon_key: 'open_in_new',
-        is_primary: true,
-        sort_order: 1,
-        action_data: { url: 'https://example.com' },
-        created_by: 'user-1',
-        updated_by: null,
-        created_at: '2026-10-01T00:00:00Z',
-        updated_at: '2026-10-01T00:00:00Z',
-        version: 1,
-        deleted_at: null,
-      }),
-    ).toMatchObject({
-      type: 'url',
-      isPrimary: true,
-      data: { url: 'https://example.com' },
     });
   });
 });

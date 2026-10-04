@@ -5,6 +5,23 @@ export function List({ children }: PropsWithChildren) {
   return <IonList className="ui-list">{children}</IonList>;
 }
 
+export type ItemProps = PropsWithChildren<{
+  className?: string;
+  dataNodeId?: string;
+}>;
+
+export function Item({ children, className, dataNodeId }: ItemProps) {
+  return (
+    <IonItem
+      className={`ui-item${className ? ` ${className}` : ''}`}
+      data-node-id={dataNodeId}
+      lines="none"
+    >
+      {children}
+    </IonItem>
+  );
+}
+
 export type ListItemProps = {
   title: ReactNode;
   description?: ReactNode;

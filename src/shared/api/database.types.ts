@@ -109,23 +109,6 @@ type ItineraryNodeRow = {
   version: number;
   deleted_at: string | null;
 };
-type ItineraryNodeActionRow = {
-  id: string;
-  trip_id: string;
-  node_id: string;
-  action_type: string;
-  label: string;
-  icon_key: string | null;
-  is_primary: boolean;
-  sort_order: number;
-  action_data: Json;
-  created_by: string | null;
-  updated_by: string | null;
-  created_at: string;
-  updated_at: string;
-  version: number;
-  deleted_at: string | null;
-};
 type BookmarkRow = {
   id: string;
   owner_user_id: string;
@@ -333,10 +316,6 @@ export type Database = {
       itinerary_nodes: DatabaseTable<
         ItineraryNodeRow,
         'trip_id' | 'node_type' | 'sort_key'
-      >;
-      itinerary_node_actions: DatabaseTable<
-        ItineraryNodeActionRow,
-        'trip_id' | 'node_id' | 'action_type' | 'label'
       >;
       bookmarks: DatabaseTable<
         BookmarkRow,

@@ -130,6 +130,19 @@
     "accessDeniedDescription": "Bạn không có quyền xem chuyến đi này.",
     "backToTrips": "Quay lại danh sách"
   },
+  "itinerary": {
+    "dayLabel": "Ngày {{day}} trong lịch trình",
+    "dayOption": "Ngày {{day}}, {{date}}",
+    "directions": "Chỉ đường",
+    "move": "Di chuyển",
+    "minutes_one": "{{count}} phút",
+    "minutes_other": "{{count}} phút",
+    "untitledStop": "Điểm dừng chưa có tên",
+    "emptyDayTitle": "Một ngày tự do",
+    "emptyDayDescription": "Chưa có kế hoạch nào cho ngày này.",
+    "loadErrorTitle": "Không thể tải lịch trình",
+    "loadErrorDescription": "Không thể tải phần này của lịch trình."
+  },
   "tripInfo": {
     "edit": "Chỉnh sửa",
     "editTitle": "Chỉnh sửa thông tin chuyến đi",

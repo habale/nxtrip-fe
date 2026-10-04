@@ -2,8 +2,6 @@ import type { Database, Json } from '../../shared/api/database.types';
 
 export type ItineraryNodeRow =
   Database['public']['Tables']['itinerary_nodes']['Row'];
-export type ItineraryNodeActionRow =
-  Database['public']['Tables']['itinerary_node_actions']['Row'];
 export type ItineraryNodeAttachmentRow =
   Database['public']['Tables']['itinerary_node_attachments']['Row'];
 export type AttachmentRow = Database['public']['Tables']['attachments']['Row'];
@@ -11,16 +9,6 @@ export type AttachmentRow = Database['public']['Tables']['attachments']['Row'];
 export type AdditionalInfoLine = {
   type: string;
   text: string;
-};
-
-export type NodeAction = {
-  id: string;
-  type: string;
-  label: string;
-  iconKey: string | null;
-  isPrimary: boolean;
-  sortOrder: number;
-  data: Record<string, Json | undefined>;
 };
 
 export type NodeAttachment = {
@@ -47,7 +35,6 @@ type ItineraryNodeBase = {
   iconKey: string | null;
   additionalData: Record<string, Json | undefined>;
   additionalLines: AdditionalInfoLine[];
-  actions: NodeAction[];
   attachments: NodeAttachment[];
   version: number;
 };
@@ -101,21 +88,8 @@ export function readAdditionalLines(value: Json): AdditionalInfoLine[] {
   });
 }
 
-export function mapNodeAction(row: ItineraryNodeActionRow): NodeAction {
-  return {
-    id: row.id,
-    type: row.action_type,
-    label: row.label,
-    iconKey: row.icon_key,
-    isPrimary: row.is_primary,
-    sortOrder: row.sort_order,
-    data: isJsonObject(row.action_data) ? row.action_data : {},
-  };
-}
-
 export function mapItineraryNode(
   row: ItineraryNodeRow,
-  actions: NodeAction[] = [],
   attachments: NodeAttachment[] = [],
 ): ItineraryNode {
   const additionalData = isJsonObject(row.additional_data)
@@ -136,7 +110,6 @@ export function mapItineraryNode(
     iconKey: row.icon_key,
     additionalData,
     additionalLines: readAdditionalLines(row.additional_data),
-    actions,
     attachments,
     version: row.version,
   };

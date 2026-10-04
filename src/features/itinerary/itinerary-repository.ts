@@ -3,10 +3,8 @@ import { getSupabaseClient } from '../../shared/api/supabase-client';
 import {
   type ItineraryDateWindow,
   type ItineraryWindow,
-  type NodeAction,
   type NodeAttachment,
   mapItineraryNode,
-  mapNodeAction,
 } from './itinerary-types';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -59,22 +57,13 @@ export function createItineraryRepository(): ItineraryRepository {
       if (nodeRows.length === 0) return { ...window, nodes: [] };
 
       const nodeIds = nodeRows.map(({ id }) => id);
-      const [actionsResult, linksResult] = await Promise.all([
-        client
-          .from('itinerary_node_actions')
-          .select('*')
-          .in('node_id', nodeIds)
-          .is('deleted_at', null)
-          .order('sort_order', { ascending: true }),
-        client
-          .from('itinerary_node_attachments')
-          .select('*')
-          .in('node_id', nodeIds)
-          .is('deleted_at', null)
-          .order('sort_order', { ascending: true }),
-      ]);
+      const linksResult = await client
+        .from('itinerary_node_attachments')
+        .select('*')
+        .in('node_id', nodeIds)
+        .is('deleted_at', null)
+        .order('sort_order', { ascending: true });
 
-      if (actionsResult.error) throw mapSupabaseError(actionsResult.error);
       if (linksResult.error) throw mapSupabaseError(linksResult.error);
 
       const attachmentIds = [
@@ -109,13 +98,6 @@ export function createItineraryRepository(): ItineraryRepository {
         });
       }
 
-      const actionsByNode = new Map<string, NodeAction[]>();
-      actionsResult.data.forEach((row) => {
-        const actions = actionsByNode.get(row.node_id) ?? [];
-        actions.push(mapNodeAction(row));
-        actionsByNode.set(row.node_id, actions);
-      });
-
       const attachmentById = new Map(
         attachmentsResult.data.map((attachment) => [attachment.id, attachment]),
       );
@@ -140,11 +122,7 @@ export function createItineraryRepository(): ItineraryRepository {
       return {
         ...window,
         nodes: nodeRows.map((row) =>
-          mapItineraryNode(
-            row,
-            actionsByNode.get(row.id),
-            attachmentsByNode.get(row.id),
-          ),
+          mapItineraryNode(row, attachmentsByNode.get(row.id)),
         ),
       };
     },
