@@ -4,8 +4,10 @@ import { useAuth } from '../auth/auth-context';
 import {
   getTripRepository,
   type CreateTripInput,
+  type RemoveTripCoverInput,
   type TripDetail,
   type TripRepository,
+  type UpdateTripCoverInput,
   type UpdateTripInput,
 } from './trip-repository';
 
@@ -53,6 +55,37 @@ export function useUpdateTripMetadata(repository?: TripRepository) {
       );
       await queryClient.invalidateQueries({ queryKey: tripKeys.all });
     },
+  });
+}
+
+function useRefreshTripAfterCoverChange() {
+  const queryClient = useQueryClient();
+
+  return async (tripId: string) => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: tripKeys.detail(tripId) }),
+      queryClient.invalidateQueries({ queryKey: tripKeys.all }),
+    ]);
+  };
+}
+
+export function useUpdateTripCover(repository?: TripRepository) {
+  const refreshTrip = useRefreshTripAfterCoverChange();
+
+  return useMutation({
+    mutationFn: (input: UpdateTripCoverInput) =>
+      (repository ?? getTripRepository()).updateCover(input),
+    onSuccess: (trip) => refreshTrip(trip.id),
+  });
+}
+
+export function useRemoveTripCover(repository?: TripRepository) {
+  const refreshTrip = useRefreshTripAfterCoverChange();
+
+  return useMutation({
+    mutationFn: (input: RemoveTripCoverInput) =>
+      (repository ?? getTripRepository()).removeCover(input),
+    onSuccess: (trip) => refreshTrip(trip.id),
   });
 }
 

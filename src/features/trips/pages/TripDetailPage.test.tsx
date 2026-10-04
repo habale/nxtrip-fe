@@ -34,6 +34,8 @@ function createRepository(
     listAccessible: vi.fn(async () => []),
     create: vi.fn(async () => 'trip-new'),
     updateMetadata: vi.fn(async () => trip),
+    updateCover: vi.fn(async () => trip),
+    removeCover: vi.fn(async () => trip),
   };
 }
 
@@ -74,7 +76,12 @@ function renderPage(
 describe('TripDetailPage', () => {
   it('renders the shared shell and all section links', async () => {
     const repository = createRepository(
-      vi.fn(async () => ({ trip, role: 'owner' as const })),
+      vi.fn(async () => ({
+        trip,
+        role: 'owner' as const,
+        coverImageUrl: null,
+        coverThumbnailUrl: null,
+      })),
     );
     renderPage('info', repository);
 
@@ -96,11 +103,17 @@ describe('TripDetailPage', () => {
       'page',
     );
     expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.getByLabelText('Add cover')).toBeInTheDocument();
   });
 
   it('keeps metadata editing hidden from non-owners', async () => {
     const repository = createRepository(
-      vi.fn(async () => ({ trip, role: 'member' as const })),
+      vi.fn(async () => ({
+        trip,
+        role: 'member' as const,
+        coverImageUrl: null,
+        coverThumbnailUrl: null,
+      })),
     );
     renderPage('info', repository);
 
@@ -108,6 +121,7 @@ describe('TripDetailPage', () => {
       await screen.findByRole('heading', { level: 1, name: 'Thailand' }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Add cover')).not.toBeInTheDocument();
   });
 
   it('renders the not-found state without exposing protected trip data', async () => {

@@ -118,6 +118,19 @@
     "nightCount": "{{count}} đêm",
     "saving": "Đang lưu…"
   },
+  "tripCover": {
+    "alt": "Ảnh bìa cho {{name}}",
+    "choose": "Thêm ảnh bìa",
+    "replace": "Thay ảnh bìa",
+    "remove": "Xóa",
+    "uploading": "Đang tải lên và tối ưu ảnh bìa…",
+    "removeTitle": "Xóa ảnh bìa chuyến đi?",
+    "removeDescription": "Ảnh bìa sẽ bị xóa khỏi chuyến đi này.",
+    "validation": {
+      "type": "Chọn ảnh JPEG, PNG hoặc WebP.",
+      "size": "Ảnh bìa phải có dung lượng không quá 10 MB."
+    }
+  },
   "actions": {
     "back": "Quay lại",
     "cancel": "Hủy",

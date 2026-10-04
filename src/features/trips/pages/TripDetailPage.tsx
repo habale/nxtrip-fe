@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
 import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
+import { TripCover } from '../components/TripCover';
 import { TripInfoPanel } from '../components/TripInfoPanel';
 import { formatTripDateRange } from '../trip-date';
 import { useTripDetail } from '../trip-hooks';
@@ -166,11 +167,14 @@ export function TripDetailPage({
 
           <main className="trip-detail-content">
             {section === 'info' ? (
-              <TripInfoPanel
-                detail={detail}
-                locale={locale}
-                repository={repository}
-              />
+              <>
+                <TripCover detail={detail} repository={repository} />
+                <TripInfoPanel
+                  detail={detail}
+                  locale={locale}
+                  repository={repository}
+                />
+              </>
             ) : (
               <section className="trip-detail-placeholder">
                 <Icon name={sectionIcons[section]} size="large" />

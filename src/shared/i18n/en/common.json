@@ -121,6 +121,19 @@
     "nightCount_other": "{{count}} nights",
     "saving": "Saving…"
   },
+  "tripCover": {
+    "alt": "Cover for {{name}}",
+    "choose": "Add cover",
+    "replace": "Replace cover",
+    "remove": "Remove",
+    "uploading": "Uploading and optimizing cover…",
+    "removeTitle": "Remove trip cover?",
+    "removeDescription": "The cover will be removed from this trip.",
+    "validation": {
+      "type": "Choose a JPEG, PNG, or WebP image.",
+      "size": "Cover images must be 10 MB or smaller."
+    }
+  },
   "actions": {
     "back": "Back",
     "cancel": "Cancel",

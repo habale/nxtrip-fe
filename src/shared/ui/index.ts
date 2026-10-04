@@ -8,6 +8,7 @@ export * from './DatePicker';
 export * from './Feedback';
 export * from './Icon';
 export * from './IconButton';
+export * from './ImagePicker';
 export * from './LanguageSwitcher';
 export * from './List';
 export * from './Modal';

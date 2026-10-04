@@ -18,6 +18,8 @@ export type TripListItem = {
 export type TripDetail = {
   trip: Trip;
   role: Database['public']['Enums']['access_role'];
+  coverImageUrl: string | null;
+  coverThumbnailUrl: string | null;
 };
 
 export type CreateTripInput = {
@@ -35,11 +37,27 @@ export type UpdateTripInput = Omit<CreateTripInput, 'createdBy'> & {
   version: number;
 };
 
+export type UpdateTripCoverInput = {
+  tripId: string;
+  version: number;
+  file: File;
+  thumbnail: Blob;
+  currentImagePath: string | null;
+  currentThumbnailPath: string | null;
+};
+
+export type RemoveTripCoverInput = Pick<
+  UpdateTripCoverInput,
+  'tripId' | 'version' | 'currentImagePath' | 'currentThumbnailPath'
+>;
+
 export type TripRepository = {
   listAccessible: (userId: string) => Promise<TripListItem[]>;
   getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
   create: (input: CreateTripInput) => Promise<string>;
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
+  updateCover: (input: UpdateTripCoverInput) => Promise<Trip>;
+  removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
 };
 
 function zonedDateToIso(date: string, timezone: string) {
@@ -130,7 +148,34 @@ export function createTripRepository(): TripRepository {
       }
       if (!data) throw new AppError('TRIP_NOT_FOUND');
 
-      return { trip: data, role: membership.role };
+      const coverPaths = [
+        data.cover_image_path,
+        data.cover_thumbnail_path,
+      ].filter((path): path is string => Boolean(path));
+      const signedUrlByPath = new Map<string, string>();
+
+      if (coverPaths.length > 0) {
+        const { data: signedCovers } = await client.storage
+          .from('trip-files')
+          .createSignedUrls(coverPaths, 60 * 60);
+
+        signedCovers?.forEach((cover) => {
+          if (cover.path && cover.signedUrl) {
+            signedUrlByPath.set(cover.path, cover.signedUrl);
+          }
+        });
+      }
+
+      return {
+        trip: data,
+        role: membership.role,
+        coverImageUrl: data.cover_image_path
+          ? (signedUrlByPath.get(data.cover_image_path) ?? null)
+          : null,
+        coverThumbnailUrl: data.cover_thumbnail_path
+          ? (signedUrlByPath.get(data.cover_thumbnail_path) ?? null)
+          : null,
+      };
     },
 
     async updateMetadata(input) {
@@ -147,6 +192,92 @@ export function createTripRepository(): TripRepository {
         throw mapSupabaseError(error);
       }
       if (!data) throw new AppError('UNKNOWN');
+
+      return data;
+    },
+
+    async updateCover(input) {
+      const assetId = crypto.randomUUID();
+      const extension =
+        input.file.type === 'image/png'
+          ? 'png'
+          : input.file.type === 'image/webp'
+            ? 'webp'
+            : 'jpg';
+      const imagePath = `${input.tripId}/cover/${assetId}.${extension}`;
+      const thumbnailPath = `${input.tripId}/cover/${assetId}-thumbnail.webp`;
+      const bucket = client.storage.from('trip-files');
+
+      const imageUpload = await bucket.upload(imagePath, input.file, {
+        cacheControl: '3600',
+        contentType: input.file.type,
+      });
+      if (imageUpload.error) throw mapSupabaseError(imageUpload.error);
+
+      const thumbnailUpload = await bucket.upload(
+        thumbnailPath,
+        input.thumbnail,
+        {
+          cacheControl: '3600',
+          contentType: 'image/webp',
+        },
+      );
+      if (thumbnailUpload.error) {
+        await bucket.remove([imagePath]);
+        throw mapSupabaseError(thumbnailUpload.error);
+      }
+
+      const { data, error } = await client
+        .from('trips')
+        .update({
+          cover_image_path: imagePath,
+          cover_thumbnail_path: thumbnailPath,
+        })
+        .eq('id', input.tripId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error || !data) {
+        await bucket.remove([imagePath, thumbnailPath]);
+        if (error?.code === '42501') {
+          throw new AppError('TRIP_ACCESS_DENIED');
+        }
+        if (error) throw mapSupabaseError(error);
+        throw new AppError('UNKNOWN');
+      }
+
+      const previousPaths = [
+        input.currentImagePath,
+        input.currentThumbnailPath,
+      ].filter((path): path is string => Boolean(path));
+      if (previousPaths.length > 0) await bucket.remove(previousPaths);
+
+      return data;
+    },
+
+    async removeCover(input) {
+      const { data, error } = await client
+        .from('trips')
+        .update({ cover_image_path: null, cover_thumbnail_path: null })
+        .eq('id', input.tripId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error) {
+        if (error.code === '42501') throw new AppError('TRIP_ACCESS_DENIED');
+        throw mapSupabaseError(error);
+      }
+      if (!data) throw new AppError('UNKNOWN');
+
+      const previousPaths = [
+        input.currentImagePath,
+        input.currentThumbnailPath,
+      ].filter((path): path is string => Boolean(path));
+      if (previousPaths.length > 0) {
+        await client.storage.from('trip-files').remove(previousPaths);
+      }
 
       return data;
     },

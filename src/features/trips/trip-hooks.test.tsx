@@ -74,6 +74,8 @@ describe('trip list hook', () => {
       getAccessibleById: vi.fn(),
       create: vi.fn(),
       updateMetadata: vi.fn(),
+      updateCover: vi.fn(),
+      removeCover: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {
@@ -90,6 +92,8 @@ describe('trip list hook', () => {
       getAccessibleById: vi.fn(),
       create: vi.fn(),
       updateMetadata: vi.fn(),
+      updateCover: vi.fn(),
+      removeCover: vi.fn(),
     } satisfies TripRepository;
 
     render(<TripListProbe repository={repository} />, {
