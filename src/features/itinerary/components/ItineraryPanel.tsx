@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -25,7 +25,11 @@ import {
   useReorderItineraryNode,
 } from '../itinerary-hooks';
 import type { ItineraryRepository } from '../itinerary-repository';
-import type { ItineraryNode, MoveNode } from '../itinerary-types';
+import type {
+  ItineraryNode,
+  MoveNode,
+  NodeAttachment,
+} from '../itinerary-types';
 import { generateSortKeyBetween } from '../itinerary-sort-key';
 import {
   getInitialItineraryWindow,
@@ -74,6 +78,64 @@ function nodeIcon(node: ItineraryNode): IconName {
   return 'location';
 }
 
+function safeExternalUrl(value: string | null) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:'
+      ? url.toString()
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function DirectionsLink({ url }: { url: string | null }) {
+  const { t } = useTranslation('common');
+  const safeUrl = safeExternalUrl(url);
+  if (!safeUrl) return null;
+
+  return (
+    <a
+      aria-label={t('itinerary.directions')}
+      className="itinerary-node__directions"
+      href={safeUrl}
+      rel="noreferrer"
+      target="_blank"
+    >
+      <Icon name="directions" />
+      <span>{t('itinerary.directions')}</span>
+    </a>
+  );
+}
+
+function AttachmentLinks({ attachments }: { attachments: NodeAttachment[] }) {
+  const visibleAttachments = attachments.filter(
+    (attachment) => attachment.role !== 'cover',
+  );
+  if (visibleAttachments.length === 0) return null;
+
+  return (
+    <ul className="itinerary-node__attachments">
+      {visibleAttachments.map((item) => {
+        const fileUrl = safeExternalUrl(item.fileUrl);
+        return (
+          <li key={item.id}>
+            <Icon name="attachment" />
+            {fileUrl ? (
+              <a href={fileUrl} rel="noreferrer" target="_blank">
+                {item.label}
+              </a>
+            ) : (
+              <span>{item.label}</span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function formatNodeTime(
   node: ItineraryNode,
   locale: string,
@@ -109,10 +171,12 @@ const MoveConnector = memo(function MoveConnector({
       <span className="itinerary-move__line" />
       <div className="itinerary-move__content">
         <div className="itinerary-move__pill">
-          <div className="itinerary-move__summary">
-            <Icon name={nodeIcon(node)} />
-            {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
-            <span>{title}</span>
+          <div className="itinerary-move__header">
+            <div className="itinerary-move__summary">
+              <Icon name={nodeIcon(node)} />
+              {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
+              <span>{title}</span>
+            </div>
           </div>
           {node.additionalLines.length > 0 && (
             <div className="itinerary-move__lines">
@@ -121,6 +185,8 @@ const MoveConnector = memo(function MoveConnector({
               ))}
             </div>
           )}
+          <AttachmentLinks attachments={node.attachments} />
+          <DirectionsLink url={node.googleMapsUrl} />
         </div>
       </div>
     </Item>
@@ -179,6 +245,8 @@ const StopCard = memo(function StopCard({
                 ))}
               </div>
             )}
+            <AttachmentLinks attachments={node.attachments} />
+            <DirectionsLink url={node.googleMapsUrl} />
           </div>
         </div>
       ) : (
@@ -198,6 +266,8 @@ const StopCard = memo(function StopCard({
                 ))}
               </div>
             )}
+            <AttachmentLinks attachments={node.attachments} />
+            <DirectionsLink url={node.googleMapsUrl} />
           </div>
         </div>
       )}
@@ -209,6 +279,8 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   const { t, i18n } = useTranslation('common');
   const initial = useMemo(() => getInitialItineraryWindow(trip), [trip]);
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
+  const dayNavigationRef = useRef<HTMLDivElement>(null);
+  const [dayNavigationScrollable, setDayNavigationScrollable] = useState(false);
   const window = useMemo(
     () => getItineraryWindowForDate(trip, selectedDate),
     [selectedDate, trip],
@@ -264,6 +336,58 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     timeZone: 'UTC',
   });
 
+  useEffect(() => {
+    const navigation = dayNavigationRef.current;
+    if (!navigation) return;
+
+    const updateScrollable = () => {
+      const buttons = Array.from(
+        navigation.querySelectorAll<HTMLElement>('[data-itinerary-day]'),
+      );
+      const gap =
+        Number.parseFloat(getComputedStyle(navigation).columnGap) || 0;
+      const contentWidth =
+        buttons.reduce((total, button) => total + button.offsetWidth, 0) +
+        Math.max(0, buttons.length - 1) * gap;
+      setDayNavigationScrollable(contentWidth > navigation.clientWidth + 1);
+    };
+
+    updateScrollable();
+    const resizeObserver = globalThis.ResizeObserver
+      ? new ResizeObserver(updateScrollable)
+      : null;
+    resizeObserver?.observe(navigation);
+    navigation
+      .querySelectorAll<HTMLElement>('[data-itinerary-day]')
+      .forEach((button) => resizeObserver?.observe(button));
+    globalThis.addEventListener('resize', updateScrollable);
+
+    return () => {
+      resizeObserver?.disconnect();
+      globalThis.removeEventListener('resize', updateScrollable);
+    };
+  }, [days, locale]);
+
+  useEffect(() => {
+    if (!dayNavigationScrollable) return;
+    const navigation = dayNavigationRef.current;
+    const selectedButton = navigation?.querySelector<HTMLElement>(
+      `[data-itinerary-day="${selectedDate}"]`,
+    );
+    if (!navigation || !selectedButton) return;
+
+    const left =
+      selectedButton.offsetLeft -
+      (navigation.clientWidth - selectedButton.offsetWidth) / 2;
+    const reduceMotion =
+      globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
+      false;
+    navigation.scrollTo?.({
+      left: Math.max(0, left),
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    });
+  }, [dayNavigationScrollable, selectedDate]);
+
   function moveNode(from: number, to: number) {
     if (
       from === to ||
@@ -300,12 +424,18 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   return (
     <section className="itinerary-panel">
       <div className="itinerary-day-navigation">
-        <div className="itinerary-day-navigation__days">
+        <div
+          ref={dayNavigationRef}
+          className={`itinerary-day-navigation__days${
+            dayNavigationScrollable ? ' is-scrollable' : ''
+          }`}
+        >
           {days.map((day) => (
             <button
               key={day}
               aria-pressed={selectedDate === day}
               className={selectedDate === day ? 'is-selected' : ''}
+              data-itinerary-day={day}
               type="button"
               onClick={() => setSelectedDate(day)}
             >

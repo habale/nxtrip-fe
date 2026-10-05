@@ -34,7 +34,35 @@ const baseNode = {
   iconKey: 'location',
   additionalData: {},
   additionalLines: [{ type: 'text', text: 'Meet at the east gate' }],
-  attachments: [],
+  attachments: [
+    {
+      id: 'node-attachment-1',
+      role: 'attachment',
+      sortOrder: 0,
+      label: 'Boarding pass',
+      fileUrl: 'https://example.com/boarding-pass.pdf',
+      thumbnailUrl: null,
+      attachment: {
+        id: 'attachment-1',
+        trip_id: trip.id,
+        storage_bucket: 'trip-files',
+        storage_path: 'trip-1/boarding-pass.pdf',
+        display_name: 'Boarding pass',
+        original_filename: 'boarding-pass.pdf',
+        mime_type: 'application/pdf',
+        size_bytes: 1024,
+        description: null,
+        category: null,
+        thumbnail_path: null,
+        metadata: {},
+        uploaded_by: 'user-1',
+        created_at: '2099-01-01T00:00:00Z',
+        updated_at: '2099-01-01T00:00:00Z',
+        version: 1,
+        deleted_at: null,
+      },
+    },
+  ],
   version: 1,
 } satisfies ItineraryNode;
 
@@ -48,7 +76,7 @@ describe('ItineraryPanel', () => {
         nodeType: 'move',
         title: 'Airport transfer',
         sortKey: 'b0',
-        googleMapsUrl: null,
+        googleMapsUrl: 'https://maps.google.com/airport',
         transportMode: 'rail',
         operator: 'Airport Rail Link',
         durationMinutes: 35,
@@ -93,7 +121,13 @@ describe('ItineraryPanel', () => {
       screen.getByText('Temple visit').closest('ion-item'),
     ).toHaveAttribute('data-node-id', 'stop-1');
     expect(screen.getByText('Meet at the east gate')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Directions' })).toBeNull();
+    expect(screen.getAllByRole('link', { name: 'Directions' })).toHaveLength(2);
+    expect(
+      screen.getAllByRole('link', { name: 'Directions' })[0],
+    ).toHaveAttribute('href', 'https://maps.google.com/example');
+    expect(screen.getAllByRole('link', { name: 'Boarding pass' })).toHaveLength(
+      2,
+    );
     expect(screen.getByText('Airport transfer')).toBeInTheDocument();
     expect(screen.queryByText('Airport Rail Link')).toBeNull();
     expect(screen.queryByText('• 35 min')).toBeNull();
