@@ -213,6 +213,7 @@ export function ItineraryNodeEditor({
         await addAttachment.mutateAsync({
           tripId: trip.id,
           nodeId: saved.id,
+          localDate,
           file: upload.file,
           role: upload.role,
           sortOrder,

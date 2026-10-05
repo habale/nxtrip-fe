@@ -4,7 +4,11 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 
 import { AuthContext, type AuthContextValue } from '../auth/auth-context';
-import { itineraryKeys, useReorderItineraryNode } from './itinerary-hooks';
+import {
+  itineraryKeys,
+  useCreateItineraryNode,
+  useReorderItineraryNode,
+} from './itinerary-hooks';
 import type { ItineraryRepository } from './itinerary-repository';
 import type {
   ItineraryDateWindow,
@@ -107,5 +111,77 @@ describe('itinerary reorder mutation', () => {
           ?.nodes.map(({ id }) => id),
       ).toEqual(['first', 'second']),
     );
+  });
+
+  it('invalidates only cached windows containing a created node day', async () => {
+    const createdNode = node('created', 'c0');
+    const repository = {
+      getDateWindow: vi.fn(),
+      createNode: vi.fn(async () => createdNode),
+      updateNode: vi.fn(),
+      reorderNode: vi.fn(),
+      removeNode: vi.fn(),
+      addNodeAttachment: vi.fn(),
+    } satisfies ItineraryRepository;
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    });
+    const adjacentWindow = {
+      ...window,
+      startDate: '2099-10-16',
+      endDate: '2099-10-16',
+    };
+    queryClient.setQueryData(itineraryKeys.window(window), {
+      ...window,
+      nodes: [],
+    });
+    queryClient.setQueryData(itineraryKeys.window(adjacentWindow), {
+      ...adjacentWindow,
+      nodes: [],
+    });
+    const auth: AuthContextValue = {
+      session: null,
+      user: { id: 'user-1' } as User,
+      status: 'ready',
+      error: null,
+      signInWithGoogle: vi.fn(),
+      signOut: vi.fn(),
+    };
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <AuthContext.Provider value={auth}>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </AuthContext.Provider>
+    );
+    const { result } = renderHook(() => useCreateItineraryNode(repository), {
+      wrapper,
+    });
+
+    await act(() =>
+      result.current.mutateAsync({
+        tripId: window.tripId,
+        nodeType: 'stop',
+        title: createdNode.title,
+        localDate: window.startDate,
+        startAt: null,
+        endAt: null,
+        timezone: 'UTC',
+        allDay: true,
+        durationMinutes: null,
+        sortKey: createdNode.sortKey,
+        googleMapsUrl: '',
+        iconKey: 'location',
+        additionalData: {},
+      }),
+    );
+
+    expect(
+      queryClient.getQueryState(itineraryKeys.window(window))?.isInvalidated,
+    ).toBe(true);
+    expect(
+      queryClient.getQueryState(itineraryKeys.window(adjacentWindow))
+        ?.isInvalidated,
+    ).toBe(false);
   });
 });

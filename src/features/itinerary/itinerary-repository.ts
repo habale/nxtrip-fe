@@ -24,6 +24,7 @@ export type ItineraryRepository = {
 export type AddNodeAttachmentInput = {
   tripId: string;
   nodeId: string;
+  localDate: string;
   file: File;
   role: 'cover' | 'attachment';
   sortOrder: number;
@@ -58,11 +59,15 @@ export type UpdateItineraryNodeInput = SaveItineraryNodeInput & {
 export type RemoveItineraryNodeInput = {
   tripId: string;
   nodeId: string;
+  localDate: string;
   version: number;
   userId: string;
 };
 
-export type ReorderItineraryNodeInput = RemoveItineraryNodeInput & {
+export type ReorderItineraryNodeInput = Omit<
+  RemoveItineraryNodeInput,
+  'localDate'
+> & {
   sortKey: string;
 };
 

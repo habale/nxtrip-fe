@@ -1,5 +1,10 @@
 import type { Trip } from '../trips/trip-repository';
-import { getInitialItineraryWindow, itineraryDays } from './itinerary-window';
+import {
+  getAdjacentItineraryWindows,
+  getInitialItineraryWindow,
+  getItineraryWindowForDate,
+  itineraryDays,
+} from './itinerary-window';
 
 const trip = {
   id: 'trip-1',
@@ -14,10 +19,28 @@ describe('itinerary view window', () => {
       getInitialItineraryWindow(trip, new Date('2026-10-10T12:00:00Z')),
     ).toEqual({
       tripId: 'trip-1',
-      startDate: '2026-10-07',
-      endDate: '2026-10-13',
+      startDate: '2026-10-08',
+      endDate: '2026-10-14',
       selectedDate: '2026-10-10',
     });
+  });
+
+  it('uses stable seven-day chunks and returns adjacent windows', () => {
+    const current = getItineraryWindowForDate(trip, '2026-10-10');
+
+    expect(getItineraryWindowForDate(trip, '2026-10-14')).toEqual(current);
+    expect(getAdjacentItineraryWindows(trip, current)).toEqual([
+      {
+        tripId: 'trip-1',
+        startDate: '2026-10-01',
+        endDate: '2026-10-07',
+      },
+      {
+        tripId: 'trip-1',
+        startDate: '2026-10-15',
+        endDate: '2026-10-20',
+      },
+    ]);
   });
 
   it('clamps the initial window to trip boundaries', () => {

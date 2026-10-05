@@ -45,31 +45,70 @@ export function itineraryDays(startDate: string, endDate: string) {
   return days;
 }
 
+export function getTripItineraryBounds(trip: Trip, fallbackDate: string) {
+  const startDate = trip.start_at
+    ? localDateForInstant(new Date(trip.start_at), trip.timezone)
+    : fallbackDate;
+  const endDate = trip.end_at
+    ? localDateForInstant(new Date(trip.end_at), trip.timezone)
+    : startDate;
+  return { startDate, endDate };
+}
+
+export function getItineraryWindowForDate(trip: Trip, requestedDate: string) {
+  const bounds = getTripItineraryBounds(trip, requestedDate);
+  const selectedDate =
+    requestedDate < bounds.startDate
+      ? bounds.startDate
+      : requestedDate > bounds.endDate
+        ? bounds.endDate
+        : requestedDate;
+  const tripStart = dateFromValue(bounds.startDate).getTime();
+  const selected = dateFromValue(selectedDate).getTime();
+  const dayOffset = Math.round((selected - tripStart) / 86_400_000);
+  const chunkOffset = Math.floor(dayOffset / ITINERARY_VIEW_DAYS);
+  const startDate = addDays(
+    bounds.startDate,
+    chunkOffset * ITINERARY_VIEW_DAYS,
+  );
+  const candidateEnd = addDays(startDate, ITINERARY_VIEW_DAYS - 1);
+
+  return {
+    tripId: trip.id,
+    startDate,
+    endDate: candidateEnd > bounds.endDate ? bounds.endDate : candidateEnd,
+  };
+}
+
+export function getAdjacentItineraryWindows(
+  trip: Trip,
+  window: ItineraryDateWindow,
+) {
+  const bounds = getTripItineraryBounds(trip, window.startDate);
+  const adjacent: ItineraryDateWindow[] = [];
+  if (window.startDate > bounds.startDate) {
+    adjacent.push(
+      getItineraryWindowForDate(trip, addDays(window.startDate, -1)),
+    );
+  }
+  if (window.endDate < bounds.endDate) {
+    adjacent.push(getItineraryWindowForDate(trip, addDays(window.endDate, 1)));
+  }
+  return adjacent;
+}
+
 export function getInitialItineraryWindow(
   trip: Trip,
   now = new Date(),
 ): ItineraryDateWindow & { selectedDate: string } {
   const today = localDateForInstant(now, trip.timezone);
-  const tripStart = trip.start_at
-    ? localDateForInstant(new Date(trip.start_at), trip.timezone)
-    : today;
-  const tripEnd = trip.end_at
-    ? localDateForInstant(new Date(trip.end_at), trip.timezone)
-    : tripStart;
+  const { startDate: tripStart, endDate: tripEnd } = getTripItineraryBounds(
+    trip,
+    today,
+  );
   const selectedDate =
     today < tripStart ? tripStart : today > tripEnd ? tripEnd : today;
-  let startDate = addDays(selectedDate, -3);
-  let endDate = addDays(startDate, ITINERARY_VIEW_DAYS - 1);
-
-  if (startDate < tripStart) {
-    startDate = tripStart;
-    endDate = addDays(startDate, ITINERARY_VIEW_DAYS - 1);
-  }
-  if (endDate > tripEnd) {
-    endDate = tripEnd;
-    startDate = addDays(endDate, -(ITINERARY_VIEW_DAYS - 1));
-    if (startDate < tripStart) startDate = tripStart;
-  }
+  const { startDate, endDate } = getItineraryWindowForDate(trip, selectedDate);
 
   return { tripId: trip.id, startDate, endDate, selectedDate };
 }

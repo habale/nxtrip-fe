@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 import { useAuth } from '../auth/auth-context';
 import {
@@ -30,14 +36,42 @@ export function useItineraryWindow(
   });
 }
 
-function useRefreshItinerary() {
+export function usePrefetchItineraryWindows(
+  windows: ItineraryDateWindow[],
+  repository?: ItineraryRepository,
+) {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: itineraryKeys.all });
+
+  useEffect(() => {
+    const itineraryRepository = repository ?? getItineraryRepository();
+    windows.forEach((window) => {
+      void queryClient.prefetchQuery({
+        queryKey: itineraryKeys.window(window),
+        queryFn: () => itineraryRepository.getDateWindow(window),
+      });
+    });
+  }, [queryClient, repository, windows]);
+}
+
+function invalidateItineraryDay(
+  queryClient: QueryClient,
+  tripId: string,
+  localDate: string,
+) {
+  return queryClient.invalidateQueries({
+    predicate: ({ queryKey }) =>
+      queryKey[0] === itineraryKeys.all[0] &&
+      queryKey[1] === tripId &&
+      typeof queryKey[2] === 'string' &&
+      typeof queryKey[3] === 'string' &&
+      queryKey[2] <= localDate &&
+      queryKey[3] >= localDate,
+  });
 }
 
 export function useCreateItineraryNode(repository?: ItineraryRepository) {
   const { user } = useAuth();
-  const refresh = useRefreshItinerary();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: Omit<SaveItineraryNodeInput, 'userId'>) => {
@@ -47,13 +81,14 @@ export function useCreateItineraryNode(repository?: ItineraryRepository) {
         userId: user.id,
       });
     },
-    onSuccess: refresh,
+    onSuccess: (node) =>
+      invalidateItineraryDay(queryClient, node.tripId, node.localDate ?? ''),
   });
 }
 
 export function useUpdateItineraryNode(repository?: ItineraryRepository) {
   const { user } = useAuth();
-  const refresh = useRefreshItinerary();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: Omit<UpdateItineraryNodeInput, 'userId'>) => {
@@ -63,13 +98,14 @@ export function useUpdateItineraryNode(repository?: ItineraryRepository) {
         userId: user.id,
       });
     },
-    onSuccess: refresh,
+    onSuccess: (node) =>
+      invalidateItineraryDay(queryClient, node.tripId, node.localDate ?? ''),
   });
 }
 
 export function useRemoveItineraryNode(repository?: ItineraryRepository) {
   const { user } = useAuth();
-  const refresh = useRefreshItinerary();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: Omit<RemoveItineraryNodeInput, 'userId'>) => {
@@ -79,7 +115,8 @@ export function useRemoveItineraryNode(repository?: ItineraryRepository) {
         userId: user.id,
       });
     },
-    onSuccess: refresh,
+    onSuccess: (_result, input) =>
+      invalidateItineraryDay(queryClient, input.tripId, input.localDate),
   });
 }
 
@@ -139,7 +176,7 @@ export function useAddItineraryNodeAttachment(
   repository?: ItineraryRepository,
 ) {
   const { user } = useAuth();
-  const refresh = useRefreshItinerary();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: Omit<AddNodeAttachmentInput, 'userId'>) => {
@@ -149,6 +186,7 @@ export function useAddItineraryNodeAttachment(
         userId: user.id,
       });
     },
-    onSuccess: refresh,
+    onSuccess: (_result, input) =>
+      invalidateItineraryDay(queryClient, input.tripId, input.localDate),
   });
 }

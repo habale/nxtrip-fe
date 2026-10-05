@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -20,6 +20,7 @@ import { ItineraryNodeEditor } from './ItineraryNodeEditor';
 import { getItineraryCategory } from '../itinerary-category';
 import {
   useItineraryWindow,
+  usePrefetchItineraryWindows,
   useRemoveItineraryNode,
   useReorderItineraryNode,
 } from '../itinerary-hooks';
@@ -28,6 +29,9 @@ import type { ItineraryNode, MoveNode } from '../itinerary-types';
 import { generateSortKeyBetween } from '../itinerary-sort-key';
 import {
   getInitialItineraryWindow,
+  getAdjacentItineraryWindows,
+  getItineraryWindowForDate,
+  getTripItineraryBounds,
   itineraryDays,
   localDateForInstant,
 } from '../itinerary-window';
@@ -84,7 +88,7 @@ function formatNodeTime(
   }).format(new Date(node.startAt));
 }
 
-function MoveConnector({
+const MoveConnector = memo(function MoveConnector({
   node,
   locale,
   timeZone,
@@ -121,9 +125,9 @@ function MoveConnector({
       </div>
     </Item>
   );
-}
+});
 
-function StopCard({
+const StopCard = memo(function StopCard({
   node,
   locale,
   timeZone,
@@ -148,7 +152,13 @@ function StopCard({
       {coverUrl ? (
         <div className="itinerary-stop__covered-card">
           <div className="itinerary-stop__hero">
-            <img alt="" className="itinerary-stop__cover" src={coverUrl} />
+            <img
+              alt=""
+              className="itinerary-stop__cover"
+              decoding="async"
+              loading="lazy"
+              src={coverUrl}
+            />
             <div className="itinerary-stop__hero-content">
               <div className="itinerary-stop__icon">
                 <Icon name={nodeIcon(node)} size="large" />
@@ -193,20 +203,20 @@ function StopCard({
       )}
     </Item>
   );
-}
+});
 
 export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   const { t, i18n } = useTranslation('common');
   const initial = useMemo(() => getInitialItineraryWindow(trip), [trip]);
-  const window = useMemo(
-    () => ({
-      tripId: initial.tripId,
-      startDate: initial.startDate,
-      endDate: initial.endDate,
-    }),
-    [initial],
-  );
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
+  const window = useMemo(
+    () => getItineraryWindowForDate(trip, selectedDate),
+    [selectedDate, trip],
+  );
+  const adjacentWindows = useMemo(
+    () => getAdjacentItineraryWindows(trip, window),
+    [trip, window],
+  );
   const [mode, setMode] = useState<'view' | 'edit' | 'reorder'>('view');
   const [editor, setEditor] = useState<
     | { type: 'create'; sortKey: string; afterNodeId?: string }
@@ -217,12 +227,24 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     useState<ItineraryNode | null>(null);
   const [reorderKeyError, setReorderKeyError] = useState(false);
   const query = useItineraryWindow(window, repository);
+  usePrefetchItineraryWindows(adjacentWindows, repository);
   const removeNode = useRemoveItineraryNode(repository);
   const reorderNode = useReorderItineraryNode(window, repository);
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
-  const days = itineraryDays(window.startDate, window.endDate);
-  const selectedNodes = (query.data?.nodes ?? []).filter(
-    (node) => node.localDate === selectedDate,
+  const tripBounds = useMemo(
+    () => getTripItineraryBounds(trip, selectedDate),
+    [selectedDate, trip],
+  );
+  const days = useMemo(
+    () => itineraryDays(tripBounds.startDate, tripBounds.endDate),
+    [tripBounds],
+  );
+  const selectedNodes = useMemo(
+    () =>
+      (query.data?.nodes ?? []).filter(
+        (node) => node.localDate === selectedDate,
+      ),
+    [query.data?.nodes, selectedDate],
   );
   const tripStart = trip.start_at
     ? localDateForInstant(new Date(trip.start_at), trip.timezone)
@@ -469,6 +491,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
           removeNode.mutate({
             tripId: trip.id,
             nodeId: nodePendingRemoval.id,
+            localDate: nodePendingRemoval.localDate ?? selectedDate,
             version: nodePendingRemoval.version,
           });
           setNodePendingRemoval(null);
