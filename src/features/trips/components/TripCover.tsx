@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppError } from '../../../shared/api/app-error';
+import { convertImageToWebp } from '../../../shared/images/image-conversion';
 import {
   Button,
   ConfirmDialog,
@@ -60,11 +61,12 @@ export function TripCover({ detail, repository }: TripCoverProps) {
     });
 
     try {
-      const thumbnail = await createCoverThumbnail(file);
+      const webpFile = await convertImageToWebp(file);
+      const thumbnail = await createCoverThumbnail(webpFile);
       await updateCover.mutateAsync({
         tripId: trip.id,
         version: trip.version,
-        file,
+        file: webpFile,
         thumbnail,
         currentImagePath: trip.cover_image_path,
         currentThumbnailPath: trip.cover_thumbnail_path,

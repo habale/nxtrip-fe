@@ -521,6 +521,7 @@
   min-width: 0;
   align-items: center;
   gap: 0.35rem;
+  font-weight: 600;
 }
 
 .itinerary-move__content {

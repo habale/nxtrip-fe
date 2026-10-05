@@ -1,5 +1,6 @@
 import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
+import { convertImageToWebp } from '../../shared/images/image-conversion';
 import {
   type ItineraryDateWindow,
   type ItineraryNode,
@@ -106,12 +107,13 @@ export function createItineraryRepository(): ItineraryRepository {
   return {
     async addNodeAttachment(input) {
       const attachmentId = crypto.randomUUID();
+      const uploadFile = await convertImageToWebp(input.file);
       const safeName =
-        input.file.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'attachment';
+        uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'attachment';
       const storagePath = `${input.tripId}/${attachmentId}/${safeName}`;
       const bucket = client.storage.from('trip-files');
-      const upload = await bucket.upload(storagePath, input.file, {
-        contentType: input.file.type || undefined,
+      const upload = await bucket.upload(storagePath, uploadFile, {
+        contentType: uploadFile.type || undefined,
         upsert: false,
       });
       if (upload.error) throw mapSupabaseError(upload.error);
@@ -120,10 +122,10 @@ export function createItineraryRepository(): ItineraryRepository {
         id: attachmentId,
         trip_id: input.tripId,
         storage_path: storagePath,
-        display_name: input.file.name,
+        display_name: uploadFile.name,
         original_filename: input.file.name,
-        mime_type: input.file.type || null,
-        size_bytes: input.file.size,
+        mime_type: uploadFile.type || null,
+        size_bytes: uploadFile.size,
         uploaded_by: input.userId,
       });
       if (attachment.error) {
