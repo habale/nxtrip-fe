@@ -17,6 +17,7 @@ import { getItineraryCategory } from '../itinerary-category';
 import { useItineraryWindow, useRemoveItineraryNode } from '../itinerary-hooks';
 import type { ItineraryRepository } from '../itinerary-repository';
 import type { ItineraryNode, MoveNode } from '../itinerary-types';
+import { generateSortKeyBetween } from '../itinerary-sort-key';
 import {
   getInitialItineraryWindow,
   itineraryDays,
@@ -200,7 +201,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
   const [editMode, setEditMode] = useState(false);
   const [editor, setEditor] = useState<
-    | { type: 'create'; placement: 'top' | 'end'; afterNodeId?: string }
+    | { type: 'create'; sortKey: string; afterNodeId?: string }
     | { type: 'edit'; node: ItineraryNode }
     | null
   >(null);
@@ -295,22 +296,23 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
               onClick={() =>
                 setEditor({
                   type: 'create',
-                  placement: 'top',
+                  sortKey: generateSortKeyBetween(
+                    null,
+                    selectedNodes[0]?.sortKey ?? null,
+                  ),
                 })
               }
             />
           )}
-          {editor?.type === 'create' &&
-            editor.placement === 'top' &&
-            !editor.afterNodeId && (
-              <ItineraryNodeEditor
-                localDate={selectedDate}
-                placement="top"
-                repository={repository}
-                trip={trip}
-                onClose={() => setEditor(null)}
-              />
-            )}
+          {editor?.type === 'create' && !editor.afterNodeId && (
+            <ItineraryNodeEditor
+              localDate={selectedDate}
+              repository={repository}
+              sortKey={editor.sortKey}
+              trip={trip}
+              onClose={() => setEditor(null)}
+            />
+          )}
 
           {selectedNodes.length === 0 && !editMode ? (
             <div className="itinerary-state">
@@ -320,7 +322,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
             </div>
           ) : (
             <div className="itinerary-timeline">
-              {selectedNodes.map((node) => (
+              {selectedNodes.map((node, index) => (
                 <div
                   key={node.id}
                   className={`itinerary-node-context${
@@ -359,8 +361,11 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                       onClick={() =>
                         setEditor({
                           type: 'create',
-                          placement: 'end',
                           afterNodeId: node.id,
+                          sortKey: generateSortKeyBetween(
+                            node.sortKey,
+                            selectedNodes[index + 1]?.sortKey ?? null,
+                          ),
                         })
                       }
                     />
@@ -369,8 +374,8 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                     editor.afterNodeId === node.id && (
                       <ItineraryNodeEditor
                         localDate={selectedDate}
-                        placement="end"
                         repository={repository}
+                        sortKey={editor.sortKey}
                         trip={trip}
                         onClose={() => setEditor(null)}
                       />
@@ -388,27 +393,6 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
               ))}
             </div>
           )}
-
-          {editMode && editor === null && selectedNodes.length > 0 && (
-            <IconButton
-              icon="add_circle"
-              label={t('itinerary.editor.addBetween')}
-              size="large"
-              onClick={() => setEditor({ type: 'create', placement: 'end' })}
-            />
-          )}
-
-          {editor?.type === 'create' &&
-            editor.placement === 'end' &&
-            !editor.afterNodeId && (
-              <ItineraryNodeEditor
-                localDate={selectedDate}
-                placement="end"
-                repository={repository}
-                trip={trip}
-                onClose={() => setEditor(null)}
-              />
-            )}
         </div>
       )}
       <ConfirmDialog

@@ -113,7 +113,7 @@ describe('ItineraryPanel', () => {
     const user = userEvent.setup();
     await user.click(screen.getByText('Edit', { selector: 'ion-button' }));
     expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(
-      nodes.length + 2,
+      nodes.length + 1,
     );
     const topAddButton = document.querySelector(
       '.itinerary-edit-context > .ui-icon-button',

@@ -76,7 +76,7 @@ function selectedIcon(values: ItineraryNodeFormValues): IconName {
 type ItineraryNodeEditorProps = {
   trip: Trip;
   localDate: string;
-  placement?: 'top' | 'end';
+  sortKey?: string;
   node?: ItineraryNode;
   repository?: ItineraryRepository;
   onClose: () => void;
@@ -85,7 +85,7 @@ type ItineraryNodeEditorProps = {
 export function ItineraryNodeEditor({
   trip,
   localDate,
-  placement = 'end',
+  sortKey,
   node,
   repository,
   onClose,
@@ -139,6 +139,11 @@ export function ItineraryNodeEditor({
   async function save() {
     setSubmitted(true);
     if (Object.keys(validateItineraryNodeForm(values)).length > 0) return;
+    if (!persistedNode && !sortKey) {
+      throw new Error(
+        'A sort key is required when creating an itinerary node.',
+      );
+    }
 
     const notes = values.notes.trim();
     const additionalData = {
@@ -181,9 +186,7 @@ export function ItineraryNodeEditor({
       durationMinutes: values.durationMinutes
         ? Number(values.durationMinutes)
         : null,
-      sortKey:
-        persistedNode?.sortKey ??
-        `${placement === 'top' ? '0' : 'z'}-${Date.now()}-${crypto.randomUUID()}`,
+      sortKey: persistedNode?.sortKey ?? sortKey!,
       googleMapsUrl: values.googleMapsUrl,
       iconKey: values.iconKey,
       additionalData,
