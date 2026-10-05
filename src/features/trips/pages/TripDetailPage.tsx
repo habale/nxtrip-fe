@@ -6,6 +6,8 @@ import { AppError } from '../../../shared/api/app-error';
 import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
 import { ItineraryPanel } from '../../itinerary/components/ItineraryPanel';
 import type { ItineraryRepository } from '../../itinerary/itinerary-repository';
+import { LedgerPanel } from '../../ledger/components/LedgerPanel';
+import type { LedgerRepository } from '../../ledger/ledger-repository';
 import { TripInfoPanel } from '../components/TripInfoPanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
 import { formatTripDateRange } from '../trip-date';
@@ -29,6 +31,7 @@ type TripDetailPageProps = {
   section?: TripSection;
   repository?: TripRepository;
   itineraryRepository?: ItineraryRepository;
+  ledgerRepository?: LedgerRepository;
 };
 
 function isTripSection(value: string | undefined): value is TripSection {
@@ -45,6 +48,7 @@ export function TripDetailPage({
   section: sectionOverride,
   repository,
   itineraryRepository,
+  ledgerRepository,
 }: TripDetailPageProps) {
   const { t, i18n } = useTranslation('common');
   const { tripId = '', section: routeSection } = useParams();
@@ -186,6 +190,12 @@ export function TripDetailPage({
               </>
             ) : section === 'itinerary' ? (
               <ItineraryPanel repository={itineraryRepository} trip={trip} />
+            ) : section === 'ledger' ? (
+              <LedgerPanel
+                repository={ledgerRepository}
+                trip={trip}
+                locale={locale}
+              />
             ) : (
               <section className="trip-detail-placeholder">
                 <Icon name={sectionIcons[section]} size="large" />

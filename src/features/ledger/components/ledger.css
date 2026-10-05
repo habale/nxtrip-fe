@@ -1,0 +1,214 @@
+.ledger-panel {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0.4rem 0 5rem;
+}
+.ledger-view-picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+.ledger-view-picker select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.ledger-view-picker > .ui-icon {
+  transform: rotate(90deg);
+  color: var(--color-ink-muted);
+}
+.ledger-view-avatar {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--color-surface);
+  font-weight: 700;
+}
+.ledger-view-copy {
+  display: grid;
+  gap: 0.2rem;
+  text-transform: uppercase;
+}
+.ledger-view-copy small {
+  color: var(--color-ink-muted);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.ledger-view-copy strong {
+  color: var(--color-primary);
+  font-size: 1.15rem;
+}
+.ledger-tip {
+  margin: 1rem 0 0.5rem;
+  color: var(--color-ink-muted);
+  text-align: center;
+  line-height: 1.35;
+}
+.ledger-date-group {
+  display: grid;
+  gap: 0.75rem;
+}
+.ledger-date-group > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.35rem;
+  color: var(--color-ink-muted);
+}
+.ledger-date-group h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.ledger-date-group header span {
+  white-space: nowrap;
+  font-weight: 600;
+}
+.ledger-expense-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 1.5rem;
+  background: var(--color-surface);
+  box-shadow: 0 2px 7px rgb(21 24 39 / 5%);
+}
+.ledger-expense-icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  color: var(--color-category-misc);
+  background: var(--color-category-misc-bg);
+}
+.ledger-expense-icon--vehicle,
+.ledger-expense-icon--train,
+.ledger-expense-icon--flight,
+.ledger-expense-icon--ferry,
+.ledger-expense-icon--walk {
+  color: var(--color-category-moving);
+  background: var(--color-category-moving-bg);
+}
+.ledger-expense-icon--restaurant {
+  color: var(--color-category-dining);
+  background: var(--color-category-dining-bg);
+}
+.ledger-expense-icon--cafe {
+  color: var(--color-category-cafe);
+  background: var(--color-category-cafe-bg);
+}
+.ledger-expense-icon--hotel {
+  color: var(--color-category-lodging);
+  background: var(--color-category-lodging-bg);
+}
+.ledger-expense-icon--shopping {
+  color: var(--color-category-shopping);
+  background: var(--color-category-shopping-bg);
+}
+.ledger-expense-icon--sightseeing {
+  color: var(--color-category-sightseeing);
+  background: var(--color-category-sightseeing-bg);
+}
+.ledger-expense-icon--activity {
+  color: var(--color-category-activity);
+  background: var(--color-category-activity-bg);
+}
+.ledger-expense-main {
+  min-width: 0;
+}
+.ledger-expense-main h4 {
+  margin: 0.15rem 0 0.15rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.ledger-expense-main > p {
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+.ledger-expense-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  color: var(--color-ink-muted);
+}
+.ledger-member-stack {
+  display: flex;
+}
+.ledger-member-stack .ui-avatar,
+.ledger-member-stack > span {
+  width: 2rem;
+  height: 2rem;
+  margin-right: -0.45rem;
+  border: 2px solid var(--color-surface);
+  background: var(--color-surface-muted);
+  font-size: 0.7rem;
+}
+.ledger-member-stack > span {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 700;
+}
+.ledger-expense-links {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+  color: var(--color-primary);
+}
+.ledger-expense-links span {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.ledger-expense-amount {
+  display: grid;
+  align-content: start;
+  justify-items: end;
+  text-align: right;
+}
+.ledger-expense-amount strong {
+  font-size: 1.35rem;
+}
+.ledger-expense-amount span {
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}
+.ledger-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--color-ink-muted);
+}
+.ledger-state h2,
+.ledger-state p {
+  margin: 0;
+}
+@media (max-width: 520px) {
+  .ledger-expense-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .ledger-expense-amount {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .ledger-expense-main {
+    grid-column: 2;
+  }
+  .ledger-expense-main h4 {
+    padding-top: 2.25rem;
+  }
+}
