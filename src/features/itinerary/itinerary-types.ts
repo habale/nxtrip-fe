@@ -17,6 +17,7 @@ export type NodeAttachment = {
   sortOrder: number;
   label: string;
   attachment: AttachmentRow;
+  fileUrl: string | null;
   thumbnailUrl: string | null;
 };
 

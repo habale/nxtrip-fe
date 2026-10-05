@@ -6,6 +6,7 @@ export type IconButtonProps = {
   icon: IconName;
   label: string;
   variant?: 'primary' | 'quiet' | 'danger';
+  size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   onClick?: () => void;
 };
@@ -20,6 +21,7 @@ export function IconButton({
   icon,
   label,
   variant = 'quiet',
+  size = 'medium',
   disabled,
   onClick,
 }: IconButtonProps) {
@@ -28,13 +30,13 @@ export function IconButton({
   return (
     <IonButton
       aria-label={label}
-      className="ui-icon-button"
+      className={`ui-icon-button ui-icon-button--${size}`}
       color={appearance.color}
       disabled={disabled}
       fill={appearance.fill}
       onClick={onClick}
     >
-      <Icon name={icon} />
+      <Icon name={icon} size={size} />
     </IonButton>
   );
 }

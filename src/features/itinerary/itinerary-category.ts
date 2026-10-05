@@ -11,6 +11,30 @@ export type ItineraryCategory =
   | 'misc'
   | 'shopping';
 
+export const ITINERARY_CATEGORIES: ItineraryCategory[] = [
+  'moving',
+  'lodging',
+  'dining',
+  'cafe',
+  'activity',
+  'sightseeing',
+  'others',
+  'misc',
+  'shopping',
+];
+
+export const iconKeyByCategory: Record<ItineraryCategory, string> = {
+  moving: 'car',
+  lodging: 'hotel',
+  dining: 'restaurant',
+  cafe: 'cafe',
+  activity: 'activity',
+  sightseeing: 'sightseeing',
+  others: 'others',
+  misc: 'misc',
+  shopping: 'shopping',
+};
+
 const categoryAliases: Record<string, ItineraryCategory> = {
   accommodation: 'lodging',
   activity: 'activity',

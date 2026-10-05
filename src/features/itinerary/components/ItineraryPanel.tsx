@@ -3,14 +3,18 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Button,
+  ConfirmDialog,
   Icon,
   Item,
   Skeleton,
+  SwipeItem,
   type IconName,
+  IconButton,
 } from '../../../shared/ui';
 import type { Trip } from '../../trips/trip-repository';
+import { ItineraryNodeEditor } from './ItineraryNodeEditor';
 import { getItineraryCategory } from '../itinerary-category';
-import { useItineraryWindow } from '../itinerary-hooks';
+import { useItineraryWindow, useRemoveItineraryNode } from '../itinerary-hooks';
 import type { ItineraryRepository } from '../itinerary-repository';
 import type { ItineraryNode, MoveNode } from '../itinerary-types';
 import {
@@ -57,18 +61,6 @@ function nodeIcon(node: ItineraryNode): IconName {
   return 'location';
 }
 
-function safeExternalUrl(value: string | null) {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:'
-      ? url.toString()
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 function formatNodeTime(
   node: ItineraryNode,
   locale: string,
@@ -83,13 +75,18 @@ function formatNodeTime(
   }).format(new Date(node.startAt));
 }
 
-function MoveConnector({ node }: { node: MoveNode }) {
+function MoveConnector({
+  node,
+  locale,
+  timeZone,
+}: {
+  node: MoveNode;
+  locale: string;
+  timeZone: string;
+}) {
   const { t } = useTranslation('common');
-  const label =
-    node.operator?.trim() ||
-    node.title.trim() ||
-    node.transportMode?.trim() ||
-    t('itinerary.move');
+  const time = formatNodeTime(node, locale, timeZone);
+  const title = node.title.trim() || t('itinerary.move');
 
   return (
     <Item
@@ -97,14 +94,21 @@ function MoveConnector({ node }: { node: MoveNode }) {
       dataNodeId={node.id}
     >
       <span className="itinerary-move__line" />
-      <div className="itinerary-move__pill">
-        <Icon name={nodeIcon(node)} />
-        <span>{label}</span>
-        {node.durationMinutes !== null && (
-          <span>
-            • {t('itinerary.minutes', { count: node.durationMinutes })}
-          </span>
-        )}
+      <div className="itinerary-move__content">
+        <div className="itinerary-move__pill">
+          <div className="itinerary-move__summary">
+            <Icon name={nodeIcon(node)} />
+            {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
+            <span>{title}</span>
+          </div>
+          {node.additionalLines.length > 0 && (
+            <div className="itinerary-move__lines">
+              {node.additionalLines.map((line, index) => (
+                <p key={`${line.type}-${index}`}>{line.text}</p>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Item>
   );
@@ -120,51 +124,64 @@ function StopCard({
   timeZone: string;
 }) {
   const { t } = useTranslation('common');
-  const directionsUrl = safeExternalUrl(node.googleMapsUrl);
   const time = formatNodeTime(node, locale, timeZone);
+  const cover = node.attachments.find(
+    (item) =>
+      item.role === 'cover' && item.attachment.mime_type?.startsWith('image/'),
+  );
+  const coverUrl = cover?.thumbnailUrl ?? cover?.fileUrl;
 
   return (
     <Item
-      className={`itinerary-stop itinerary-category--${getItineraryCategory(node)}`}
+      className={`itinerary-stop itinerary-category--${getItineraryCategory(node)}${coverUrl ? ' itinerary-stop--cover' : ''}`}
       dataNodeId={node.id}
     >
-      <div className="itinerary-stop__layout">
-        <div className="itinerary-stop__icon">
-          <Icon name={nodeIcon(node)} size="large" />
-        </div>
-        <div className="itinerary-stop__content">
-          {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
-          <h3>{node.title || t('itinerary.untitledStop')}</h3>
-          {node.additionalLines.length > 0 && (
-            <div className="itinerary-stop__lines">
-              {node.additionalLines.map((line, index) => (
-                <p key={`${line.type}-${index}`}>{line.text}</p>
-              ))}
+      {coverUrl ? (
+        <div className="itinerary-stop__covered-card">
+          <div className="itinerary-stop__hero">
+            <img alt="" className="itinerary-stop__cover" src={coverUrl} />
+            <div className="itinerary-stop__hero-content">
+              <div className="itinerary-stop__icon">
+                <Icon name={nodeIcon(node)} size="large" />
+              </div>
+              <div className="itinerary-stop__summary">
+                {time && (
+                  <time dateTime={node.startAt ?? undefined}>{time}</time>
+                )}
+                <h3>{node.title || t('itinerary.untitledStop')}</h3>
+              </div>
             </div>
-          )}
-          {node.attachments.length > 0 && (
-            <ul className="itinerary-stop__attachments">
-              {node.attachments.map((item) => (
-                <li key={item.id}>
-                  <Icon name="attachment" />
-                  <span>{item.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          </div>
+          <div className="itinerary-stop__cover-body">
+            {node.additionalLines.length > 0 && (
+              <div className="itinerary-stop__lines">
+                {node.additionalLines.map((line, index) => (
+                  <p key={`${line.type}-${index}`}>{line.text}</p>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        {directionsUrl && (
-          <a
-            className="itinerary-stop__directions"
-            href={directionsUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            <Icon name="directions" />
-            <span>{t('itinerary.directions')}</span>
-          </a>
-        )}
-      </div>
+      ) : (
+        <div className="itinerary-stop__layout">
+          <div className="itinerary-stop__icon">
+            <Icon name={nodeIcon(node)} size="large" />
+          </div>
+          <div className="itinerary-stop__content">
+            <div className="itinerary-stop__summary">
+              {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
+              <h3>{node.title || t('itinerary.untitledStop')}</h3>
+            </div>
+            {node.additionalLines.length > 0 && (
+              <div className="itinerary-stop__lines">
+                {node.additionalLines.map((line, index) => (
+                  <p key={`${line.type}-${index}`}>{line.text}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </Item>
   );
 }
@@ -181,7 +198,16 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     [initial],
   );
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
+  const [editMode, setEditMode] = useState(false);
+  const [editor, setEditor] = useState<
+    | { type: 'create'; placement: 'top' | 'end'; afterNodeId?: string }
+    | { type: 'edit'; node: ItineraryNode }
+    | null
+  >(null);
+  const [nodePendingRemoval, setNodePendingRemoval] =
+    useState<ItineraryNode | null>(null);
   const query = useItineraryWindow(window, repository);
+  const removeNode = useRemoveItineraryNode(repository);
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
   const days = itineraryDays(window.startDate, window.endDate);
   const selectedNodes = (query.data?.nodes ?? []).filter(
@@ -227,10 +253,21 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
       </div>
 
       <header className="itinerary-day-heading">
-        <p>{t('itinerary.dayLabel', { day: tripDayNumber(selectedDate) })}</p>
-        <h2>
-          {headingFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}
-        </h2>
+        <div>
+          <p>{t('itinerary.dayLabel', { day: tripDayNumber(selectedDate) })}</p>
+          <h2>
+            {headingFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}
+          </h2>
+        </div>
+        <Button
+          variant="quiet"
+          onClick={() => {
+            setEditMode((current) => !current);
+            setEditor(null);
+          }}
+        >
+          {t(editMode ? 'itinerary.editor.done' : 'itinerary.editor.editMode')}
+        </Button>
       </header>
 
       {query.isPending ? (
@@ -248,28 +285,153 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
             {t('actions.retry')}
           </Button>
         </div>
-      ) : selectedNodes.length === 0 ? (
-        <div className="itinerary-state">
-          <Icon name="calendar" size="large" />
-          <h2>{t('itinerary.emptyDayTitle')}</h2>
-          <p>{t('itinerary.emptyDayDescription')}</p>
-        </div>
       ) : (
-        <div className="itinerary-timeline">
-          {selectedNodes.map((node) =>
-            node.nodeType === 'move' ? (
-              <MoveConnector key={node.id} node={node} />
-            ) : (
-              <StopCard
-                key={node.id}
-                locale={locale}
-                node={node}
-                timeZone={trip.timezone}
-              />
-            ),
+        <div className="itinerary-edit-context">
+          {editMode && editor === null && (
+            <IconButton
+              icon="add_circle"
+              label={t('itinerary.editor.addBetween')}
+              size="large"
+              onClick={() =>
+                setEditor({
+                  type: 'create',
+                  placement: 'top',
+                })
+              }
+            />
           )}
+          {editor?.type === 'create' &&
+            editor.placement === 'top' &&
+            !editor.afterNodeId && (
+              <ItineraryNodeEditor
+                localDate={selectedDate}
+                placement="top"
+                repository={repository}
+                trip={trip}
+                onClose={() => setEditor(null)}
+              />
+            )}
+
+          {selectedNodes.length === 0 && !editMode ? (
+            <div className="itinerary-state">
+              <Icon name="calendar" size="large" />
+              <h2>{t('itinerary.emptyDayTitle')}</h2>
+              <p>{t('itinerary.emptyDayDescription')}</p>
+            </div>
+          ) : (
+            <div className="itinerary-timeline">
+              {selectedNodes.map((node) => (
+                <div
+                  key={node.id}
+                  className={`itinerary-node-context${
+                    editor?.type === 'edit' && editor.node.id === node.id
+                      ? ' itinerary-node-context--editing'
+                      : ''
+                  }`}
+                >
+                  <SwipeItem
+                    disabled={!editMode || editor !== null}
+                    editLabel={t('itinerary.editor.editNode')}
+                    removeDisabled={removeNode.isPending}
+                    removeLabel={t('itinerary.editor.removeNode')}
+                    onEdit={() => setEditor({ type: 'edit', node })}
+                    onRemove={() => setNodePendingRemoval(node)}
+                  >
+                    {node.nodeType === 'move' ? (
+                      <MoveConnector
+                        locale={locale}
+                        node={node}
+                        timeZone={trip.timezone}
+                      />
+                    ) : (
+                      <StopCard
+                        locale={locale}
+                        node={node}
+                        timeZone={trip.timezone}
+                      />
+                    )}
+                  </SwipeItem>
+                  {editMode && editor === null && (
+                    <IconButton
+                      icon="add_circle"
+                      label={t('itinerary.editor.addBetween')}
+                      size="large"
+                      onClick={() =>
+                        setEditor({
+                          type: 'create',
+                          placement: 'end',
+                          afterNodeId: node.id,
+                        })
+                      }
+                    />
+                  )}
+                  {editor?.type === 'create' &&
+                    editor.afterNodeId === node.id && (
+                      <ItineraryNodeEditor
+                        localDate={selectedDate}
+                        placement="end"
+                        repository={repository}
+                        trip={trip}
+                        onClose={() => setEditor(null)}
+                      />
+                    )}
+                  {editor?.type === 'edit' && editor.node.id === node.id && (
+                    <ItineraryNodeEditor
+                      localDate={selectedDate}
+                      node={node}
+                      repository={repository}
+                      trip={trip}
+                      onClose={() => setEditor(null)}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {editMode && editor === null && selectedNodes.length > 0 && (
+            <IconButton
+              icon="add_circle"
+              label={t('itinerary.editor.addBetween')}
+              size="large"
+              onClick={() => setEditor({ type: 'create', placement: 'end' })}
+            />
+          )}
+
+          {editor?.type === 'create' &&
+            editor.placement === 'end' &&
+            !editor.afterNodeId && (
+              <ItineraryNodeEditor
+                localDate={selectedDate}
+                placement="end"
+                repository={repository}
+                trip={trip}
+                onClose={() => setEditor(null)}
+              />
+            )}
         </div>
       )}
+      <ConfirmDialog
+        destructive
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('itinerary.editor.removeNode')}
+        message={t('itinerary.editor.removeDescription', {
+          title:
+            nodePendingRemoval?.title || t('itinerary.editor.untitledNode'),
+        })}
+        open={nodePendingRemoval !== null}
+        title={t('itinerary.editor.removeTitle')}
+        onCancel={() => setNodePendingRemoval(null)}
+        onConfirm={() => {
+          if (!nodePendingRemoval) return;
+          removeNode.mutate({
+            tripId: trip.id,
+            nodeId: nodePendingRemoval.id,
+            version: nodePendingRemoval.version,
+          });
+          setNodePendingRemoval(null);
+        }}
+      />
     </section>
   );
 }

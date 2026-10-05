@@ -66,7 +66,7 @@ describe('shared UI components', () => {
         <Badge>Planning</Badge>
         <Chip label="Hanoi" />
         <Icon name="location" label="Location" />
-        <IconButton icon="add" label="Add item" />
+        <IconButton icon="add" label="Add item" size="large" />
         <Avatar name="Nolan" />
         <Avatar name="Alex Morgan" initialCount={2} />
         <Avatar name="Nolan" initialCount={2} />
@@ -100,7 +100,15 @@ describe('shared UI components', () => {
       'aria-pressed',
       'true',
     );
+    expect(screen.getByLabelText('Add item')).toHaveClass(
+      'ui-icon-button--large',
+    );
     expect(container.querySelector('ion-segment')).toBeInTheDocument();
+    expect(container.querySelector('ion-input')).toHaveAttribute('mode', 'md');
+    expect(container.querySelector('ion-textarea')).toHaveAttribute(
+      'mode',
+      'md',
+    );
     expect(container.querySelector('ion-datetime')).toBeInTheDocument();
     expect(screen.getByText('Oct 3 – Oct 8, 2026')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Location' })).toHaveTextContent(

@@ -147,10 +147,34 @@
   --padding-end: 0;
 }
 
+.ui-icon-button--small {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.ui-icon-button--medium {
+  width: var(--control-min-height);
+  height: var(--control-min-height);
+}
+
+.ui-icon-button--large {
+  width: 3.5rem;
+  height: 3.5rem;
+  min-height: 3.5rem;
+}
+
 .ui-image-picker__label {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.ui-modal__content {
+  --padding-top: 1.25rem;
+  --padding-end: 1.25rem;
+  --padding-bottom: calc(1.25rem + var(--ion-safe-area-bottom, 0px));
+  --padding-start: 1.25rem;
 }
 
 .ui-icon {

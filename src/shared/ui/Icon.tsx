@@ -1,5 +1,6 @@
 export type IconName =
   | 'add'
+  | 'add_circle'
   | 'activity'
   | 'attachment'
   | 'back'
@@ -46,6 +47,7 @@ export type IconProps = {
 
 const materialSymbolByName: Record<IconName, string> = {
   add: 'add',
+  add_circle: 'add_circle',
   activity: 'attractions',
   attachment: 'attach_file',
   back: 'arrow_back',

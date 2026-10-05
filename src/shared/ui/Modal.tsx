@@ -33,7 +33,7 @@ export function Modal({
           <IonTitle>{title}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">{children}</IonContent>
+      <IonContent className="ui-modal__content">{children}</IonContent>
     </IonModal>
   );
 }

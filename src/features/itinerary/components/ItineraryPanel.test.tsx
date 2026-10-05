@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { User } from '@supabase/supabase-js';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 
 import { i18n } from '../../../shared/i18n';
+import { AuthContext, type AuthContextValue } from '../../auth/auth-context';
 import type { Trip } from '../../trips/trip-repository';
 import type { ItineraryRepository } from '../itinerary-repository';
 import type { ItineraryNode } from '../itinerary-types';
@@ -49,10 +52,15 @@ describe('ItineraryPanel', () => {
         transportMode: 'rail',
         operator: 'Airport Rail Link',
         durationMinutes: 35,
+        additionalLines: [{ type: 'text', text: 'Board from platform three' }],
       },
     ];
     const repository = {
       getDateWindow: vi.fn(async (window) => ({ ...window, nodes })),
+      createNode: vi.fn(),
+      updateNode: vi.fn(),
+      removeNode: vi.fn(),
+      addNodeAttachment: vi.fn(),
     } satisfies ItineraryRepository;
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
@@ -60,9 +68,22 @@ describe('ItineraryPanel', () => {
 
     render(
       <I18nextProvider i18n={i18n}>
-        <QueryClientProvider client={queryClient}>
-          <ItineraryPanel repository={repository} trip={trip} />
-        </QueryClientProvider>
+        <AuthContext.Provider
+          value={
+            {
+              session: null,
+              user: { id: 'user-1' } as User,
+              status: 'ready',
+              error: null,
+              signInWithGoogle: vi.fn(),
+              signOut: vi.fn(),
+            } satisfies AuthContextValue
+          }
+        >
+          <QueryClientProvider client={queryClient}>
+            <ItineraryPanel repository={repository} trip={trip} />
+          </QueryClientProvider>
+        </AuthContext.Provider>
       </I18nextProvider>,
     );
 
@@ -71,19 +92,34 @@ describe('ItineraryPanel', () => {
       screen.getByText('Temple visit').closest('ion-item'),
     ).toHaveAttribute('data-node-id', 'stop-1');
     expect(screen.getByText('Meet at the east gate')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Directions' })).toHaveAttribute(
-      'href',
-      'https://maps.google.com/example',
-    );
-    expect(screen.getByText('Airport Rail Link')).toBeInTheDocument();
-    expect(screen.getByText('• 35 min')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Directions' })).toBeNull();
+    expect(screen.getByText('Airport transfer')).toBeInTheDocument();
+    expect(screen.queryByText('Airport Rail Link')).toBeNull();
+    expect(screen.queryByText('• 35 min')).toBeNull();
     expect(
-      screen.getByText('Airport Rail Link').closest('ion-item'),
+      screen
+        .getByText('Board from platform three')
+        .closest('.itinerary-move__pill'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Airport transfer').closest('ion-item'),
     ).toHaveAttribute('data-node-id', 'move-1');
     expect(repository.getDateWindow).toHaveBeenCalledWith({
       tripId: trip.id,
       startDate: '2099-10-15',
       endDate: '2099-10-18',
     });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByText('Edit', { selector: 'ion-button' }));
+    expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(
+      nodes.length + 2,
+    );
+    const topAddButton = document.querySelector(
+      '.itinerary-edit-context > .ui-icon-button',
+    );
+    expect(topAddButton).toBeInTheDocument();
+    await user.click(topAddButton!);
+    expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
   });
 });

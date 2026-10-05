@@ -2,6 +2,7 @@ import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
 import {
   type ItineraryDateWindow,
+  type ItineraryNode,
   type ItineraryWindow,
   type NodeAttachment,
   mapItineraryNode,
@@ -12,7 +13,70 @@ export const MAX_ITINERARY_WINDOW_DAYS = 31;
 
 export type ItineraryRepository = {
   getDateWindow: (window: ItineraryDateWindow) => Promise<ItineraryWindow>;
+  createNode: (input: SaveItineraryNodeInput) => Promise<ItineraryNode>;
+  updateNode: (input: UpdateItineraryNodeInput) => Promise<ItineraryNode>;
+  removeNode: (input: RemoveItineraryNodeInput) => Promise<void>;
+  addNodeAttachment: (input: AddNodeAttachmentInput) => Promise<void>;
 };
+
+export type AddNodeAttachmentInput = {
+  tripId: string;
+  nodeId: string;
+  file: File;
+  role: 'cover' | 'attachment';
+  sortOrder: number;
+  userId: string;
+};
+
+export type SaveItineraryNodeInput = {
+  tripId: string;
+  nodeType: 'stop' | 'move';
+  title: string;
+  localDate: string;
+  startAt: string | null;
+  endAt: string | null;
+  timezone: string;
+  allDay: boolean;
+  durationMinutes: number | null;
+  sortKey: string;
+  googleMapsUrl: string;
+  iconKey: string;
+  additionalData: Record<
+    string,
+    import('../../shared/api/database.types').Json | undefined
+  >;
+  userId: string;
+};
+
+export type UpdateItineraryNodeInput = SaveItineraryNodeInput & {
+  nodeId: string;
+  version: number;
+};
+
+export type RemoveItineraryNodeInput = {
+  tripId: string;
+  nodeId: string;
+  version: number;
+  userId: string;
+};
+
+function mapNodeWrite(input: SaveItineraryNodeInput) {
+  return {
+    node_type: input.nodeType,
+    title: input.title.trim(),
+    additional_data: input.additionalData,
+    local_date: input.localDate,
+    start_at: input.allDay ? null : input.startAt,
+    end_at: input.allDay ? null : input.endAt,
+    timezone: input.timezone,
+    all_day: input.allDay,
+    duration_minutes: input.durationMinutes,
+    sort_key: input.sortKey,
+    google_maps_url: input.googleMapsUrl.trim() || null,
+    icon_key: input.iconKey,
+    updated_by: input.userId,
+  };
+}
 
 export function validateItineraryDateWindow(window: ItineraryDateWindow) {
   if (!window.tripId.trim()) throw new RangeError('Trip ID is required.');
@@ -40,6 +104,117 @@ export function createItineraryRepository(): ItineraryRepository {
   const client = getSupabaseClient();
 
   return {
+    async addNodeAttachment(input) {
+      const attachmentId = crypto.randomUUID();
+      const safeName =
+        input.file.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'attachment';
+      const storagePath = `${input.tripId}/${attachmentId}/${safeName}`;
+      const bucket = client.storage.from('trip-files');
+      const upload = await bucket.upload(storagePath, input.file, {
+        contentType: input.file.type || undefined,
+        upsert: false,
+      });
+      if (upload.error) throw mapSupabaseError(upload.error);
+
+      const attachment = await client.from('attachments').insert({
+        id: attachmentId,
+        trip_id: input.tripId,
+        storage_path: storagePath,
+        display_name: input.file.name,
+        original_filename: input.file.name,
+        mime_type: input.file.type || null,
+        size_bytes: input.file.size,
+        uploaded_by: input.userId,
+      });
+      if (attachment.error) {
+        await bucket.remove([storagePath]);
+        throw mapSupabaseError(attachment.error);
+      }
+
+      if (input.role === 'cover') {
+        const previousCover = await client
+          .from('itinerary_node_attachments')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('trip_id', input.tripId)
+          .eq('node_id', input.nodeId)
+          .eq('role', 'cover')
+          .is('deleted_at', null);
+        if (previousCover.error) {
+          await client
+            .from('attachments')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', attachmentId);
+          await bucket.remove([storagePath]);
+          throw mapSupabaseError(previousCover.error);
+        }
+      }
+
+      const link = await client.from('itinerary_node_attachments').insert({
+        trip_id: input.tripId,
+        node_id: input.nodeId,
+        attachment_id: attachmentId,
+        role: input.role,
+        sort_order: input.sortOrder,
+        label: input.file.name,
+        created_by: input.userId,
+      });
+      if (link.error) {
+        await client
+          .from('attachments')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', attachmentId);
+        await bucket.remove([storagePath]);
+        throw mapSupabaseError(link.error);
+      }
+    },
+
+    async createNode(input) {
+      const { data, error } = await client
+        .from('itinerary_nodes')
+        .insert({
+          ...mapNodeWrite(input),
+          trip_id: input.tripId,
+          created_by: input.userId,
+        })
+        .select('*')
+        .single();
+
+      if (error) throw mapSupabaseError(error);
+      return mapItineraryNode(data);
+    },
+
+    async updateNode(input) {
+      const { data, error } = await client
+        .from('itinerary_nodes')
+        .update(mapNodeWrite(input))
+        .eq('trip_id', input.tripId)
+        .eq('id', input.nodeId)
+        .eq('version', input.version)
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new Error('Itinerary node update conflict.');
+      return mapItineraryNode(data);
+    },
+
+    async removeNode(input) {
+      const { data, error } = await client
+        .from('itinerary_nodes')
+        .update({
+          deleted_at: new Date().toISOString(),
+          updated_by: input.userId,
+        })
+        .eq('trip_id', input.tripId)
+        .eq('id', input.nodeId)
+        .eq('version', input.version)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new Error('Itinerary node removal conflict.');
+    },
+
     async getDateWindow(window) {
       validateItineraryDateWindow(window);
 
@@ -81,19 +256,20 @@ export function createItineraryRepository(): ItineraryRepository {
         throw mapSupabaseError(attachmentsResult.error);
       }
 
-      const thumbnailPaths = attachmentsResult.data.flatMap((attachment) =>
-        attachment.thumbnail_path ? [attachment.thumbnail_path] : [],
-      );
-      const thumbnailUrlByPath = new Map<string, string>();
-      if (thumbnailPaths.length > 0) {
-        const { data: signedThumbnails, error: signedUrlError } =
+      const filePaths = attachmentsResult.data.flatMap((attachment) => [
+        attachment.storage_path,
+        ...(attachment.thumbnail_path ? [attachment.thumbnail_path] : []),
+      ]);
+      const signedUrlByPath = new Map<string, string>();
+      if (filePaths.length > 0) {
+        const { data: signedFiles, error: signedUrlError } =
           await client.storage
             .from('trip-files')
-            .createSignedUrls(thumbnailPaths, 60 * 60);
+            .createSignedUrls(filePaths, 60 * 60);
         if (signedUrlError) throw mapSupabaseError(signedUrlError);
-        signedThumbnails?.forEach((thumbnail) => {
-          if (thumbnail.path && thumbnail.signedUrl) {
-            thumbnailUrlByPath.set(thumbnail.path, thumbnail.signedUrl);
+        signedFiles?.forEach((file) => {
+          if (file.path && file.signedUrl) {
+            signedUrlByPath.set(file.path, file.signedUrl);
           }
         });
       }
@@ -112,8 +288,9 @@ export function createItineraryRepository(): ItineraryRepository {
           sortOrder: link.sort_order,
           label: link.label?.trim() || attachment.display_name,
           attachment,
+          fileUrl: signedUrlByPath.get(attachment.storage_path) ?? null,
           thumbnailUrl: attachment.thumbnail_path
-            ? (thumbnailUrlByPath.get(attachment.thumbnail_path) ?? null)
+            ? (signedUrlByPath.get(attachment.thumbnail_path) ?? null)
             : null,
         });
         attachmentsByNode.set(link.node_id, nodeAttachments);

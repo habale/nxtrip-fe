@@ -41,6 +41,7 @@ export function TextArea({
       label={label}
       labelPlacement="stacked"
       maxlength={maxlength}
+      mode="md"
       name={name}
       placeholder={placeholder}
       readonly={readonly}

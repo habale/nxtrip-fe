@@ -6,7 +6,16 @@ export type TextInputProps = {
   name?: string;
   placeholder?: string;
   maxlength?: number;
-  type?: 'text' | 'email' | 'password' | 'search' | 'tel' | 'url';
+  type?:
+    | 'date'
+    | 'text'
+    | 'email'
+    | 'number'
+    | 'password'
+    | 'search'
+    | 'tel'
+    | 'time'
+    | 'url';
   inputMode?:
     'text' | 'email' | 'numeric' | 'decimal' | 'search' | 'tel' | 'url';
   autocomplete?:
@@ -64,6 +73,7 @@ export function TextInput({
       label={label}
       labelPlacement="stacked"
       maxlength={maxlength}
+      mode="md"
       name={name}
       placeholder={placeholder}
       readonly={readonly}
