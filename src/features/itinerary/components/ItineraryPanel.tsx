@@ -4,8 +4,12 @@ import { useTranslation } from 'react-i18next';
 import {
   Button,
   ConfirmDialog,
+  FabButton,
+  FabMenu,
   Icon,
   Item,
+  ReorderHandle,
+  ReorderList,
   Skeleton,
   SwipeItem,
   type IconName,
@@ -14,7 +18,11 @@ import {
 import type { Trip } from '../../trips/trip-repository';
 import { ItineraryNodeEditor } from './ItineraryNodeEditor';
 import { getItineraryCategory } from '../itinerary-category';
-import { useItineraryWindow, useRemoveItineraryNode } from '../itinerary-hooks';
+import {
+  useItineraryWindow,
+  useRemoveItineraryNode,
+  useReorderItineraryNode,
+} from '../itinerary-hooks';
 import type { ItineraryRepository } from '../itinerary-repository';
 import type { ItineraryNode, MoveNode } from '../itinerary-types';
 import { generateSortKeyBetween } from '../itinerary-sort-key';
@@ -199,7 +207,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     [initial],
   );
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
-  const [editMode, setEditMode] = useState(false);
+  const [mode, setMode] = useState<'view' | 'edit' | 'reorder'>('view');
   const [editor, setEditor] = useState<
     | { type: 'create'; sortKey: string; afterNodeId?: string }
     | { type: 'edit'; node: ItineraryNode }
@@ -207,8 +215,10 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   >(null);
   const [nodePendingRemoval, setNodePendingRemoval] =
     useState<ItineraryNode | null>(null);
+  const [reorderKeyError, setReorderKeyError] = useState(false);
   const query = useItineraryWindow(window, repository);
   const removeNode = useRemoveItineraryNode(repository);
+  const reorderNode = useReorderItineraryNode(window, repository);
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
   const days = itineraryDays(window.startDate, window.endDate);
   const selectedNodes = (query.data?.nodes ?? []).filter(
@@ -231,6 +241,39 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     dateStyle: 'full',
     timeZone: 'UTC',
   });
+
+  function moveNode(from: number, to: number) {
+    if (
+      from === to ||
+      from < 0 ||
+      to < 0 ||
+      from >= selectedNodes.length ||
+      to >= selectedNodes.length ||
+      reorderNode.isPending
+    ) {
+      return;
+    }
+
+    setReorderKeyError(false);
+    const reordered = [...selectedNodes];
+    const [movedNode] = reordered.splice(from, 1);
+    reordered.splice(to, 0, movedNode);
+
+    try {
+      const sortKey = generateSortKeyBetween(
+        reordered[to - 1]?.sortKey ?? null,
+        reordered[to + 1]?.sortKey ?? null,
+      );
+      reorderNode.mutate({
+        tripId: trip.id,
+        nodeId: movedNode.id,
+        version: movedNode.version,
+        sortKey,
+      });
+    } catch {
+      setReorderKeyError(true);
+    }
+  }
 
   return (
     <section className="itinerary-panel">
@@ -260,15 +303,6 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
             {headingFormatter.format(new Date(`${selectedDate}T00:00:00Z`))}
           </h2>
         </div>
-        <Button
-          variant="quiet"
-          onClick={() => {
-            setEditMode((current) => !current);
-            setEditor(null);
-          }}
-        >
-          {t(editMode ? 'itinerary.editor.done' : 'itinerary.editor.editMode')}
-        </Button>
       </header>
 
       {query.isPending ? (
@@ -288,7 +322,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
         </div>
       ) : (
         <div className="itinerary-edit-context">
-          {editMode && editor === null && (
+          {mode === 'edit' && editor === null && (
             <IconButton
               icon="add_circle"
               label={t('itinerary.editor.addBetween')}
@@ -314,25 +348,43 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
             />
           )}
 
-          {selectedNodes.length === 0 && !editMode ? (
+          {selectedNodes.length === 0 && mode !== 'edit' ? (
             <div className="itinerary-state">
               <Icon name="calendar" size="large" />
               <h2>{t('itinerary.emptyDayTitle')}</h2>
               <p>{t('itinerary.emptyDayDescription')}</p>
             </div>
           ) : (
-            <div className="itinerary-timeline">
+            <ReorderList
+              className="itinerary-timeline"
+              disabled={mode !== 'reorder' || reorderNode.isPending}
+              onReorder={moveNode}
+            >
               {selectedNodes.map((node, index) => (
                 <div
                   key={node.id}
                   className={`itinerary-node-context${
+                    mode === 'reorder'
+                      ? ' itinerary-node-context--reordering'
+                      : ''
+                  }${
                     editor?.type === 'edit' && editor.node.id === node.id
                       ? ' itinerary-node-context--editing'
                       : ''
                   }`}
                 >
+                  {mode === 'reorder' && (
+                    <div className="itinerary-reorder-anchor">
+                      <ReorderHandle
+                        label={t('itinerary.editor.dragNode', {
+                          title:
+                            node.title || t('itinerary.editor.untitledNode'),
+                        })}
+                      />
+                    </div>
+                  )}
                   <SwipeItem
-                    disabled={!editMode || editor !== null}
+                    disabled={mode !== 'edit' || editor !== null}
                     editLabel={t('itinerary.editor.editNode')}
                     removeDisabled={removeNode.isPending}
                     removeLabel={t('itinerary.editor.removeNode')}
@@ -353,7 +405,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                       />
                     )}
                   </SwipeItem>
-                  {editMode && editor === null && (
+                  {mode === 'edit' && editor === null && (
                     <IconButton
                       icon="add_circle"
                       label={t('itinerary.editor.addBetween')}
@@ -391,7 +443,13 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                   )}
                 </div>
               ))}
-            </div>
+            </ReorderList>
+          )}
+
+          {(reorderNode.isError || reorderKeyError) && (
+            <p className="itinerary-reorder-error" role="alert">
+              {t('itinerary.editor.reorderError')}
+            </p>
           )}
         </div>
       )}
@@ -416,6 +474,36 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
           setNodePendingRemoval(null);
         }}
       />
+      {mode === 'view' && !query.isPending && !query.isError && (
+        <FabMenu
+          icon="edit"
+          label={t('itinerary.editor.actionsMenu')}
+          actions={[
+            {
+              icon: 'edit',
+              label: t('itinerary.editor.editItinerary'),
+              onClick: () => setMode('edit'),
+            },
+            {
+              icon: 'drag',
+              label: t('itinerary.editor.rearrangeItinerary'),
+              disabled: selectedNodes.length < 2,
+              onClick: () => setMode('reorder'),
+            },
+          ]}
+        />
+      )}
+      {mode !== 'view' && (
+        <FabButton
+          hideWhenKeyboardOpen
+          icon="check"
+          label={t('itinerary.editor.done')}
+          onClick={() => {
+            setMode('view');
+            setEditor(null);
+          }}
+        />
+      )}
     </section>
   );
 }

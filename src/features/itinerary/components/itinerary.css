@@ -101,6 +101,46 @@
   user-select: none;
 }
 
+.itinerary-node-context--reordering {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.itinerary-node-context--reordering > .ui-swipe-item {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.itinerary-reorder-anchor {
+  display: grid;
+  grid-column: 1;
+  place-items: center;
+}
+
+.itinerary-reorder-anchor .ui-reorder-handle {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-ink-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.itinerary-reorder-anchor .ui-reorder-handle:active {
+  background: var(--color-surface-muted);
+  cursor: grabbing;
+}
+
+.itinerary-reorder-error {
+  margin: 0;
+  padding: 0 1rem;
+  color: var(--color-negative);
+  font-size: 0.9rem;
+}
+
 .itinerary-add-label {
   display: inline-flex;
   align-items: center;

@@ -7,6 +7,7 @@ export * from './Chip';
 export * from './DatePicker';
 export * from './DateRangePicker';
 export * from './Feedback';
+export * from './FabMenu';
 export * from './FilePicker';
 export * from './Icon';
 export * from './IconButton';

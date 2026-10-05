@@ -11,6 +11,7 @@ export type IconName =
   | 'check'
   | 'close'
   | 'document'
+  | 'drag'
   | 'directions'
   | 'edit'
   | 'ferry'
@@ -58,6 +59,7 @@ const materialSymbolByName: Record<IconName, string> = {
   check: 'check',
   close: 'close',
   document: 'description',
+  drag: 'drag_indicator',
   directions: 'near_me',
   edit: 'edit',
   ferry: 'directions_boat',

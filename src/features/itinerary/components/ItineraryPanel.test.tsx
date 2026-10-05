@@ -59,6 +59,7 @@ describe('ItineraryPanel', () => {
       getDateWindow: vi.fn(async (window) => ({ ...window, nodes })),
       createNode: vi.fn(),
       updateNode: vi.fn(),
+      reorderNode: vi.fn(),
       removeNode: vi.fn(),
       addNodeAttachment: vi.fn(),
     } satisfies ItineraryRepository;
@@ -111,7 +112,12 @@ describe('ItineraryPanel', () => {
     });
 
     const user = userEvent.setup();
-    await user.click(screen.getByText('Edit', { selector: 'ion-button' }));
+    await user.click(
+      screen.getByText('Itinerary actions').closest('ion-fab-button')!,
+    );
+    await user.click(
+      screen.getByText('Edit itinerary').closest('ion-fab-button')!,
+    );
     expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(
       nodes.length + 1,
     );
@@ -121,5 +127,16 @@ describe('ItineraryPanel', () => {
     expect(topAddButton).toBeInTheDocument();
     await user.click(topAddButton!);
     expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
+    await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
+    await user.click(screen.getByText('Done').closest('ion-fab-button')!);
+
+    await user.click(
+      screen.getByText('Itinerary actions').closest('ion-fab-button')!,
+    );
+    await user.click(
+      screen.getByText('Rearrange itinerary').closest('ion-fab-button')!,
+    );
+    expect(document.querySelectorAll('ion-reorder')).toHaveLength(nodes.length);
+    expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(0);
   });
 });

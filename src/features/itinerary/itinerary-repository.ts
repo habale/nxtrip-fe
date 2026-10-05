@@ -16,6 +16,7 @@ export type ItineraryRepository = {
   getDateWindow: (window: ItineraryDateWindow) => Promise<ItineraryWindow>;
   createNode: (input: SaveItineraryNodeInput) => Promise<ItineraryNode>;
   updateNode: (input: UpdateItineraryNodeInput) => Promise<ItineraryNode>;
+  reorderNode: (input: ReorderItineraryNodeInput) => Promise<void>;
   removeNode: (input: RemoveItineraryNodeInput) => Promise<void>;
   addNodeAttachment: (input: AddNodeAttachmentInput) => Promise<void>;
 };
@@ -59,6 +60,10 @@ export type RemoveItineraryNodeInput = {
   nodeId: string;
   version: number;
   userId: string;
+};
+
+export type ReorderItineraryNodeInput = RemoveItineraryNodeInput & {
+  sortKey: string;
 };
 
 function mapNodeWrite(input: SaveItineraryNodeInput) {
@@ -198,6 +203,23 @@ export function createItineraryRepository(): ItineraryRepository {
       if (error) throw mapSupabaseError(error);
       if (!data) throw new Error('Itinerary node update conflict.');
       return mapItineraryNode(data);
+    },
+
+    async reorderNode(input) {
+      const { data, error } = await client
+        .from('itinerary_nodes')
+        .update({
+          sort_key: input.sortKey,
+          updated_by: input.userId,
+        })
+        .eq('trip_id', input.tripId)
+        .eq('id', input.nodeId)
+        .eq('version', input.version)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new Error('Itinerary node reorder conflict.');
     },
 
     async removeNode(input) {

@@ -37,6 +37,7 @@ export function IconButton({
       onClick={onClick}
     >
       <Icon name={icon} size={size} />
+      <span className="sr-only">{label}</span>
     </IonButton>
   );
 }

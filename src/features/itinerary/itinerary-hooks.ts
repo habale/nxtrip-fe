@@ -6,10 +6,11 @@ import {
   type AddNodeAttachmentInput,
   type ItineraryRepository,
   type RemoveItineraryNodeInput,
+  type ReorderItineraryNodeInput,
   type SaveItineraryNodeInput,
   type UpdateItineraryNodeInput,
 } from './itinerary-repository';
-import type { ItineraryDateWindow } from './itinerary-types';
+import type { ItineraryDateWindow, ItineraryWindow } from './itinerary-types';
 
 export const itineraryKeys = {
   all: ['itinerary'] as const,
@@ -79,6 +80,58 @@ export function useRemoveItineraryNode(repository?: ItineraryRepository) {
       });
     },
     onSuccess: refresh,
+  });
+}
+
+export function useReorderItineraryNode(
+  window: ItineraryDateWindow,
+  repository?: ItineraryRepository,
+) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const queryKey = itineraryKeys.window(window);
+
+  return useMutation({
+    mutationFn: (input: Omit<ReorderItineraryNodeInput, 'userId'>) => {
+      if (!user) throw new Error('Authentication is required.');
+      return (repository ?? getItineraryRepository()).reorderNode({
+        ...input,
+        userId: user.id,
+      });
+    },
+    onMutate: async (input) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<ItineraryWindow>(queryKey);
+      queryClient.setQueryData<ItineraryWindow>(queryKey, (current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          nodes: current.nodes
+            .map((node) =>
+              node.id === input.nodeId
+                ? { ...node, sortKey: input.sortKey }
+                : node,
+            )
+            .sort((left, right) => {
+              const dateOrder = (left.localDate ?? '').localeCompare(
+                right.localDate ?? '',
+              );
+              if (dateOrder !== 0) return dateOrder;
+              return left.sortKey < right.sortKey
+                ? -1
+                : left.sortKey > right.sortKey
+                  ? 1
+                  : 0;
+            }),
+        };
+      });
+      return { previous };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previous)
+        queryClient.setQueryData(queryKey, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
   });
 }
 

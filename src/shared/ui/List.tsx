@@ -5,6 +5,8 @@ import {
   IonItemSliding,
   IonLabel,
   IonList,
+  IonReorder,
+  IonReorderGroup,
 } from '@ionic/react';
 import {
   useEffect,
@@ -33,6 +35,41 @@ export function Item({ children, className, dataNodeId }: ItemProps) {
     >
       {children}
     </IonItem>
+  );
+}
+
+export type ReorderListProps = PropsWithChildren<{
+  className?: string;
+  disabled?: boolean;
+  onReorder: (from: number, to: number) => void;
+}>;
+
+export function ReorderList({
+  children,
+  className,
+  disabled = false,
+  onReorder,
+}: ReorderListProps) {
+  return (
+    <IonReorderGroup
+      className={className}
+      disabled={disabled}
+      onIonItemReorder={(event) => {
+        const { from, to } = event.detail;
+        event.detail.complete(false);
+        onReorder(from, to);
+      }}
+    >
+      {children}
+    </IonReorderGroup>
+  );
+}
+
+export function ReorderHandle({ label }: { label: string }) {
+  return (
+    <IonReorder aria-label={label} className="ui-reorder-handle">
+      <Icon name="drag" />
+    </IonReorder>
   );
 }
 
