@@ -15,6 +15,7 @@ import type { ItineraryCategory } from '../itinerary-category';
 import {
   useAddItineraryNodeAttachment,
   useCreateItineraryNode,
+  useRemoveItineraryNodeAttachment,
   useUpdateItineraryNode,
 } from '../itinerary-hooks';
 import {
@@ -94,6 +95,7 @@ export function ItineraryNodeEditor({
   const createNode = useCreateItineraryNode(repository);
   const updateNode = useUpdateItineraryNode(repository);
   const addAttachment = useAddItineraryNodeAttachment(repository);
+  const removeAttachment = useRemoveItineraryNodeAttachment(repository);
   const [values, setValues] = useState(() =>
     initialNodeFormValues(localDate, trip.timezone, node),
   );
@@ -103,13 +105,19 @@ export function ItineraryNodeEditor({
   const [mapsOpen, setMapsOpen] = useState(Boolean(node?.googleMapsUrl));
   const [cover, setCover] = useState<File>();
   const [coverPreview, setCoverPreview] = useState<string>();
+  const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>(
+    [],
+  );
   const [files, setFiles] = useState<File[]>([]);
   const errors = submitted ? validateItineraryNodeForm(values) : {};
   const mutation = persistedNode ? updateNode : createNode;
-  const busy = mutation.isPending || addAttachment.isPending;
+  const busy =
+    mutation.isPending || addAttachment.isPending || removeAttachment.isPending;
   const existingCover = node?.attachments.find(
     (item) =>
-      item.role === 'cover' && item.attachment.mime_type?.startsWith('image/'),
+      item.role === 'cover' &&
+      !removedAttachmentIds.includes(item.id) &&
+      item.attachment.mime_type?.startsWith('image/'),
   );
   const displayedCoverUrl =
     values.nodeType === 'stop'
@@ -248,18 +256,36 @@ export function ItineraryNodeEditor({
       {displayedCoverUrl && (
         <div className="itinerary-editor__cover">
           <img alt="" src={displayedCoverUrl} />
-          {coverPreview && (
-            <Button
-              variant="danger-text"
-              onClick={() => {
+          <Button
+            disabled={busy}
+            size="small"
+            variant="danger-text"
+            onClick={() => {
+              if (coverPreview) {
                 URL.revokeObjectURL(coverPreview);
                 setCover(undefined);
                 setCoverPreview(undefined);
-              }}
-            >
-              {t('actions.delete')}
-            </Button>
-          )}
+                return;
+              }
+              if (!existingCover || !persistedNode?.localDate) return;
+              void removeAttachment
+                .mutateAsync({
+                  tripId: trip.id,
+                  nodeId: persistedNode.id,
+                  attachmentLinkId: existingCover.id,
+                  localDate: persistedNode.localDate,
+                })
+                .then(() =>
+                  setRemovedAttachmentIds((current) => [
+                    ...current,
+                    existingCover.id,
+                  ]),
+                )
+                .catch(() => undefined);
+            }}
+          >
+            {t('actions.delete')}
+          </Button>
         </div>
       )}
 
@@ -267,6 +293,7 @@ export function ItineraryNodeEditor({
         <div className="itinerary-editor__identity">
           <Button
             ariaLabel={t('itinerary.editor.chooseCategory')}
+            disabled={busy}
             variant="quiet"
             onClick={() => setIconPickerOpen(true)}
           >
@@ -278,6 +305,7 @@ export function ItineraryNodeEditor({
             {!values.allDay && (
               <div className="itinerary-editor__times">
                 <TextInput
+                  disabled={busy}
                   errorText={errorText('startTime')}
                   label={t('itinerary.editor.startTime')}
                   type="time"
@@ -288,6 +316,7 @@ export function ItineraryNodeEditor({
             )}
             <TextInput
               required
+              disabled={busy}
               errorText={errorText('title')}
               label={t('itinerary.editor.title')}
               maxlength={300}
@@ -298,6 +327,7 @@ export function ItineraryNodeEditor({
         </div>
 
         <TextArea
+          disabled={busy}
           label={t('itinerary.editor.notes')}
           rows={3}
           value={values.notes}
@@ -306,6 +336,7 @@ export function ItineraryNodeEditor({
 
         {mapsOpen && (
           <TextInput
+            disabled={busy}
             errorText={errorText('googleMapsUrl')}
             label={t('itinerary.editor.mapsUrl')}
             type="url"
@@ -325,6 +356,7 @@ export function ItineraryNodeEditor({
                     name: file.name,
                   })}
                   size="small"
+                  disabled={busy}
                   variant="danger-text"
                   onClick={() =>
                     setFiles((current) =>
@@ -363,7 +395,11 @@ export function ItineraryNodeEditor({
               setFiles((current) => [...current, ...selected])
             }
           />
-          <Button variant="quiet" onClick={() => setMapsOpen(true)}>
+          <Button
+            disabled={busy}
+            variant="quiet"
+            onClick={() => setMapsOpen(true)}
+          >
             <Icon name="directions" />
             {t('itinerary.editor.addMapsLink')}
           </Button>
@@ -371,9 +407,12 @@ export function ItineraryNodeEditor({
       </div>
 
       <Modal
+        dismissible={!busy}
         open={iconPickerOpen}
         title={t('itinerary.editor.chooseIcon')}
-        onDismiss={() => setIconPickerOpen(false)}
+        onDismiss={() => {
+          if (!busy) setIconPickerOpen(false);
+        }}
       >
         <div className="itinerary-icon-picker">
           <section>
@@ -387,6 +426,7 @@ export function ItineraryNodeEditor({
                     values.iconKey === option.iconKey
                   }
                   className={`itinerary-category--${option.category}`}
+                  disabled={busy}
                   type="button"
                   onClick={() => {
                     setValues((current) => ({
@@ -416,6 +456,7 @@ export function ItineraryNodeEditor({
                     values.iconKey === option.iconKey
                   }
                   className="itinerary-category--moving"
+                  disabled={busy}
                   type="button"
                   onClick={() => {
                     if (coverPreview) URL.revokeObjectURL(coverPreview);
@@ -441,7 +482,7 @@ export function ItineraryNodeEditor({
         </div>
       </Modal>
 
-      {(mutation.error || addAttachment.error) && (
+      {(mutation.error || addAttachment.error || removeAttachment.error) && (
         <p className="itinerary-editor__error" role="alert">
           {t('errors:generic')}
         </p>
@@ -450,7 +491,7 @@ export function ItineraryNodeEditor({
         <Button disabled={busy} variant="quiet" onClick={onClose}>
           {t('actions.cancel')}
         </Button>
-        <Button loading={busy} onClick={() => void save()}>
+        <Button disabled={busy} loading={busy} onClick={() => void save()}>
           {busy ? t('itinerary.editor.saving') : t('actions.save')}
         </Button>
       </div>

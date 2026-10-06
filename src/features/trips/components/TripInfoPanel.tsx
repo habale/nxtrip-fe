@@ -204,12 +204,9 @@ export function TripInfoPanel({
           {t(`home.status.${trip.status}`)}
         </Badge>
         {role === 'owner' && (
-          <div
-            className="trip-info-edit-action"
-            onClick={() => setEditing(true)}
-          >
+          <Button size="small" variant="quiet" onClick={() => setEditing(true)}>
             {t('tripInfo.edit')}
-          </div>
+          </Button>
         )}
       </div>
       <h2>{trip.name}</h2>

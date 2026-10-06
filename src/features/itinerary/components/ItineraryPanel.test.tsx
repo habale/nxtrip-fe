@@ -68,21 +68,25 @@ const baseNode = {
 
 describe('ItineraryPanel', () => {
   it('renders stop and move nodes for a bounded selected day', async () => {
-    const nodes: ItineraryNode[] = [
-      baseNode,
-      {
-        ...baseNode,
-        id: 'move-1',
-        nodeType: 'move',
-        title: 'Airport transfer',
-        sortKey: 'b0',
-        googleMapsUrl: 'https://maps.google.com/airport',
-        transportMode: 'rail',
-        operator: 'Airport Rail Link',
-        durationMinutes: 35,
-        additionalLines: [{ type: 'text', text: 'Board from platform three' }],
-      },
-    ];
+    const nodes = (
+      [
+        baseNode,
+        {
+          ...baseNode,
+          id: 'move-1',
+          nodeType: 'move',
+          title: 'Airport transfer',
+          sortKey: 'b0',
+          googleMapsUrl: 'https://maps.google.com/airport',
+          transportMode: 'rail',
+          operator: 'Airport Rail Link',
+          durationMinutes: 35,
+          additionalLines: [
+            { type: 'text', text: 'Board from platform three' },
+          ],
+        },
+      ] satisfies ItineraryNode[]
+    ).reverse();
     const repository = {
       getDateWindow: vi.fn(async (window) => ({ ...window, nodes })),
       createNode: vi.fn(),
@@ -129,6 +133,7 @@ describe('ItineraryPanel', () => {
       2,
     );
     expect(screen.getByText('Airport transfer')).toBeInTheDocument();
+    expect(screen.getByText('End of day')).toBeInTheDocument();
     expect(screen.queryByText('Airport Rail Link')).toBeNull();
     expect(screen.queryByText('• 35 min')).toBeNull();
     expect(
@@ -160,6 +165,13 @@ describe('ItineraryPanel', () => {
     );
     expect(topAddButton).toBeInTheDocument();
     await user.click(topAddButton!);
+    expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
+    await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
+
+    const betweenAddButtons = document.querySelectorAll(
+      '.ui-icon-button--large',
+    );
+    await user.click(betweenAddButtons[1]);
     expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
     await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
     await user.click(screen.getByText('Done').closest('ion-fab-button')!);

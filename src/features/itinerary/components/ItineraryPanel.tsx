@@ -251,24 +251,30 @@ const StopCard = memo(function StopCard({
         </div>
       ) : (
         <div className="itinerary-stop__layout">
-          <div className="itinerary-stop__icon">
-            <Icon name={nodeIcon(node)} size="large" />
-          </div>
-          <div className="itinerary-stop__content">
+          <div className="itinerary-stop__header">
+            <div className="itinerary-stop__icon">
+              <Icon name={nodeIcon(node)} size="large" />
+            </div>
             <div className="itinerary-stop__summary">
               {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
               <h3>{node.title || t('itinerary.untitledStop')}</h3>
             </div>
-            {node.additionalLines.length > 0 && (
-              <div className="itinerary-stop__lines">
-                {node.additionalLines.map((line, index) => (
-                  <p key={`${line.type}-${index}`}>{line.text}</p>
-                ))}
-              </div>
-            )}
-            <AttachmentLinks attachments={node.attachments} />
-            <DirectionsLink url={node.googleMapsUrl} />
           </div>
+          {(node.additionalLines.length > 0 ||
+            node.attachments.length > 0 ||
+            node.googleMapsUrl) && (
+            <div className="itinerary-stop__body">
+              {node.additionalLines.length > 0 && (
+                <div className="itinerary-stop__lines">
+                  {node.additionalLines.map((line, index) => (
+                    <p key={`${line.type}-${index}`}>{line.text}</p>
+                  ))}
+                </div>
+              )}
+              <AttachmentLinks attachments={node.attachments} />
+              <DirectionsLink url={node.googleMapsUrl} />
+            </div>
+          )}
         </div>
       )}
     </Item>
@@ -313,9 +319,15 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
   );
   const selectedNodes = useMemo(
     () =>
-      (query.data?.nodes ?? []).filter(
-        (node) => node.localDate === selectedDate,
-      ),
+      (query.data?.nodes ?? [])
+        .filter((node) => node.localDate === selectedDate)
+        .sort((left, right) =>
+          left.sortKey < right.sortKey
+            ? -1
+            : left.sortKey > right.sortKey
+              ? 1
+              : left.id.localeCompare(right.id),
+        ),
     [query.data?.nodes, selectedDate],
   );
   const tripStart = trip.start_at
@@ -421,6 +433,23 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
     }
   }
 
+  function openCreateEditor(
+    previousSortKey: string | null,
+    nextSortKey: string | null,
+    afterNodeId?: string,
+  ) {
+    setReorderKeyError(false);
+    try {
+      setEditor({
+        type: 'create',
+        afterNodeId,
+        sortKey: generateSortKeyBetween(previousSortKey, nextSortKey),
+      });
+    } catch {
+      setReorderKeyError(true);
+    }
+  }
+
   return (
     <section className="itinerary-panel">
       <div className="itinerary-day-navigation">
@@ -480,13 +509,7 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
               label={t('itinerary.editor.addBetween')}
               size="large"
               onClick={() =>
-                setEditor({
-                  type: 'create',
-                  sortKey: generateSortKeyBetween(
-                    null,
-                    selectedNodes[0]?.sortKey ?? null,
-                  ),
-                })
+                openCreateEditor(null, selectedNodes[0]?.sortKey ?? null)
               }
             />
           )}
@@ -562,16 +585,18 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                       icon="add_circle"
                       label={t('itinerary.editor.addBetween')}
                       size="large"
-                      onClick={() =>
-                        setEditor({
-                          type: 'create',
-                          afterNodeId: node.id,
-                          sortKey: generateSortKeyBetween(
-                            node.sortKey,
-                            selectedNodes[index + 1]?.sortKey ?? null,
-                          ),
-                        })
-                      }
+                      onClick={() => {
+                        const nextSortKey = selectedNodes
+                          .slice(index + 1)
+                          .find(
+                            (candidate) => candidate.sortKey > node.sortKey,
+                          )?.sortKey;
+                        openCreateEditor(
+                          node.sortKey,
+                          nextSortKey ?? null,
+                          node.id,
+                        );
+                      }}
                     />
                   )}
                   {editor?.type === 'create' &&
@@ -596,6 +621,12 @@ export function ItineraryPanel({ trip, repository }: ItineraryPanelProps) {
                 </div>
               ))}
             </ReorderList>
+          )}
+
+          {selectedNodes.length > 0 && (
+            <div className="itinerary-end-of-day" role="note">
+              <span>{t('itinerary.endOfDay')}</span>
+            </div>
           )}
 
           {(reorderNode.isError || reorderKeyError) && (

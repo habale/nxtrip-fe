@@ -19,6 +19,7 @@ export type ItineraryRepository = {
   reorderNode: (input: ReorderItineraryNodeInput) => Promise<void>;
   removeNode: (input: RemoveItineraryNodeInput) => Promise<void>;
   addNodeAttachment: (input: AddNodeAttachmentInput) => Promise<void>;
+  removeNodeAttachment?: (input: RemoveNodeAttachmentInput) => Promise<void>;
 };
 
 export type AddNodeAttachmentInput = {
@@ -28,6 +29,14 @@ export type AddNodeAttachmentInput = {
   file: File;
   role: 'cover' | 'attachment';
   sortOrder: number;
+  userId: string;
+};
+
+export type RemoveNodeAttachmentInput = {
+  tripId: string;
+  nodeId: string;
+  attachmentLinkId: string;
+  localDate: string;
   userId: string;
 };
 
@@ -115,6 +124,21 @@ export function createItineraryRepository(): ItineraryRepository {
   const client = getSupabaseClient();
 
   return {
+    async removeNodeAttachment(input) {
+      const { data, error } = await client
+        .from('itinerary_node_attachments')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', input.attachmentLinkId)
+        .eq('trip_id', input.tripId)
+        .eq('node_id', input.nodeId)
+        .is('deleted_at', null)
+        .select('id')
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      if (!data) throw new Error('Itinerary attachment removal conflict.');
+    },
+
     async addNodeAttachment(input) {
       const attachmentId = crypto.randomUUID();
       const uploadFile = await convertImageToWebp(input.file);

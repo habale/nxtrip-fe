@@ -1,6 +1,7 @@
 .itinerary-panel {
   display: grid;
   gap: 1.75rem;
+  margin-bottom: 2rem;
 }
 
 .itinerary-day-navigation {
@@ -85,7 +86,32 @@
   gap: 0.8rem;
 }
 
-.itinerary-edit-context,
+.itinerary-end-of-day {
+  display: grid;
+  grid-template-columns: minmax(1rem, 1fr) auto minmax(1rem, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.4rem 0 0;
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.itinerary-end-of-day::before,
+.itinerary-end-of-day::after {
+  height: 1px;
+  background: var(--color-border);
+  content: '';
+}
+
+.itinerary-edit-context {
+  display: grid;
+  gap: 1.5rem;
+  border-radius: var(--radius-card);
+}
+
 .itinerary-node-context {
   display: grid;
   gap: 0.75rem;
@@ -302,7 +328,6 @@
 .itinerary-editor__tools .ui-button {
   width: 100%;
   margin: 0;
-  border-bottom: 1px solid var(--color-border);
   text-align: left;
   --border-radius: 0;
 }
@@ -347,7 +372,6 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid var(--color-border);
 }
 
 .itinerary-category--moving {
@@ -483,10 +507,15 @@
 .itinerary-stop__layout {
   display: grid;
   width: 100%;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 0.9rem;
+  gap: 1rem;
   padding: clamp(1rem, 4vw, 1.5rem);
+}
+
+.itinerary-stop__header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.9rem;
 }
 
 .itinerary-stop__icon {
@@ -499,18 +528,18 @@
   color: var(--itinerary-category-color);
 }
 
-.itinerary-stop__content {
+.itinerary-stop__body {
   display: grid;
   min-width: 0;
   gap: 1rem;
 }
 
-.itinerary-stop__content time {
+.itinerary-stop__header time {
   color: var(--color-ink);
   font-size: 0.85rem;
 }
 
-.itinerary-stop__content h3 {
+.itinerary-stop__header h3 {
   font-size: clamp(1.1rem, 4.5vw, 1.4rem);
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -694,10 +723,6 @@
 }
 
 @media (max-width: 560px) {
-  .itinerary-stop__layout {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
   .itinerary-editor__times {
     grid-template-columns: 1fr;
   }

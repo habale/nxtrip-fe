@@ -237,6 +237,7 @@
     "untitledStop": "Untitled stop",
     "emptyDayTitle": "A free day",
     "emptyDayDescription": "Nothing is planned for this day yet.",
+    "endOfDay": "End of day",
     "loadErrorTitle": "The itinerary took a detour",
     "loadErrorDescription": "We couldn't load this part of the itinerary.",
     "categories": {
@@ -257,6 +258,7 @@
       "rearrangeItinerary": "Rearrange itinerary",
       "done": "Done",
       "addAtEnd": "Add at end",
+      "addBetween": "Add itinerary item",
       "editNode": "Edit",
       "removeNode": "Remove",
       "dragNode": "Drag to reorder {{title}}",

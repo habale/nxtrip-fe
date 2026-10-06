@@ -12,6 +12,7 @@ import {
   type AddNodeAttachmentInput,
   type ItineraryRepository,
   type RemoveItineraryNodeInput,
+  type RemoveNodeAttachmentInput,
   type ReorderItineraryNodeInput,
   type SaveItineraryNodeInput,
   type UpdateItineraryNodeInput,
@@ -185,6 +186,27 @@ export function useAddItineraryNodeAttachment(
         ...input,
         userId: user.id,
       });
+    },
+    onSuccess: (_result, input) =>
+      invalidateItineraryDay(queryClient, input.tripId, input.localDate),
+  });
+}
+
+export function useRemoveItineraryNodeAttachment(
+  repository?: ItineraryRepository,
+) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: Omit<RemoveNodeAttachmentInput, 'userId'>) => {
+      if (!user) throw new Error('Authentication is required.');
+      const removeNodeAttachment = (repository ?? getItineraryRepository())
+        .removeNodeAttachment;
+      if (!removeNodeAttachment) {
+        throw new Error('Removing itinerary attachments is unavailable.');
+      }
+      return removeNodeAttachment({ ...input, userId: user.id });
     },
     onSuccess: (_result, input) =>
       invalidateItineraryDay(queryClient, input.tripId, input.localDate),
