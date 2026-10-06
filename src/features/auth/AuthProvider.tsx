@@ -80,27 +80,31 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
     };
   }, [authClient]);
 
-  const signInWithGoogle = useCallback(async (returnTo = '/home') => {
-    if (!authClient) {
-      throw error ?? new Error('Authentication is not configured.');
-    }
+  const signInWithGoogle = useCallback(
+    async (returnTo = '/home') => {
+      if (!authClient) {
+        throw error ?? new Error('Authentication is not configured.');
+      }
 
-    setError(null);
-    const safeReturnTo = returnTo.startsWith('/') && !returnTo.startsWith('//')
-      ? returnTo
-      : '/home';
-    const { error: signInError } = await authClient.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: new URL(safeReturnTo, window.location.origin).toString(),
-      },
-    });
+      setError(null);
+      const safeReturnTo =
+        returnTo.startsWith('/') && !returnTo.startsWith('//')
+          ? returnTo
+          : '/home';
+      const { error: signInError } = await authClient.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: new URL(safeReturnTo, window.location.origin).toString(),
+        },
+      });
 
-    if (signInError) {
-      setError(signInError);
-      throw signInError;
-    }
-  }, [authClient, error]);
+      if (signInError) {
+        setError(signInError);
+        throw signInError;
+      }
+    },
+    [authClient, error],
+  );
 
   const signOut = useCallback(async () => {
     if (!authClient) {
@@ -120,6 +124,19 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
     setSession(null);
   }, [authClient, error]);
 
+  const signInAsGuest = useCallback(async () => {
+    if (!authClient) {
+      throw error ?? new Error('Authentication is not configured.');
+    }
+
+    setError(null);
+    const { error: signInError } = await authClient.signInAnonymously();
+    if (signInError) {
+      setError(signInError);
+      throw signInError;
+    }
+  }, [authClient, error]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -127,9 +144,10 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
       status,
       error,
       signInWithGoogle,
+      signInAsGuest,
       signOut,
     }),
-    [error, session, signInWithGoogle, signOut, status],
+    [error, session, signInAsGuest, signInWithGoogle, signOut, status],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

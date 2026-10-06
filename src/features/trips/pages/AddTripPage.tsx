@@ -64,21 +64,6 @@ export function AddTripPage() {
             <p>{t('addTrip.description')}</p>
           </section>
 
-          <section className="add-trip-card add-trip-card--create">
-            <h2>{t('addTrip.createTitle')}</h2>
-            <p>{t('addTrip.createDescription')}</p>
-            <Button block href={routes.newTrip} navigationDirection="forward">
-              <span className="add-trip-button-label">
-                {t('addTrip.createAction')}
-                <Icon name="forward" />
-              </span>
-            </Button>
-          </section>
-
-          <div className="add-trip-divider">
-            <span>{t('addTrip.or')}</span>
-          </div>
-
           <form className="add-trip-card add-trip-join" onSubmit={submit}>
             <div className="add-trip-card-heading">
               <h2>{t('addTrip.joinTitle')}</h2>
@@ -121,6 +106,21 @@ export function AddTripPage() {
                 : t('addTrip.joinAction')}
             </Button>
           </form>
+
+          <div className="add-trip-divider">
+            <span>{t('addTrip.or')}</span>
+          </div>
+
+          <section className="add-trip-card add-trip-card--create">
+            <h2>{t('addTrip.createTitle')}</h2>
+            <p>{t('addTrip.createDescription')}</p>
+            <Button block href={routes.newTrip} navigationDirection="forward">
+              <span className="add-trip-button-label">
+                {t('addTrip.createAction')}
+                <Icon name="forward" />
+              </span>
+            </Button>
+          </section>
 
           <section className="pending-invites" aria-labelledby="pending-title">
             <div className="pending-invites__heading">

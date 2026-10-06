@@ -1,6 +1,8 @@
 import type { PropsWithChildren } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
+import { clearAuthReturnTo, getAuthReturnTo } from '../auth-return';
 import { routes } from '../routes';
 
 type PublicRouteShellProps = PropsWithChildren<{
@@ -11,5 +13,11 @@ export function PublicRouteShell({
   isAuthenticated,
   children,
 }: PublicRouteShellProps) {
-  return isAuthenticated ? <Navigate to={routes.home} replace /> : children;
+  const [returnTo] = useState(() => getAuthReturnTo() ?? routes.home);
+
+  useEffect(() => {
+    if (isAuthenticated) clearAuthReturnTo();
+  }, [isAuthenticated]);
+
+  return isAuthenticated ? <Navigate to={returnTo} replace /> : children;
 }

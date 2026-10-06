@@ -78,6 +78,7 @@ type TripAccessMembershipRow = {
 type TripInviteRow = {
   id: string;
   trip_id: string;
+  trip_member_id: string | null;
   code: string;
   role: Database['public']['Enums']['access_role'];
   created_by: string | null;
@@ -384,6 +385,14 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      claim_trip_member: {
+        Args: {
+          p_trip_id: string;
+          p_trip_member_id: string;
+          p_request_id?: string;
+        };
+        Returns: string;
+      };
       join_trip_by_code: {
         Args: { p_code: string; p_request_id?: string };
         Returns: string;
@@ -445,7 +454,7 @@ export type Database = {
       };
     };
     Enums: {
-      access_role: 'owner' | 'member';
+      access_role: 'owner' | 'member' | 'viewer';
       access_status: 'active' | 'revoked';
       device_platform: 'ios' | 'android' | 'web';
       notification_outbox_status:

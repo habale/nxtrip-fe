@@ -34,6 +34,7 @@ import { AddLedgerEntryModal } from './AddLedgerEntryModal';
 type LedgerPanelProps = {
   trip: Trip;
   locale: string;
+  canEdit?: boolean;
   repository?: LedgerRepository;
 };
 
@@ -319,7 +320,9 @@ function MemberTransferCard({
         </h4>
         <p>
           {t(sent ? 'ledger.sent' : 'ledger.received')}{' '}
-          <strong className={sent ? 'ledger-money--paid' : 'ledger-money--share'}>
+          <strong
+            className={sent ? 'ledger-money--paid' : 'ledger-money--share'}
+          >
             {formatMoney(
               item.transfer.amount_minor,
               item.transfer.currency,
@@ -426,6 +429,7 @@ function GroupSummaryCard({
   transferSuggestion,
   transferring,
   onTransfer,
+  canTransfer,
 }: {
   summary: MemberFinancialSummary;
   currency: string;
@@ -435,6 +439,7 @@ function GroupSummaryCard({
   transferSuggestion: TransferSuggestion | null;
   transferring: boolean;
   onTransfer: (suggestion: TransferSuggestion) => void;
+  canTransfer: boolean;
 }) {
   const { t } = useTranslation('common');
   const paidAndSentMinor = summary.paidMinor + summary.transferSentMinor;
@@ -461,7 +466,7 @@ function GroupSummaryCard({
       onAction={onSelect}
       endActionLabel={t('ledger.transferred')}
       endIcon="check"
-      endDisabled={!transferSuggestion || transferring}
+      endDisabled={!canTransfer || !transferSuggestion || transferring}
       onEndAction={() => {
         if (transferSuggestion) onTransfer(transferSuggestion);
       }}
@@ -511,6 +516,7 @@ function TransferSuggestionCard({
   decimalPlaces,
   transferring,
   onTransfer,
+  canTransfer,
 }: {
   suggestion: TransferSuggestion;
   currency: string;
@@ -518,6 +524,7 @@ function TransferSuggestionCard({
   decimalPlaces: number;
   transferring: boolean;
   onTransfer: (suggestion: TransferSuggestion) => void;
+  canTransfer: boolean;
 }) {
   const { t } = useTranslation('common');
   return (
@@ -525,7 +532,7 @@ function TransferSuggestionCard({
       className="ledger-group-member-item"
       endActionLabel={t('ledger.transferred')}
       endIcon="check"
-      endDisabled={transferring}
+      endDisabled={!canTransfer || transferring}
       onEndAction={() => onTransfer(suggestion)}
     >
       <article className="ledger-transfer-suggestion">
@@ -666,7 +673,12 @@ function MemberBalanceSummary({
   );
 }
 
-export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
+export function LedgerPanel({
+  trip,
+  locale,
+  canEdit = true,
+  repository,
+}: LedgerPanelProps) {
   const { t } = useTranslation('common');
   const query = useLedgerExpenses(trip.id, repository);
   const recordTransfer = useRecordTripTransfer(repository);
@@ -834,7 +846,9 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
         >
           <option value="all">{t('ledger.allExpenses')}</option>
           <option value="summary">{t('ledger.groupSummary')}</option>
-          <option value="_" disabled>__________________</option>
+          <option value="_" disabled>
+            __________________
+          </option>
           {(query.data?.members ?? []).map((member) => (
             <option key={member.id} value={`member:${member.id}`}>
               {member.display_name}
@@ -844,7 +858,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
         <Icon name="forward" />
       </label>
 
-      {view === 'all' && (
+      {canEdit && view === 'all' && (
         <p className="ledger-tip">
           {t('ledger.tipDetails')}
           <br />
@@ -881,7 +895,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                 <br />
               </>
             )}
-            {t('ledger.groupSummaryTransferTip')}
+            {canEdit && t('ledger.groupSummaryTransferTip')}
           </p>
         </>
       )}
@@ -917,6 +931,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                 locale={locale}
                 decimalPlaces={trip.currency_decimal_places}
                 transferring={recordTransfer.isPending}
+                canTransfer={canEdit}
                 onTransfer={setPendingTransfer}
               />
             ))}
@@ -945,6 +960,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                     : null
                 }
                 transferring={recordTransfer.isPending}
+                canTransfer={canEdit}
                 onTransfer={setPendingTransfer}
               />
             ))}
@@ -1047,7 +1063,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
           </section>
         ))
       )}
-      {query.data && (
+      {canEdit && query.data && (
         <>
           <FabButton
             label={t('ledger.addEntry')}
@@ -1064,7 +1080,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
         </>
       )}
       <ConfirmDialog
-        open={Boolean(pendingTransfer)}
+        open={canEdit && Boolean(pendingTransfer)}
         title={t('ledger.confirmTransferTitle')}
         message={
           pendingTransfer

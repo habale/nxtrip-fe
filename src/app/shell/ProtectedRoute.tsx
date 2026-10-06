@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
+import { saveAuthReturnTo } from '../auth-return';
 import { routes } from '../routes';
 
 type ProtectedRouteProps = PropsWithChildren<{
@@ -14,15 +15,9 @@ export function ProtectedRoute({
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return (
-      <Navigate
-        to={routes.login}
-        replace
-        state={{
-          from: `${location.pathname}${location.search}${location.hash}`,
-        }}
-      />
-    );
+    const returnTo = `${location.pathname}${location.search}${location.hash}`;
+    if (location.pathname !== routes.login) saveAuthReturnTo(returnTo);
+    return <Navigate to={routes.login} replace />;
   }
 
   return children;

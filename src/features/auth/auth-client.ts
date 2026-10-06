@@ -22,6 +22,7 @@ export type AuthClient = {
     provider: 'google';
     options: { redirectTo: string };
   }) => Promise<{ error: Error | null }>;
+  signInAnonymously: () => Promise<{ error: Error | null }>;
   signOut: (options: { scope: 'local' }) => Promise<{ error: Error | null }>;
 };
 

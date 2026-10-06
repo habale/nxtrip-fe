@@ -43,6 +43,7 @@ function createRepository(
     getActiveInvite: vi.fn(async () => null),
     createInvite: vi.fn(),
     revokeInvite: vi.fn(),
+    claimMember: vi.fn(),
     updateMetadata: vi.fn(async () => trip),
     updateCover: vi.fn(async () => trip),
     removeCover: vi.fn(async () => trip),
@@ -66,6 +67,7 @@ function renderPage(
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
+    signInAsGuest: vi.fn(),
     signOut: vi.fn(),
   };
 
@@ -196,12 +198,14 @@ describe('TripDetailPage', () => {
     expect(screen.queryByText('Linked')).not.toBeInTheDocument();
     const linkedCard = screen.getByText('Liam Tran').closest('article');
     expect(linkedCard).not.toBeNull();
-    expect(within(linkedCard!).getByText('Edit')).toBeInTheDocument();
-    expect(within(linkedCard!).queryByText('Remove')).not.toBeInTheDocument();
+    expect(within(linkedCard!).getByText('Actions for Liam Tran')).toHaveClass(
+      'sr-only',
+    );
     const guestCard = screen.getByText('Kenji Mori').closest('article');
     expect(guestCard).not.toBeNull();
-    expect(within(guestCard!).getByText('Edit')).toBeInTheDocument();
-    expect(within(guestCard!).queryByText('Remove')).not.toBeInTheDocument();
+    expect(within(guestCard!).getByText('Actions for Kenji Mori')).toHaveClass(
+      'sr-only',
+    );
     expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 

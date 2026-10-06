@@ -30,6 +30,7 @@ function createWrapper() {
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
+    signInAsGuest: vi.fn(),
     signOut: vi.fn(),
   };
 

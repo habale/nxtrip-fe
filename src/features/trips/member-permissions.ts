@@ -6,7 +6,7 @@ export type MemberManagementPermissions = {
 };
 
 export function getMemberManagementPermissions(
-  viewerRole: 'owner' | 'member',
+  viewerRole: 'owner' | 'member' | 'viewer',
   target: TripMemberDetail,
 ): MemberManagementPermissions {
   return {

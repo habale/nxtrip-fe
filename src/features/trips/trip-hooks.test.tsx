@@ -48,6 +48,7 @@ function createWrapper() {
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
+    signInAsGuest: vi.fn(),
     signOut: vi.fn(),
   };
 
@@ -79,6 +80,7 @@ describe('trip list hook', () => {
       getActiveInvite: vi.fn(async () => null),
       createInvite: vi.fn(),
       revokeInvite: vi.fn(),
+      claimMember: vi.fn(),
       updateMetadata: vi.fn(),
       updateCover: vi.fn(),
       removeCover: vi.fn(),
@@ -105,6 +107,7 @@ describe('trip list hook', () => {
       getActiveInvite: vi.fn(async () => null),
       createInvite: vi.fn(),
       revokeInvite: vi.fn(),
+      claimMember: vi.fn(),
       updateMetadata: vi.fn(),
       updateCover: vi.fn(),
       removeCover: vi.fn(),

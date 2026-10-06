@@ -30,8 +30,7 @@ export function useTripInvite(
   return useQuery({
     queryKey: tripKeys.invite(tripId),
     enabled: Boolean(tripId && enabled),
-    queryFn: () =>
-      (repository ?? getTripRepository()).getActiveInvite(tripId),
+    queryFn: () => (repository ?? getTripRepository()).getActiveInvite(tripId),
   });
 }
 
@@ -58,6 +57,32 @@ export function useRevokeTripInvite(repository?: TripRepository) {
       (repository ?? getTripRepository()).revokeInvite(inviteId),
     onSuccess: (_result, { tripId }) => {
       queryClient.setQueryData(tripKeys.invite(tripId), null);
+    },
+  });
+}
+
+export function useClaimTripMember(repository?: TripRepository) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      tripId,
+      tripMemberId,
+    }: {
+      tripId: string;
+      tripMemberId: string;
+    }) => (repository ?? getTripRepository()).claimMember(tripId, tripMemberId),
+    onSuccess: (_memberId, { tripId }) => {
+      void queryClient.invalidateQueries({ queryKey: tripKeys.detail(tripId) });
+      void queryClient.invalidateQueries({
+        queryKey: tripKeys.members(tripId),
+      });
+      if (user) {
+        void queryClient.invalidateQueries({
+          queryKey: tripKeys.list(user.id),
+        });
+      }
     },
   });
 }

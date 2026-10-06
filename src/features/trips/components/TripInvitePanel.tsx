@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
@@ -8,7 +8,7 @@ import {
   useRevokeTripInvite,
   useTripInvite,
 } from '../trip-hooks';
-import type { TripRepository } from '../trip-repository';
+import type { TripInvite, TripRepository } from '../trip-repository';
 
 type TripInvitePanelProps = {
   repository?: TripRepository;
@@ -27,48 +27,48 @@ export function TripInvitePanel({
   const revokeInvite = useRevokeTripInvite(repository);
   const [copied, setCopied] = useState(false);
   const invite = inviteQuery.data;
-  const shareUrl = useMemo(() => {
-    if (!invite || typeof window === 'undefined') return '';
-    const url = new URL(routes.addTrip, window.location.origin);
-    url.searchParams.set('code', invite.code);
-    return url.toString();
-  }, [invite]);
 
-  async function copyLink() {
-    await navigator.clipboard.writeText(shareUrl);
+  function getShareUrl(currentInvite: TripInvite) {
+    const url = new URL(routes.addTrip, window.location.origin);
+    url.searchParams.set('code', currentInvite.code);
+    url.searchParams.set('guest', '1');
+    return url.toString();
+  }
+
+  async function copyLink(currentInvite: TripInvite) {
+    await navigator.clipboard.writeText(getShareUrl(currentInvite));
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   }
 
-  async function shareLink() {
+  async function shareLink(currentInvite: TripInvite) {
     if (!navigator.share) {
-      await copyLink();
+      await copyLink(currentInvite);
       return;
     }
-
     await navigator.share({
       title: tripName,
       text: t('tripInvite.shareText', { trip: tripName }),
-      url: shareUrl,
+      url: getShareUrl(currentInvite),
     });
   }
 
   const error = inviteQuery.error ?? createInvite.error ?? revokeInvite.error;
 
   return (
-    <section className="trip-invite-panel" aria-labelledby="trip-invite-title">
+    <section className="trip-invite-panel">
       <div className="trip-invite-panel__heading">
         <div>
           <p>{t('tripInvite.ownerOnly')}</p>
-          <h2 id="trip-invite-title">{t('tripInvite.title')}</h2>
+          <h2>{t('tripInvite.title')}</h2>
         </div>
       </div>
       <p className="trip-invite-panel__description">
-        {t('tripInvite.description')}
+        {t('tripInvite.sharedDescription')}
       </p>
 
       {invite ? (
-        <>
+        <div className="trip-invite-panel__invite">
           <div className="trip-invite-panel__code">
             <div>
               <span>{t('tripInvite.code')}</span>
@@ -77,7 +77,7 @@ export function TripInvitePanel({
             <Button
               size="small"
               variant="quiet"
-              onClick={() => void copyLink()}
+              onClick={() => void copyLink(invite)}
             >
               <Icon size="large" name={copied ? 'check' : 'copy'} />
             </Button>
@@ -92,7 +92,7 @@ export function TripInvitePanel({
             </small>
           )}
           <div className="trip-invite-panel__actions">
-            <Button onClick={() => void shareLink()}>
+            <Button onClick={() => void shareLink(invite)}>
               <Icon name="share" />
               {t('tripInvite.share')}
             </Button>
@@ -100,16 +100,13 @@ export function TripInvitePanel({
               disabled={revokeInvite.isPending}
               variant="danger-text"
               onClick={() =>
-                void revokeInvite.mutateAsync({
-                  tripId,
-                  inviteId: invite.id,
-                })
+                void revokeInvite.mutateAsync({ tripId, inviteId: invite.id })
               }
             >
               {t('tripInvite.revoke')}
             </Button>
           </div>
-        </>
+        </div>
       ) : (
         <Button
           loading={createInvite.isPending}
@@ -118,7 +115,7 @@ export function TripInvitePanel({
           <Icon name="share" />
           {createInvite.isPending
             ? t('tripInvite.creating')
-            : t('tripInvite.create')}
+            : t('tripInvite.createShared')}
         </Button>
       )}
 

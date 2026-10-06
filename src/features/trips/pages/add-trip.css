@@ -70,6 +70,12 @@
   line-height: 1.65;
 }
 
+.add-trip-join input {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+}
+
 .add-trip-card {
   display: grid;
   overflow: hidden;

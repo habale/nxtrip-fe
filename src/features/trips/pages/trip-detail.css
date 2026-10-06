@@ -148,6 +148,24 @@
   color: var(--color-ink-muted);
 }
 
+.trip-invite-panel__invite {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.trip-invite-panel__invite h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.trip-invite-panel__create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .trip-invite-panel__code {
   padding: 1rem;
   border-radius: var(--radius-control);

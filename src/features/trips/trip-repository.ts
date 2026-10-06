@@ -30,8 +30,7 @@ export type TripDetail = {
   coverThumbnailUrl: string | null;
 };
 
-export type TripInvite =
-  Database['public']['Tables']['trip_invites']['Row'];
+export type TripInvite = Database['public']['Tables']['trip_invites']['Row'];
 
 export type CreateTripInput = {
   name: string;
@@ -91,6 +90,7 @@ export type TripRepository = {
   getActiveInvite: (tripId: string) => Promise<TripInvite | null>;
   createInvite: (tripId: string, createdBy: string) => Promise<TripInvite>;
   revokeInvite: (inviteId: string) => Promise<void>;
+  claimMember: (tripId: string, tripMemberId: string) => Promise<string>;
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
   updateCover: (input: UpdateTripCoverInput) => Promise<Trip>;
   removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
@@ -211,6 +211,7 @@ export function createTripRepository(): TripRepository {
         .from('trip_invites')
         .select('*')
         .eq('trip_id', tripId)
+        .is('trip_member_id', null)
         .eq('is_active', true)
         .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order('created_at', { ascending: false })
@@ -236,8 +237,9 @@ export function createTripRepository(): TripRepository {
         .from('trip_invites')
         .insert({
           trip_id: tripId,
+          trip_member_id: null,
           code,
-          role: 'member',
+          role: 'viewer',
           created_by: createdBy,
           expires_at: expiresAt.toISOString(),
           max_uses: null,
@@ -256,6 +258,18 @@ export function createTripRepository(): TripRepository {
         .eq('id', inviteId);
 
       if (error) throw mapSupabaseError(error);
+    },
+
+    async claimMember(tripId, tripMemberId) {
+      const requestId = createRequestId();
+      const { data, error } = await client.rpc('claim_trip_member', {
+        p_trip_id: tripId,
+        p_trip_member_id: tripMemberId,
+        p_request_id: requestId,
+      });
+
+      if (error) throw mapSupabaseError(error, requestId);
+      return data;
     },
 
     async listMembers(tripId) {

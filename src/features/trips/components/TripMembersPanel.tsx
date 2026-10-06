@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  ContextMenu,
   Checkbox,
   Icon,
   Modal,
@@ -15,6 +16,7 @@ import {
   TextArea,
   TextInput,
 } from '../../../shared/ui';
+import { useAuth } from '../../auth/auth-context';
 import {
   type GuestMemberFormValues,
   validateGuestMemberForm,
@@ -22,6 +24,7 @@ import {
 import { getMemberManagementPermissions } from '../member-permissions';
 import {
   useAddGuestMember,
+  useClaimTripMember,
   useDeactivateGuestMember,
   useTripMembers,
   useUpdateGuestMember,
@@ -31,7 +34,7 @@ import type { TripMemberDetail, TripRepository } from '../trip-repository';
 type TripMembersPanelProps = {
   tripId: string;
   treasurerMemberId: string | null;
-  viewerRole: 'owner' | 'member';
+  viewerRole: 'owner' | 'member' | 'viewer';
   repository?: TripRepository;
 };
 
@@ -49,10 +52,12 @@ export function TripMembersPanel({
   repository,
 }: TripMembersPanelProps) {
   const { t } = useTranslation('common');
+  const { user } = useAuth();
   const membersQuery = useTripMembers(tripId, repository);
   const addGuest = useAddGuestMember(repository);
   const updateGuest = useUpdateGuestMember(repository);
   const deactivateGuest = useDeactivateGuestMember(repository);
+  const claimMember = useClaimTripMember(repository);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -62,6 +67,7 @@ export function TripMembersPanel({
   const [editValues, setEditValues] = useState(emptyValues);
   const [deactivateTarget, setDeactivateTarget] =
     useState<TripMemberDetail | null>(null);
+  const [claimTarget, setClaimTarget] = useState<TripMemberDetail | null>(null);
   const errors = submitted ? validateGuestMemberForm(values) : {};
   const members = membersQuery.data ?? [];
   const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -153,6 +159,15 @@ export function TripMembersPanel({
       .catch(() => undefined);
   }
 
+  async function claim() {
+    if (!claimTarget) return;
+    const target = claimTarget;
+    setClaimTarget(null);
+    await claimMember
+      .mutateAsync({ tripId, tripMemberId: target.member.id })
+      .catch(() => undefined);
+  }
+
   const errorText = (field: keyof GuestMemberFormValues) => {
     const code = errors[field];
     return code ? t(`tripMembers.validation.${code}`) : undefined;
@@ -223,10 +238,7 @@ export function TripMembersPanel({
                     <h3>{member.display_name}</h3>
                     {linkedUserId && accessStatus === 'active' && (
                       <span className="trip-member-card__linked-badge">
-                        <Icon
-                          label={t('tripMembers.linked')}
-                          name="link"
-                        />
+                        <Icon label={t('tripMembers.linked')} name="link" />
                       </span>
                     )}
                     {role === 'owner' && (
@@ -243,24 +255,44 @@ export function TripMembersPanel({
                   {member.note && <small>{member.note}</small>}
                 </div>
                 <div className="trip-member-card__actions">
-                  {permissions.canDeactivate && (
-                    <Button
-                      size="small"
-                      variant="danger-text"
-                      onClick={() => setDeactivateTarget(target)}
-                    >
-                      {t('tripMembers.deactivate')}
-                    </Button>
+                  {viewerRole === 'owner' && (
+                    <ContextMenu
+                      label={t('tripMembers.actionsFor', {
+                        name: member.display_name,
+                      })}
+                      items={[
+                        {
+                          label: t('tripMembers.edit'),
+                          icon: 'edit',
+                          disabled: !permissions.canEdit,
+                          onSelect: () => openEdit(target),
+                        },
+                        {
+                          label: t('tripMembers.deactivate'),
+                          icon: 'trash',
+                          destructive: true,
+                          disabled: !permissions.canDeactivate,
+                          onSelect: () => setDeactivateTarget(target),
+                        },
+                      ]}
+                    />
                   )}
-                  {permissions.canEdit && (
-                    <Button
-                      size="small"
-                      variant="quiet"
-                      onClick={() => openEdit(target)}
-                    >
-                      {t('tripMembers.edit')}
-                    </Button>
-                  )}
+                  {viewerRole === 'viewer' &&
+                    user &&
+                    !user.is_anonymous &&
+                    member.is_active &&
+                    !member.email &&
+                    !linkedUserId && (
+                      <Button
+                        disabled={claimMember.isPending}
+                        size="small"
+                        variant="quiet"
+                        onClick={() => setClaimTarget(target)}
+                      >
+                        <Icon name="link" />
+                        {t('tripMembers.linkAction')}
+                      </Button>
+                    )}
                 </div>
               </article>
             );
@@ -420,6 +452,15 @@ export function TripMembersPanel({
           )}
         </p>
       )}
+      {claimMember.error && (
+        <p className="trip-member-form__error" role="alert">
+          {t(
+            claimMember.error instanceof AppError
+              ? claimMember.error.translationKey
+              : 'errors:generic',
+          )}
+        </p>
+      )}
       <ConfirmDialog
         destructive
         cancelLabel={t('actions.cancel')}
@@ -431,6 +472,17 @@ export function TripMembersPanel({
         title={t('tripMembers.deactivateTitle')}
         onCancel={() => setDeactivateTarget(null)}
         onConfirm={() => void deactivate()}
+      />
+      <ConfirmDialog
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('tripMembers.linkAction')}
+        message={t('tripMembers.linkDescription', {
+          name: claimTarget?.member.display_name ?? '',
+        })}
+        open={Boolean(claimTarget)}
+        title={t('tripMembers.linkTitle')}
+        onCancel={() => setClaimTarget(null)}
+        onConfirm={() => void claim()}
       />
     </section>
   );

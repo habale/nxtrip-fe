@@ -1,21 +1,34 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 
+import { getAuthReturnTo } from '../../../app/auth-return';
 import { Button, Icon, LanguageSwitcher, Page } from '../../../shared/ui';
 import { useAuth } from '../auth-context';
 
 export function LoginPage() {
   const { t } = useTranslation('common');
-  const { error, signInWithGoogle } = useAuth();
-  const location = useLocation();
+  const { error, signInAsGuest, signInWithGoogle } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const returnTo = getAuthReturnTo() ?? undefined;
+  const guestInvite = (() => {
+    if (!returnTo?.startsWith('/')) return false;
+    const query = returnTo.split('?')[1] ?? '';
+    return new URLSearchParams(query).get('guest') === '1';
+  })();
 
   async function handleGoogleSignIn() {
     setSubmitting(true);
     try {
-      const state = location.state as { from?: string } | null;
-      await signInWithGoogle(state?.from);
+      await signInWithGoogle(returnTo);
+    } catch {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleGuestSignIn() {
+    setSubmitting(true);
+    try {
+      await signInAsGuest();
     } catch {
       setSubmitting(false);
     }
@@ -63,10 +76,11 @@ export function LoginPage() {
 
             <div className="auth-guest-button">
               <Button
-                ariaLabel={`${t('auth.accessAsGuest')} — ${t('auth.comingSoon')}`}
+                ariaLabel={t('auth.accessAsGuest')}
                 block
-                disabled
+                disabled={!guestInvite || submitting}
                 variant="quiet"
+                onClick={() => void handleGuestSignIn()}
               >
                 {t('auth.accessAsGuest')}
               </Button>

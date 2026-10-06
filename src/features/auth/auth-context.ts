@@ -9,6 +9,7 @@ export type AuthContextValue = {
   status: AuthStatus;
   error: Error | null;
   signInWithGoogle: (returnTo?: string) => Promise<void>;
+  signInAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 

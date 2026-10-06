@@ -71,6 +71,7 @@ describe('itinerary reorder mutation', () => {
       status: 'ready',
       error: null,
       signInWithGoogle: vi.fn(),
+      signInAsGuest: vi.fn(),
       signOut: vi.fn(),
     };
     const wrapper = ({ children }: PropsWithChildren) => (
@@ -145,6 +146,7 @@ describe('itinerary reorder mutation', () => {
       status: 'ready',
       error: null,
       signInWithGoogle: vi.fn(),
+      signInAsGuest: vi.fn(),
       signOut: vi.fn(),
     };
     const wrapper = ({ children }: PropsWithChildren) => (

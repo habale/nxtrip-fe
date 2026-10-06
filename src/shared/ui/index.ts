@@ -4,6 +4,7 @@ export * from './Button';
 export * from './Card';
 export * from './Checkbox';
 export * from './Chip';
+export * from './ContextMenu';
 export * from './DatePicker';
 export * from './DateRangePicker';
 export * from './Feedback';
