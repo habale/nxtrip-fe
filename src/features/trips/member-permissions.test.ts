@@ -32,10 +32,19 @@ describe('member management permissions', () => {
     });
   });
 
-  it('protects linked account members from guest actions', () => {
+  it('lets owners edit linked members without allowing removal', () => {
     expect(
       getMemberManagementPermissions(
         'owner',
+        member({ linkedUserId: 'user-2', role: 'member' }),
+      ),
+    ).toEqual({ canEdit: true, canDeactivate: false });
+  });
+
+  it('does not let regular members edit another linked member', () => {
+    expect(
+      getMemberManagementPermissions(
+        'member',
         member({ linkedUserId: 'user-2', role: 'member' }),
       ),
     ).toEqual({ canEdit: false, canDeactivate: false });

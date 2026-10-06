@@ -105,6 +105,72 @@
   padding: 1.25rem 1rem max(3rem, env(safe-area-inset-bottom));
 }
 
+.trip-invite-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.trip-invite-panel__heading,
+.trip-invite-panel__actions,
+.trip-invite-panel__code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.trip-invite-panel h2,
+.trip-invite-panel p {
+  margin: 0;
+}
+
+.trip-invite-panel__heading > .ui-icon {
+  color: var(--color-primary);
+}
+
+.trip-invite-panel__heading p,
+.trip-invite-panel small {
+  color: var(--color-ink-muted);
+}
+
+.trip-invite-panel__heading p {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trip-invite-panel__description {
+  color: var(--color-ink-muted);
+}
+
+.trip-invite-panel__code {
+  padding: 1rem;
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+}
+
+.trip-invite-panel__code > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.trip-invite-panel__code strong {
+  color: var(--color-primary);
+  font-size: clamp(1.25rem, 5vw, 1.65rem);
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.trip-invite-panel__actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
 .trip-cover {
   position: relative;
   display: grid;
@@ -255,13 +321,11 @@
   white-space: nowrap;
 }
 
-.trip-member-card__link-state {
-  padding: 0.55rem 0.75rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-soft);
+.trip-member-card__linked-badge .ui-icon {
   color: var(--color-primary);
-  font-size: 0.75rem;
-  font-weight: 750;
+  font-weight: 600;
+  position: relative;
+  top: 2px;
 }
 
 .trip-member-card__actions {

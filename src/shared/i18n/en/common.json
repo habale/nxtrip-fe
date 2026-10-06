@@ -338,6 +338,19 @@
     "nightCount_other": "{{count}} nights",
     "saving": "Saving…"
   },
+  "tripInvite": {
+    "ownerOnly": "Owner controls",
+    "title": "Invite members",
+    "description": "Share this private link or code. Anyone who joins must sign in to NxTrip first.",
+    "code": "Trip code",
+    "create": "Create invite link",
+    "creating": "Creating invite…",
+    "share": "Share invite",
+    "shareText": "Join my {{trip}} trip on NxTrip.",
+    "revoke": "Revoke link",
+    "expires": "This link expires {{date}}.",
+    "error": "We couldn’t manage the invitation. Please try again."
+  },
   "tripCover": {
     "alt": "Cover for {{name}}",
     "choose": "Add cover",
@@ -363,7 +376,7 @@
     "note": "Note (optional)",
     "adding": "Adding…",
     "edit": "Edit",
-    "editGuestTitle": "Edit guest member",
+    "editGuestTitle": "Edit member",
     "saving": "Saving…",
     "deactivate": "Remove",
     "deactivateTitle": "Remove guest?",

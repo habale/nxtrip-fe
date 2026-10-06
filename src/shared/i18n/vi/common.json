@@ -335,6 +335,19 @@
     "nightCount": "{{count}} đêm",
     "saving": "Đang lưu…"
   },
+  "tripInvite": {
+    "ownerOnly": "Quyền của chủ chuyến đi",
+    "title": "Mời thành viên",
+    "description": "Chia sẻ liên kết hoặc mã riêng tư này. Người tham gia cần đăng nhập NxTrip trước.",
+    "code": "Mã chuyến đi",
+    "create": "Tạo liên kết mời",
+    "creating": "Đang tạo lời mời…",
+    "share": "Chia sẻ lời mời",
+    "shareText": "Tham gia chuyến đi {{trip}} của tôi trên NxTrip.",
+    "revoke": "Thu hồi liên kết",
+    "expires": "Liên kết hết hạn vào {{date}}.",
+    "error": "Không thể quản lý lời mời. Vui lòng thử lại."
+  },
   "tripCover": {
     "alt": "Ảnh bìa cho {{name}}",
     "choose": "Thêm ảnh bìa",
@@ -360,7 +373,7 @@
     "note": "Ghi chú (không bắt buộc)",
     "adding": "Đang thêm…",
     "edit": "Chỉnh sửa",
-    "editGuestTitle": "Chỉnh sửa thành viên khách",
+    "editGuestTitle": "Chỉnh sửa thành viên",
     "saving": "Đang lưu…",
     "deactivate": "Xóa",
     "deactivateTitle": "Xóa thành viên khách?",

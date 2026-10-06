@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
@@ -13,8 +13,11 @@ import './add-trip.css';
 export function AddTripPage() {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const joinTrip = useJoinTrip();
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(() =>
+    normalizeTripCode(searchParams.get('code') ?? ''),
+  );
   const [submitted, setSubmitted] = useState(false);
   const validationError = submitted ? validateTripCode(code) : undefined;
 

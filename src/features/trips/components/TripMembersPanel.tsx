@@ -221,6 +221,14 @@ export function TripMembersPanel({
                 <div className="trip-member-card__details">
                   <div className="trip-member-card__name">
                     <h3>{member.display_name}</h3>
+                    {linkedUserId && accessStatus === 'active' && (
+                      <span className="trip-member-card__linked-badge">
+                        <Icon
+                          label={t('tripMembers.linked')}
+                          name="link"
+                        />
+                      </span>
+                    )}
                     {role === 'owner' && (
                       <Badge>{t('tripMembers.owner')}</Badge>
                     )}
@@ -235,11 +243,6 @@ export function TripMembersPanel({
                   {member.note && <small>{member.note}</small>}
                 </div>
                 <div className="trip-member-card__actions">
-                  {linkedUserId && accessStatus === 'active' && (
-                    <span className="trip-member-card__link-state">
-                      {t('tripMembers.linked')}
-                    </span>
-                  )}
                   {permissions.canDeactivate && (
                     <Button
                       size="small"

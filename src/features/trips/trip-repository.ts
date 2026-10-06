@@ -30,6 +30,9 @@ export type TripDetail = {
   coverThumbnailUrl: string | null;
 };
 
+export type TripInvite =
+  Database['public']['Tables']['trip_invites']['Row'];
+
 export type CreateTripInput = {
   name: string;
   description: string;
@@ -85,6 +88,9 @@ export type TripRepository = {
   getAccessibleById: (tripId: string, userId: string) => Promise<TripDetail>;
   create: (input: CreateTripInput) => Promise<string>;
   joinByCode: (code: string) => Promise<string>;
+  getActiveInvite: (tripId: string) => Promise<TripInvite | null>;
+  createInvite: (tripId: string, createdBy: string) => Promise<TripInvite>;
+  revokeInvite: (inviteId: string) => Promise<void>;
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
   updateCover: (input: UpdateTripCoverInput) => Promise<Trip>;
   removeCover: (input: RemoveTripCoverInput) => Promise<Trip>;
@@ -198,6 +204,58 @@ export function createTripRepository(): TripRepository {
 
       if (error) throw mapSupabaseError(error, requestId);
       return data;
+    },
+
+    async getActiveInvite(tripId) {
+      const { data, error } = await client
+        .from('trip_invites')
+        .select('*')
+        .eq('trip_id', tripId)
+        .eq('is_active', true)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw mapSupabaseError(error);
+      return data;
+    },
+
+    async createInvite(tripId, createdBy) {
+      const random = new Uint8Array(8);
+      crypto.getRandomValues(random);
+      const code = Array.from(random, (value) =>
+        value.toString(16).padStart(2, '0'),
+      )
+        .join('')
+        .toUpperCase();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      const { data, error } = await client
+        .from('trip_invites')
+        .insert({
+          trip_id: tripId,
+          code,
+          role: 'member',
+          created_by: createdBy,
+          expires_at: expiresAt.toISOString(),
+          max_uses: null,
+        })
+        .select('*')
+        .single();
+
+      if (error) throw mapSupabaseError(error);
+      return data;
+    },
+
+    async revokeInvite(inviteId) {
+      const { error } = await client
+        .from('trip_invites')
+        .update({ is_active: false })
+        .eq('id', inviteId);
+
+      if (error) throw mapSupabaseError(error);
     },
 
     async listMembers(tripId) {

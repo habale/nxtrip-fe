@@ -11,6 +11,7 @@ export type IconName =
   | 'cafe'
   | 'check'
   | 'close'
+  | 'copy'
   | 'document'
   | 'drag'
   | 'directions'
@@ -20,6 +21,7 @@ export type IconName =
   | 'forward'
   | 'home'
   | 'hotel'
+  | 'link'
   | 'location'
   | 'menu'
   | 'misc'
@@ -30,6 +32,7 @@ export type IconName =
   | 'restaurant'
   | 'savings'
   | 'search'
+  | 'share'
   | 'settings'
   | 'shopping'
   | 'sightseeing'
@@ -62,6 +65,7 @@ const materialSymbolByName: Record<IconName, string> = {
   cafe: 'local_cafe',
   check: 'check',
   close: 'close',
+  copy: 'content_copy',
   document: 'description',
   drag: 'drag_indicator',
   directions: 'near_me',
@@ -71,6 +75,7 @@ const materialSymbolByName: Record<IconName, string> = {
   forward: 'chevron_right',
   home: 'home',
   hotel: 'hotel',
+  link: 'link',
   location: 'location_on',
   menu: 'menu',
   misc: 'category',
@@ -81,6 +86,7 @@ const materialSymbolByName: Record<IconName, string> = {
   restaurant: 'restaurant',
   savings: 'savings',
   search: 'search',
+  share: 'share',
   settings: 'settings',
   shopping: 'shopping_bag',
   sightseeing: 'temple_buddhist',

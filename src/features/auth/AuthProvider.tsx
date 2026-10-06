@@ -80,16 +80,19 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
     };
   }, [authClient]);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (returnTo = '/home') => {
     if (!authClient) {
       throw error ?? new Error('Authentication is not configured.');
     }
 
     setError(null);
+    const safeReturnTo = returnTo.startsWith('/') && !returnTo.startsWith('//')
+      ? returnTo
+      : '/home';
     const { error: signInError } = await authClient.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: new URL('/home', window.location.origin).toString(),
+        redirectTo: new URL(safeReturnTo, window.location.origin).toString(),
       },
     });
 

@@ -19,7 +19,48 @@ export const tripKeys = {
   list: (userId: string) => [...tripKeys.all, 'list', userId] as const,
   detail: (tripId: string) => [...tripKeys.all, 'detail', tripId] as const,
   members: (tripId: string) => [...tripKeys.all, 'members', tripId] as const,
+  invite: (tripId: string) => [...tripKeys.all, 'invite', tripId] as const,
 };
+
+export function useTripInvite(
+  tripId: string,
+  enabled: boolean,
+  repository?: TripRepository,
+) {
+  return useQuery({
+    queryKey: tripKeys.invite(tripId),
+    enabled: Boolean(tripId && enabled),
+    queryFn: () =>
+      (repository ?? getTripRepository()).getActiveInvite(tripId),
+  });
+}
+
+export function useCreateTripInvite(repository?: TripRepository) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (tripId: string) => {
+      if (!user) throw new Error('Authentication is required.');
+      return (repository ?? getTripRepository()).createInvite(tripId, user.id);
+    },
+    onSuccess: (invite) => {
+      queryClient.setQueryData(tripKeys.invite(invite.trip_id), invite);
+    },
+  });
+}
+
+export function useRevokeTripInvite(repository?: TripRepository) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ inviteId }: { tripId: string; inviteId: string }) =>
+      (repository ?? getTripRepository()).revokeInvite(inviteId),
+    onSuccess: (_result, { tripId }) => {
+      queryClient.setQueryData(tripKeys.invite(tripId), null);
+    },
+  });
+}
 
 export function useTripList(repository?: TripRepository) {
   const { user } = useAuth();

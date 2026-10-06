@@ -9,6 +9,7 @@ import type { ItineraryRepository } from '../../itinerary/itinerary-repository';
 import { LedgerPanel } from '../../ledger/components/LedgerPanel';
 import type { LedgerRepository } from '../../ledger/ledger-repository';
 import { TripInfoPanel } from '../components/TripInfoPanel';
+import { TripInvitePanel } from '../components/TripInvitePanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
 import { formatTripDateRange } from '../trip-date';
 import { useTripDetail } from '../trip-hooks';
@@ -182,6 +183,13 @@ export function TripDetailPage({
                   locale={locale}
                   repository={repository}
                 />
+                {detail.role === 'owner' && (
+                  <TripInvitePanel
+                    repository={repository}
+                    tripId={trip.id}
+                    tripName={trip.name}
+                  />
+                )}
                 <TripMembersPanel
                   repository={repository}
                   tripId={trip.id}

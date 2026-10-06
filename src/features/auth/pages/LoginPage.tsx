@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 
 import { Button, Icon, LanguageSwitcher, Page } from '../../../shared/ui';
 import { useAuth } from '../auth-context';
@@ -7,12 +8,14 @@ import { useAuth } from '../auth-context';
 export function LoginPage() {
   const { t } = useTranslation('common');
   const { error, signInWithGoogle } = useAuth();
+  const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleGoogleSignIn() {
     setSubmitting(true);
     try {
-      await signInWithGoogle();
+      const state = location.state as { from?: string } | null;
+      await signInWithGoogle(state?.from);
     } catch {
       setSubmitting(false);
     }

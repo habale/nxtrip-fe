@@ -40,6 +40,9 @@ function createRepository(
     listAccessible: vi.fn(async () => []),
     create: vi.fn(async () => 'trip-new'),
     joinByCode: vi.fn(async () => 'trip-joined'),
+    getActiveInvite: vi.fn(async () => null),
+    createInvite: vi.fn(),
+    revokeInvite: vi.fn(),
     updateMetadata: vi.fn(async () => trip),
     updateCover: vi.fn(async () => trip),
     removeCover: vi.fn(async () => trip),
@@ -188,7 +191,12 @@ describe('TripDetailPage', () => {
     expect(await screen.findByText('Members (2)')).toBeInTheDocument();
     expect(screen.getByText('Liam Tran')).toBeInTheDocument();
     expect(screen.getByText('Owner')).toBeInTheDocument();
-    expect(screen.getByText('Linked')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Linked' })).toBeInTheDocument();
+    expect(screen.queryByText('Linked')).not.toBeInTheDocument();
+    const linkedCard = screen.getByText('Liam Tran').closest('article');
+    expect(linkedCard).not.toBeNull();
+    expect(within(linkedCard!).getByText('Edit')).toBeInTheDocument();
+    expect(within(linkedCard!).queryByText('Remove')).not.toBeInTheDocument();
     const guestCard = screen.getByText('Kenji Mori').closest('article');
     expect(guestCard).not.toBeNull();
     expect(within(guestCard!).getByText('Edit')).toBeInTheDocument();
