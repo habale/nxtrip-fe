@@ -134,6 +134,7 @@ describe('TripDetailPage', () => {
       await screen.findByRole('heading', { level: 1, name: 'Thailand' }),
     ).toBeInTheDocument();
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add member')).not.toBeInTheDocument();
   });
 
   it('shows linked, guest, and inactive member states', async () => {

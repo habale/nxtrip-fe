@@ -268,12 +268,14 @@ export function TripMembersPanel({
         </div>
       )}
 
-      <Button variant="quiet" onClick={() => setModalOpen(true)}>
-        <span className="trip-members-add">
-          <Icon name="add" />
-          {t('tripMembers.addGuest')}
-        </span>
-      </Button>
+      {viewerRole === 'owner' && (
+        <Button variant="quiet" onClick={() => setModalOpen(true)}>
+          <span className="trip-members-add">
+            <Icon name="add" />
+            {t('tripMembers.addGuest')}
+          </span>
+        </Button>
+      )}
 
       <Modal
         open={modalOpen}

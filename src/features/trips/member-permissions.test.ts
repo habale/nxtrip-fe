@@ -25,10 +25,10 @@ function member(overrides: Partial<TripMemberDetail>): TripMemberDetail {
 }
 
 describe('member management permissions', () => {
-  it('allows current trip members to manage active guests', () => {
+  it('keeps guest management read-only for regular members', () => {
     expect(getMemberManagementPermissions('member', member({}))).toEqual({
-      canEdit: true,
-      canDeactivate: true,
+      canEdit: false,
+      canDeactivate: false,
     });
   });
 
@@ -39,6 +39,13 @@ describe('member management permissions', () => {
         member({ linkedUserId: 'user-2', role: 'member' }),
       ),
     ).toEqual({ canEdit: true, canDeactivate: false });
+  });
+
+  it('lets owners edit and remove active guest members', () => {
+    expect(getMemberManagementPermissions('owner', member({}))).toEqual({
+      canEdit: true,
+      canDeactivate: true,
+    });
   });
 
   it('does not let regular members edit another linked member', () => {

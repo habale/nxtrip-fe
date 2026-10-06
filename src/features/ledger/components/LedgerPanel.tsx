@@ -834,7 +834,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
         >
           <option value="all">{t('ledger.allExpenses')}</option>
           <option value="summary">{t('ledger.groupSummary')}</option>
-          <option value="_" disabled>________________</option>
+          <option value="_" disabled>__________________</option>
           {(query.data?.members ?? []).map((member) => (
             <option key={member.id} value={`member:${member.id}`}>
               {member.display_name}

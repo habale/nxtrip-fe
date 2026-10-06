@@ -9,10 +9,9 @@ export function getMemberManagementPermissions(
   viewerRole: 'owner' | 'member',
   target: TripMemberDetail,
 ): MemberManagementPermissions {
-  const isGuest = !target.linkedUserId;
-
   return {
-    canEdit: isGuest || viewerRole === 'owner',
-    canDeactivate: isGuest && target.member.is_active,
+    canEdit: viewerRole === 'owner',
+    canDeactivate:
+      viewerRole === 'owner' && !target.linkedUserId && target.member.is_active,
   };
 }

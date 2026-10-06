@@ -67,6 +67,53 @@ const baseNode = {
 } satisfies ItineraryNode;
 
 describe('ItineraryPanel', () => {
+  it('renders a read-only itinerary without the actions FAB', async () => {
+    const repository = {
+      getDateWindow: vi.fn(async (window) => ({
+        ...window,
+        nodes: [baseNode],
+      })),
+      createNode: vi.fn(),
+      updateNode: vi.fn(),
+      reorderNode: vi.fn(),
+      removeNode: vi.fn(),
+      addNodeAttachment: vi.fn(),
+    } satisfies ItineraryRepository;
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <AuthContext.Provider
+          value={
+            {
+              session: null,
+              user: { id: 'user-1' } as User,
+              status: 'ready',
+              error: null,
+              signInWithGoogle: vi.fn(),
+              signOut: vi.fn(),
+            } satisfies AuthContextValue
+          }
+        >
+          <QueryClientProvider client={queryClient}>
+            <ItineraryPanel
+              canEdit={false}
+              repository={repository}
+              trip={trip}
+            />
+          </QueryClientProvider>
+        </AuthContext.Provider>
+      </I18nextProvider>,
+    );
+
+    expect(await screen.findByText('Temple visit')).toBeInTheDocument();
+    expect(screen.queryByText('Itinerary actions')).not.toBeInTheDocument();
+    expect(document.querySelector('ion-reorder')).not.toBeInTheDocument();
+    expect(document.querySelector('.ui-icon-button')).not.toBeInTheDocument();
+  });
+
   it('renders stop and move nodes for a bounded selected day', async () => {
     const nodes = (
       [

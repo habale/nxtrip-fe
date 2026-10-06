@@ -198,7 +198,11 @@ export function TripDetailPage({
                 />
               </>
             ) : section === 'itinerary' ? (
-              <ItineraryPanel repository={itineraryRepository} trip={trip} />
+              <ItineraryPanel
+                canEdit={detail.role === 'owner'}
+                repository={itineraryRepository}
+                trip={trip}
+              />
             ) : section === 'ledger' ? (
               <LedgerPanel
                 repository={ledgerRepository}

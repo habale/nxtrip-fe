@@ -9,7 +9,7 @@
   z-index: 20;
   top: 0;
   display: grid;
-  min-height: 5.75rem;
+  min-height: 4rem;
   grid-template-columns: 3.25rem minmax(0, 1fr) 3.25rem;
   align-items: center;
   gap: 0.5rem;
@@ -64,7 +64,7 @@
 .trip-detail-nav {
   position: sticky;
   z-index: 15;
-  top: 5.75rem;
+  top: 4rem;
   display: flex;
   overflow-x: auto;
   padding: 0 0.75rem;
@@ -80,7 +80,7 @@
 .trip-detail-nav .ui-tab-link {
   display: grid;
   flex: 0 0 auto;
-  min-height: 3.2rem;
+  min-height: 2.75rem;
   place-items: center;
   padding: 0 1.25rem;
   border-bottom: 3px solid transparent;
