@@ -15,7 +15,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 
 export function List({ children }: PropsWithChildren) {
   return <IonList className="ui-list">{children}</IonList>;
@@ -140,6 +140,75 @@ export function SwipeItem({
           {removeLabel}
         </IonItemOption>
       </IonItemOptions>
+    </IonItemSliding>
+  );
+}
+
+export type SwipeStartActionItemProps = PropsWithChildren<{
+  className?: string;
+  actionLabel: string;
+  icon?: IconName;
+  onAction: () => void;
+  endActionLabel?: string;
+  endIcon?: IconName;
+  endDisabled?: boolean;
+  onEndAction?: () => void;
+}>;
+
+export function SwipeStartActionItem({
+  children,
+  className,
+  actionLabel,
+  icon = 'person',
+  onAction,
+  endActionLabel,
+  endIcon = 'check',
+  endDisabled = false,
+  onEndAction,
+}: SwipeStartActionItemProps) {
+  const slidingRef = useRef<HTMLIonItemSlidingElement>(null);
+
+  async function runAction() {
+    await slidingRef.current?.close();
+    onAction();
+  }
+
+  async function runEndAction() {
+    await slidingRef.current?.close();
+    if (!endDisabled) onEndAction?.();
+  }
+
+  return (
+    <IonItemSliding ref={slidingRef} className="ui-swipe-item">
+      <IonItemOptions side="start" onIonSwipe={() => void runAction()}>
+        <IonItemOption
+          color="primary"
+          expandable
+          onClick={() => void runAction()}
+        >
+          <Icon name={icon} />
+          {actionLabel}
+        </IonItemOption>
+      </IonItemOptions>
+      <IonItem
+        className={`ui-item${className ? ` ${className}` : ''}`}
+        lines="none"
+      >
+        {children}
+      </IonItem>
+      {endActionLabel && onEndAction && (
+        <IonItemOptions side="end" onIonSwipe={() => void runEndAction()}>
+          <IonItemOption
+            color="success"
+            disabled={endDisabled}
+            expandable
+            onClick={() => void runEndAction()}
+          >
+            <Icon name={endIcon} />
+            {endActionLabel}
+          </IonItemOption>
+        </IonItemOptions>
+      )}
     </IonItemSliding>
   );
 }

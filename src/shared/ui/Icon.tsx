@@ -27,6 +27,7 @@ export type IconName =
   | 'paste'
   | 'previous'
   | 'restaurant'
+  | 'savings'
   | 'search'
   | 'settings'
   | 'shopping'
@@ -75,6 +76,7 @@ const materialSymbolByName: Record<IconName, string> = {
   paste: 'content_paste',
   previous: 'chevron_left',
   restaurant: 'restaurant',
+  savings: 'savings',
   search: 'search',
   settings: 'settings',
   shopping: 'shopping_bag',

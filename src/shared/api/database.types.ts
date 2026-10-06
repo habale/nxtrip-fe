@@ -168,6 +168,7 @@ type TripFundRow = {
   name: string;
   currency: string;
   is_active: boolean;
+  is_default: boolean;
   created_at: string;
   updated_at: string;
   version: number;
@@ -419,6 +420,17 @@ export type Database = {
       soft_delete_expense: {
         Args: { p_expense_id: string; p_request_id?: string };
         Returns: undefined;
+      };
+      save_fund_contribution: {
+        Args: {
+          p_trip_id: string;
+          p_member_id: string;
+          p_contribution_type: string;
+          p_amount_minor: number;
+          p_occurred_at?: string;
+          p_note?: string;
+        };
+        Returns: string;
       };
     };
     Enums: {

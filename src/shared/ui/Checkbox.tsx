@@ -1,7 +1,8 @@
 import { IonCheckbox } from '@ionic/react';
 
 export type CheckboxProps = {
-  label: string;
+  label?: string;
+  ariaLabel?: string;
   checked?: boolean;
   disabled?: boolean;
   helperText?: string;
@@ -11,6 +12,7 @@ export type CheckboxProps = {
 
 export function Checkbox({
   label,
+  ariaLabel,
   checked,
   disabled,
   helperText,
@@ -19,6 +21,7 @@ export function Checkbox({
 }: CheckboxProps) {
   return (
     <IonCheckbox
+      aria-label={ariaLabel}
       alignment="center"
       checked={checked}
       disabled={disabled}
@@ -28,7 +31,7 @@ export function Checkbox({
       labelPlacement="start"
       onIonChange={(event) => onCheckedChange?.(event.detail.checked)}
     >
-      {label}
+      {label ?? null}
     </IonCheckbox>
   );
 }

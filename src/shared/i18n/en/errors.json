@@ -25,6 +25,9 @@
     "EXPENSE_SHARE_AMOUNT_INVALID": "Each expense share must be zero or greater.",
     "EXPENSE_SHARE_MISMATCH": "The expense shares must add up to the total amount.",
     "ITINERARY_NODE_INVALID": "The selected itinerary item is unavailable.",
+    "CONTRIBUTION_TYPE_INVALID": "Choose either Deposit or Sponsor.",
+    "CONTRIBUTION_AMOUNT_INVALID": "Enter an amount greater than zero.",
+    "CONTRIBUTION_MEMBER_INVALID": "The selected contributing member is unavailable.",
     "SETTLEMENT_NOT_FOUND": "This settlement could not be found.",
     "SETTLEMENT_MARK_FORBIDDEN": "You don't have permission to update this settlement.",
     "SETTLEMENT_ALREADY_DONE": "This settlement is already marked as done."

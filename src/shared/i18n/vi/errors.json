@@ -25,6 +25,9 @@
     "EXPENSE_SHARE_AMOUNT_INVALID": "Mỗi phần chia khoản chi phải bằng hoặc lớn hơn 0.",
     "EXPENSE_SHARE_MISMATCH": "Tổng các phần chia phải bằng tổng số tiền của khoản chi.",
     "ITINERARY_NODE_INVALID": "Mục lịch trình đã chọn không còn khả dụng.",
+    "CONTRIBUTION_TYPE_INVALID": "Chọn Đặt cọc hoặc Tài trợ.",
+    "CONTRIBUTION_AMOUNT_INVALID": "Nhập số tiền lớn hơn 0.",
+    "CONTRIBUTION_MEMBER_INVALID": "Thành viên đóng góp đã chọn không còn khả dụng.",
     "SETTLEMENT_NOT_FOUND": "Không tìm thấy khoản quyết toán này.",
     "SETTLEMENT_MARK_FORBIDDEN": "Bạn không có quyền cập nhật khoản quyết toán này.",
     "SETTLEMENT_ALREADY_DONE": "Khoản quyết toán này đã được đánh dấu hoàn tất."

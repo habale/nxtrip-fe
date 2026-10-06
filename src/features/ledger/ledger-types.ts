@@ -20,7 +20,37 @@ export type LedgerExpense = {
 
 export type LedgerData = {
   expenses: LedgerExpense[];
+  contributions: Array<{
+    contribution: Database['public']['Tables']['fund_contributions']['Row'];
+    member: LedgerMember | null;
+    fundName: string;
+    fundIsDefault: boolean;
+  }>;
   members: LedgerMember[];
+  funds: Array<
+    Pick<
+      Database['public']['Tables']['trip_funds']['Row'],
+      'id' | 'name' | 'currency'
+    >
+  >;
+  settlements: Database['public']['Tables']['settlements']['Row'][];
+};
+
+export type LedgerEntryType = 'expense' | 'sponsor' | 'deposit';
+export type LedgerSplitMode = 'equal' | 'percent' | 'amount';
+
+export type SaveLedgerEntryInput = {
+  tripId: string;
+  type: LedgerEntryType;
+  title: string;
+  category: string;
+  occurredAt: string;
+  amountMinor: number;
+  currency: string;
+  paidByMemberId: string;
+  splitMode: LedgerSplitMode;
+  shares: Array<{ memberId: string; amountMinor: number }>;
+  userId: string;
 };
 
 export function formatMoney(
@@ -32,6 +62,7 @@ export function formatMoney(
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
+    currencyDisplay: 'narrowSymbol',
   }).format(amountMinor / 100);
 }
 

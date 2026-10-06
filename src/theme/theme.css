@@ -26,8 +26,8 @@
   --color-category-dining-bg: #ffdad6;
   --color-category-cafe: #865710;
   --color-category-cafe-bg: #e7ddcf;
-  --color-category-lodging: #b00075;
-  --color-category-lodging-bg: #efcce3;
+  --color-category-lodging: #7e22ce;
+  --color-category-lodging-bg: #e8c9fe;
   --color-category-shopping: #04829f;
   --color-category-shopping-bg: #cde6ec;
   --color-category-sightseeing: #230c6e;
@@ -304,16 +304,41 @@
 }
 
 .ui-segment {
-  padding: 0.25rem;
+  padding: 0.35rem;
   border-radius: var(--radius-pill);
-  background: var(--color-surface-muted);
+  background: #eaedff;
 }
 
 .ui-segment ion-segment-button {
   min-height: var(--control-min-height);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
   --border-radius: var(--radius-pill);
-  --indicator-color: var(--color-primary);
-  --color-checked: var(--color-surface);
+  --color: var(--color-ink-muted);
+  --color-checked: var(--color-primary);
+  --indicator-color: var(--color-surface);
+  --indicator-height: 100%;
+  --indicator-box-shadow: 0 0.25rem 0.75rem rgb(29 78 216 / 12%);
+}
+
+.ui-segment ion-segment-button::part(indicator) {
+  padding: 0;
+}
+
+.ui-segment ion-segment-button::part(indicator-background) {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  box-shadow: 0 0.25rem 0.75rem rgb(29 78 216 / 12%);
+}
+
+.ui-segment ion-segment-button.segment-button-checked {
+  font-weight: 700;
 }
 
 .ui-field-error {
