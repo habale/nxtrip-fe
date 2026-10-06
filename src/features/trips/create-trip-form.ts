@@ -5,6 +5,7 @@ export type CreateTripFormValues = {
   endDate: string;
   timezone: string;
   defaultCurrency: string;
+  currencyDecimalPlaces: number;
 };
 
 export type CreateTripFormErrors = Partial<
@@ -29,6 +30,14 @@ export function validateCreateTripForm(values: CreateTripFormValues) {
 
   if (!/^[A-Za-z]{3}$/.test(values.defaultCurrency.trim())) {
     errors.defaultCurrency = 'invalidCurrency';
+  }
+
+  if (
+    !Number.isInteger(values.currencyDecimalPlaces) ||
+    values.currencyDecimalPlaces < 0 ||
+    values.currencyDecimalPlaces > 4
+  ) {
+    errors.currencyDecimalPlaces = 'invalidDecimalPlaces';
   }
 
   if (values.startDate && values.endDate && values.endDate < values.startDate) {

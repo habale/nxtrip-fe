@@ -10,6 +10,7 @@ describe('trip repository create mapping', () => {
         endDate: '2026-10-08',
         timezone: 'Asia/Tokyo',
         defaultCurrency: 'jpy',
+        currencyDecimalPlaces: 0,
         createdBy: 'user-123',
       }),
     ).toEqual({
@@ -19,6 +20,7 @@ describe('trip repository create mapping', () => {
       end_at: '2026-10-07T15:00:00.000Z',
       timezone: 'Asia/Tokyo',
       default_currency: 'JPY',
+      currency_decimal_places: 0,
       created_by: 'user-123',
     });
   });
@@ -31,6 +33,7 @@ describe('trip repository create mapping', () => {
       endDate: '',
       timezone: 'UTC',
       defaultCurrency: 'USD',
+      currencyDecimalPlaces: 2,
       createdBy: 'user-123',
     });
 
@@ -48,6 +51,7 @@ describe('trip repository create mapping', () => {
         endDate: '',
         timezone: 'UTC',
         defaultCurrency: 'usd',
+        currencyDecimalPlaces: 2,
       }),
     ).toEqual({
       name: 'Updated trip',

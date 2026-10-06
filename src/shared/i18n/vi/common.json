@@ -97,6 +97,10 @@
     "timezone": "Múi giờ",
     "timezoneHelp": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh.",
     "defaultCurrency": "Tiền tệ mặc định",
+    "currencyLocked": "Không thể thay đổi tiền tệ sau khi tạo chuyến đi.",
+    "currencyDecimalPlaces": "Số chữ số thập phân",
+    "currencyDecimalPlacesHelp": "Chọn từ 0 đến 4 chữ số thập phân. Không thể thay đổi sau này.",
+    "currencyDecimalPlacesLocked": "Không thể thay đổi số chữ số thập phân sau khi tạo chuyến đi.",
     "submit": "Tạo chuyến đi",
     "creating": "Đang tạo chuyến đi…",
     "validation": {
@@ -104,7 +108,8 @@
       "tooLong": "Tên chuyến đi không được vượt quá 160 ký tự.",
       "endBeforeStart": "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.",
       "invalidTimezone": "Nhập múi giờ IANA hợp lệ.",
-      "invalidCurrency": "Nhập mã tiền tệ gồm ba chữ cái hợp lệ."
+      "invalidCurrency": "Nhập mã tiền tệ gồm ba chữ cái hợp lệ.",
+      "invalidDecimalPlaces": "Chọn một số nguyên từ 0 đến 4."
     }
   },
   "tripDetail": {
@@ -202,6 +207,8 @@
       "splitMethod": "Cách phân chia",
       "number": "Số tiền",
       "equal": "Chia đều",
+      "byPercent": "Theo %",
+      "byAmount": "Theo {{currency}}",
       "includeMember": "Bao gồm {{name}}",
       "percentValidation": "Tổng tỷ lệ phải bằng 100% (hiện tại {{total}}%).",
       "amountValidation": "Tổng số tiền của thành viên phải bằng tổng khoản chi.",
@@ -306,9 +313,9 @@
     "edit": "Chỉnh sửa",
     "editTitle": "Chỉnh sửa thông tin chuyến đi",
     "ownerOnly": "Quyền của chủ chuyến đi",
-    "version": "Phiên bản {{version}}",
     "timezone": "Múi giờ",
-    "defaultCurrency": "Tiền tệ mặc định",
+    "defaultCurrency": "Tiền tệ",
+    "decimalPlaces": "Số chữ số thập phân",
     "dayCount": "{{count}} ngày",
     "nightCount": "{{count}} đêm",
     "saving": "Đang lưu…"

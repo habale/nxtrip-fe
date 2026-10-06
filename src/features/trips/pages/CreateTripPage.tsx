@@ -9,6 +9,7 @@ import {
   DateRangePicker,
   Icon,
   Page,
+  Select,
   TextArea,
   TextInput,
 } from '../../../shared/ui';
@@ -17,6 +18,7 @@ import {
   validateCreateTripForm,
 } from '../create-trip-form';
 import { useCreateTrip } from '../trip-hooks';
+import { getCurrencyOptions, getTimezoneOptions } from '../trip-options';
 
 import './create-trip.css';
 
@@ -28,11 +30,12 @@ function getInitialValues(): CreateTripFormValues {
     endDate: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     defaultCurrency: 'VND',
+    currencyDecimalPlaces: 0,
   };
 }
 
 export function CreateTripPage() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const navigate = useNavigate();
   const createTrip = useCreateTrip();
   const [values, setValues] = useState(getInitialValues);
@@ -119,24 +122,38 @@ export function CreateTripPage() {
           </section>
 
           <section className="create-trip-card create-trip-settings">
-            <TextInput
+            <Select
               required
               errorText={errorText('timezone')}
               helperText={t('createTrip.timezoneHelp')}
               label={t('createTrip.timezone')}
-              placeholder="Asia/Ho_Chi_Minh"
+              options={getTimezoneOptions(values.timezone)}
               value={values.timezone}
-              onValueChange={(value) => update('timezone', value)}
+              onValueChange={(value) => update('timezone', String(value))}
             />
-            <TextInput
+            <Select
               required
               errorText={errorText('defaultCurrency')}
               label={t('createTrip.defaultCurrency')}
-              maxlength={3}
-              placeholder="VND"
+              options={getCurrencyOptions(
+                values.defaultCurrency,
+                i18n.resolvedLanguage ?? i18n.language,
+              )}
               value={values.defaultCurrency}
               onValueChange={(value) =>
-                update('defaultCurrency', value.toUpperCase())
+                update('defaultCurrency', String(value).toUpperCase())
+              }
+            />
+            <TextInput
+              required
+              errorText={errorText('currencyDecimalPlaces')}
+              helperText={t('createTrip.currencyDecimalPlacesHelp')}
+              inputMode="numeric"
+              label={t('createTrip.currencyDecimalPlaces')}
+              type="number"
+              value={String(values.currencyDecimalPlaces)}
+              onValueChange={(value) =>
+                update('currencyDecimalPlaces', Number(value))
               }
             />
           </section>

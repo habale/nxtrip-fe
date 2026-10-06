@@ -21,6 +21,11 @@ import type {
   LedgerEntryType,
   LedgerSplitMode,
 } from '../ledger-types';
+import {
+  formatAmountInput,
+  getCurrencySymbol,
+  toStoredAmount,
+} from '../ledger-types';
 
 type Props = {
   open: boolean;
@@ -63,7 +68,7 @@ export function AddLedgerEntryModal({
   repository,
   onDismiss,
 }: Props) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const { t: tError } = useTranslation('errors');
   const mutation = useSaveLedgerEntry(repository);
   const sortedMembers = useMemo(
@@ -87,6 +92,11 @@ export function AddLedgerEntryModal({
   const [direction, setDirection] = useState<
     'total-to-split' | 'split-to-total'
   >('total-to-split');
+  const decimalPlaces = trip.currency_decimal_places;
+  const currencySymbol = getCurrencySymbol(
+    trip.default_currency,
+    i18n.resolvedLanguage ?? i18n.language,
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -100,15 +110,16 @@ export function AddLedgerEntryModal({
     selectedIds.includes(id),
   );
   const enteredAmountsTotalMinor = activeMembers.reduce(
-    (sum, member) => sum + Math.round((Number(values[member.id]) || 0) * 100),
+    (sum, member) =>
+      sum + toStoredAmount(Number(values[member.id]) || 0, decimalPlaces),
     0,
   );
   const derivesTotal = type === 'expense' && direction === 'split-to-total';
   const totalMinor = derivesTotal
     ? enteredAmountsTotalMinor
-    : Math.round((Number(total) || 0) * 100);
+    : toStoredAmount(Number(total) || 0, decimalPlaces);
   const displayedTotal = derivesTotal
-    ? (enteredAmountsTotalMinor / 100).toFixed(2)
+    ? formatAmountInput(enteredAmountsTotalMinor, decimalPlaces)
     : total;
   const computedShares = useMemo(() => {
     const equalAmounts = distribute(totalMinor, activeMembers.length);
@@ -119,7 +130,7 @@ export function AddLedgerEntryModal({
           ? equalAmounts[index]
           : splitMode === 'percent'
             ? Math.round((totalMinor * entered) / 100)
-            : Math.round(entered * 100);
+            : toStoredAmount(entered, decimalPlaces);
       return { memberId: member.id, amountMinor };
     });
     if (splitMode === 'percent' && shares.length) {
@@ -130,7 +141,7 @@ export function AddLedgerEntryModal({
       shares[shares.length - 1].amountMinor += totalMinor - roundedTotal;
     }
     return shares;
-  }, [activeMembers, splitMode, totalMinor, values]);
+  }, [activeMembers, decimalPlaces, splitMode, totalMinor, values]);
   const allocatedMinor = computedShares.reduce(
     (sum, share) => sum + share.amountMinor,
     0,
@@ -282,7 +293,7 @@ export function AddLedgerEntryModal({
           </legend>
           <TextInput
             label={t('ledger.modal.totalCurrency', {
-              currency: trip.default_currency,
+              currency: currencySymbol,
             })}
             type="number"
             inputMode="decimal"
@@ -308,7 +319,12 @@ export function AddLedgerEntryModal({
                       setSplitMode('amount');
                       setDirection('split-to-total');
                     } else {
-                      setTotal((enteredAmountsTotalMinor / 100).toFixed(2));
+                      setTotal(
+                        formatAmountInput(
+                          enteredAmountsTotalMinor,
+                          decimalPlaces,
+                        ),
+                      );
                       setDirection('total-to-split');
                     }
                   }}
@@ -325,11 +341,26 @@ export function AddLedgerEntryModal({
                   value={splitMode}
                   options={
                     direction === 'split-to-total'
-                      ? [{ value: 'amount', label: t('ledger.modal.number') }]
+                      ? [
+                          {
+                            value: 'amount',
+                            label: t('ledger.modal.byAmount', {
+                              currency: currencySymbol,
+                            }),
+                          },
+                        ]
                       : [
                           { value: 'equal', label: t('ledger.modal.equal') },
-                          { value: 'percent', label: '%' },
-                          { value: 'amount', label: t('ledger.modal.number') },
+                          {
+                            value: 'percent',
+                            label: t('ledger.modal.byPercent'),
+                          },
+                          {
+                            value: 'amount',
+                            label: t('ledger.modal.byAmount', {
+                              currency: currencySymbol,
+                            }),
+                          },
                         ]
                   }
                   onValueChange={(value) =>
@@ -369,15 +400,14 @@ export function AddLedgerEntryModal({
                       </span>
                       {splitMode === 'equal' ? (
                         <strong>
-                          {((computed?.amountMinor ?? 0) / 100).toFixed(2)}
+                          {formatAmountInput(
+                            computed?.amountMinor ?? 0,
+                            decimalPlaces,
+                          )}
                         </strong>
                       ) : (
                         <TextInput
-                          label={
-                            splitMode === 'percent'
-                              ? '%'
-                              : trip.default_currency
-                          }
+                          label={splitMode === 'percent' ? '%' : currencySymbol}
                           type="number"
                           inputMode="decimal"
                           value={values[member.id] ?? ''}

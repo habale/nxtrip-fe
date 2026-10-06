@@ -117,9 +117,11 @@ function MemberStack({ expense }: { expense: LedgerExpense }) {
 function ExpenseCard({
   expense,
   locale,
+  decimalPlaces,
 }: {
   expense: LedgerExpense;
   locale: string;
+  decimalPlaces: number;
 }) {
   const { t } = useTranslation('common');
   const equalAmount = expense.shares[0]?.amountMinor;
@@ -147,6 +149,7 @@ function ExpenseCard({
             expense.expense.amount_minor,
             expense.expense.currency,
             locale,
+            decimalPlaces,
           )}
         </strong>
         <span>
@@ -156,6 +159,7 @@ function ExpenseCard({
                   equalAmount,
                   expense.expense.currency,
                   locale,
+                  decimalPlaces,
                 ),
               })
             : t('ledger.customSplit')}
@@ -190,10 +194,12 @@ function MemberExpenseCard({
   expense,
   memberId,
   locale,
+  decimalPlaces,
 }: {
   expense: LedgerExpense;
   memberId: string;
   locale: string;
+  decimalPlaces: number;
 }) {
   const { t } = useTranslation('common');
   const share = expense.shares.find(({ member }) => member.id === memberId);
@@ -217,6 +223,7 @@ function MemberExpenseCard({
                   expense.expense.amount_minor,
                   expense.expense.currency,
                   locale,
+                  decimalPlaces,
                 )}
               </strong>
             </>
@@ -230,6 +237,7 @@ function MemberExpenseCard({
                   share.amountMinor,
                   expense.expense.currency,
                   locale,
+                  decimalPlaces,
                 )}
               </strong>
             </>
@@ -304,6 +312,7 @@ function GroupSummaryCard({
   summary,
   currency,
   locale,
+  decimalPlaces,
   onSelect,
   pendingSettlementIds,
   settling,
@@ -312,6 +321,7 @@ function GroupSummaryCard({
   summary: MemberFinancialSummary;
   currency: string;
   locale: string;
+  decimalPlaces: number;
   onSelect: () => void;
   pendingSettlementIds: string[];
   settling: boolean;
@@ -352,33 +362,43 @@ function GroupSummaryCard({
           <strong>{summary.member.display_name}</strong>
           <span>
             {t('ledger.paid')}{' '}
-            {formatMoney(summary.paidMinor, currency, locale)}
+            {formatMoney(summary.paidMinor, currency, locale, decimalPlaces)}
           </span>
           <span>
             {t('ledger.share')}{' '}
-            {formatMoney(summary.shareMinor, currency, locale)}
+            {formatMoney(summary.shareMinor, currency, locale, decimalPlaces)}
           </span>
           {summary.depositMinor > 0 && (
             <span>
               {t('ledger.deposit')}{' '}
-              {formatMoney(summary.depositMinor, currency, locale)}
+              {formatMoney(
+                summary.depositMinor,
+                currency,
+                locale,
+                decimalPlaces,
+              )}
             </span>
           )}
           {summary.sponsorMinor > 0 && (
             <span>
               {t('ledger.sponsor')}{' '}
-              {formatMoney(summary.sponsorMinor, currency, locale)}
+              {formatMoney(
+                summary.sponsorMinor,
+                currency,
+                locale,
+                decimalPlaces,
+              )}
             </span>
           )}
         </span>
         <span className="ledger-group-member__balance">
           <strong className={`ledger-balance ledger-balance--${balanceClass}`}>
-            {summary.balanceMinor > 0
-              ? '+'
-              : summary.balanceMinor < 0
-                ? '−'
-                : ''}{' '}
-            {formatMoney(Math.abs(summary.balanceMinor), currency, locale)}
+            {formatMoney(
+              Math.abs(summary.balanceMinor),
+              currency,
+              locale,
+              decimalPlaces,
+            )}
           </strong>
           <span>{balanceLabel}</span>
         </span>
@@ -390,9 +410,11 @@ function GroupSummaryCard({
 function MemberContributionCard({
   item,
   locale,
+  decimalPlaces,
 }: {
   item: LedgerContribution;
   locale: string;
+  decimalPlaces: number;
 }) {
   const { t } = useTranslation('common');
   const sponsor = item.contribution.contribution_type === 'sponsor';
@@ -415,6 +437,7 @@ function MemberContributionCard({
               item.contribution.amount_minor,
               item.contribution.currency,
               locale,
+              decimalPlaces,
             )}
           </strong>
         </p>
@@ -431,6 +454,7 @@ function MemberBalanceSummary({
   depositMinor,
   currency,
   locale,
+  decimalPlaces,
 }: {
   memberName: string;
   paidMinor: number;
@@ -439,6 +463,7 @@ function MemberBalanceSummary({
   depositMinor: number;
   currency: string;
   locale: string;
+  decimalPlaces: number;
 }) {
   const { t } = useTranslation('common');
   const balanceMinor = paidMinor + depositMinor - shareMinor;
@@ -455,32 +480,33 @@ function MemberBalanceSummary({
       <div className="ledger-member-summary__balance">
         <span>{t('ledger.memberBalance')}</span>
         <strong>
-          {balanceLabel} {formatMoney(Math.abs(balanceMinor), currency, locale)}
+          {balanceLabel}{' '}
+          {formatMoney(Math.abs(balanceMinor), currency, locale, decimalPlaces)}
         </strong>
       </div>
       <dl>
         <div>
           <dt>{t('ledger.paidOut')}</dt>
           <dd className="ledger-money--paid">
-            {formatMoney(paidMinor, currency, locale)}
+            {formatMoney(paidMinor, currency, locale, decimalPlaces)}
           </dd>
         </div>
         <div>
           <dt>{t('ledger.fairShare')}</dt>
           <dd className="ledger-money--share">
-            {formatMoney(shareMinor, currency, locale)}
+            {formatMoney(shareMinor, currency, locale, decimalPlaces)}
           </dd>
         </div>
         <div>
           <dt>{t('ledger.deposit')}</dt>
           <dd className="ledger-money--deposit">
-            {formatMoney(depositMinor, currency, locale)}
+            {formatMoney(depositMinor, currency, locale, decimalPlaces)}
           </dd>
         </div>
         <div>
           <dt>{t('ledger.sponsor')}</dt>
           <dd className="ledger-money--sponsor">
-            {formatMoney(sponsorMinor, currency, locale)}
+            {formatMoney(sponsorMinor, currency, locale, decimalPlaces)}
           </dd>
         </div>
       </dl>
@@ -657,6 +683,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
           depositMinor={memberTotals.depositMinor}
           currency={trip.default_currency}
           locale={locale}
+          decimalPlaces={trip.currency_decimal_places}
         />
       )}
 
@@ -700,6 +727,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                       contribution.amount_minor,
                       contribution.currency,
                       locale,
+                      trip.currency_decimal_places,
                     )}
                   </strong>
                   <span>
@@ -731,6 +759,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                 summary={summary}
                 currency={trip.default_currency}
                 locale={locale}
+                decimalPlaces={trip.currency_decimal_places}
                 onSelect={() => setView(`member:${summary.member.id}`)}
                 pendingSettlementIds={(query.data?.settlements ?? []).flatMap(
                   (settlement) =>
@@ -770,12 +799,14 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                     expense={item.value}
                     memberId={selectedMember.id}
                     locale={locale}
+                    decimalPlaces={trip.currency_decimal_places}
                   />
                 ) : (
                   <MemberContributionCard
                     key={`contribution:${item.value.contribution.id}`}
                     item={item.value}
                     locale={locale}
+                    decimalPlaces={trip.currency_decimal_places}
                   />
                 ),
               )}
@@ -804,6 +835,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                     ),
                     expenses[0].expense.currency,
                     locale,
+                    trip.currency_decimal_places,
                   ),
                 })}
               </span>
@@ -813,6 +845,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                 key={expense.expense.id}
                 expense={expense}
                 locale={locale}
+                decimalPlaces={trip.currency_decimal_places}
               />
             ))}
           </section>

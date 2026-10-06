@@ -39,6 +39,7 @@ type TripRow = {
   timezone: string;
   status: Database['public']['Enums']['trip_status'];
   default_currency: string;
+  currency_decimal_places: number;
   cover_image_path: string | null;
   cover_thumbnail_path: string | null;
   created_by: string | null;

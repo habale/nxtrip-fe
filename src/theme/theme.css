@@ -27,7 +27,7 @@
   --color-category-cafe: #865710;
   --color-category-cafe-bg: #e7ddcf;
   --color-category-lodging: #7e22ce;
-  --color-category-lodging-bg: #e8c9fe;
+  --color-category-lodging-bg: #e5d3f5;
   --color-category-shopping: #04829f;
   --color-category-shopping-bg: #cde6ec;
   --color-category-sightseeing: #230c6e;
@@ -418,8 +418,6 @@
   max-width: 32rem;
   margin: 0 auto;
   gap: 1rem;
-  padding: 1rem clamp(0.25rem, 4vw, 0.75rem)
-    max(1rem, env(safe-area-inset-bottom));
 }
 
 .ui-date-range__draft {

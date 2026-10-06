@@ -17,6 +17,7 @@ const tripItem: TripListItem = {
     timezone: 'Asia/Bangkok',
     status: 'ongoing',
     default_currency: 'THB',
+    currency_decimal_places: 0,
     cover_image_path: null,
     cover_thumbnail_path: null,
     created_by: 'user-123',

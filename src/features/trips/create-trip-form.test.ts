@@ -7,6 +7,7 @@ const validValues = {
   endDate: '2026-10-08',
   timezone: 'Asia/Tokyo',
   defaultCurrency: 'JPY',
+  currencyDecimalPlaces: 0,
 };
 
 describe('create trip form validation', () => {

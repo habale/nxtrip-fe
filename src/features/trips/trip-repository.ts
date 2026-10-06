@@ -37,6 +37,7 @@ export type CreateTripInput = {
   endDate: string;
   timezone: string;
   defaultCurrency: string;
+  currencyDecimalPlaces: number;
   createdBy: string;
 };
 
@@ -143,14 +144,20 @@ export function mapCreateTripInput(input: CreateTripInput) {
       : null,
     timezone: input.timezone.trim(),
     default_currency: input.defaultCurrency.toUpperCase(),
+    currency_decimal_places: input.currencyDecimalPlaces,
     created_by: input.createdBy,
   };
 }
 
 export function mapUpdateTripInput(input: UpdateTripInput) {
   const mapped = mapCreateTripInput({ ...input, createdBy: '' });
-  const { created_by: _, ...metadata } = mapped;
-  void _;
+  const {
+    created_by: _createdBy,
+    currency_decimal_places: _currencyDecimalPlaces,
+    ...metadata
+  } = mapped;
+  void _createdBy;
+  void _currencyDecimalPlaces;
   return metadata;
 }
 

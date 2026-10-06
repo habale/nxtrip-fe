@@ -98,6 +98,10 @@
     "timezone": "Timezone",
     "timezoneHelp": "Use an IANA timezone such as Asia/Ho_Chi_Minh.",
     "defaultCurrency": "Default currency",
+    "currencyLocked": "Currency cannot be changed after the trip is created.",
+    "currencyDecimalPlaces": "Currency decimal places",
+    "currencyDecimalPlacesHelp": "Choose between 0 and 4 decimal places. This cannot be changed later.",
+    "currencyDecimalPlacesLocked": "Decimal places cannot be changed after the trip is created.",
     "submit": "Create trip",
     "creating": "Creating trip…",
     "validation": {
@@ -105,7 +109,8 @@
       "tooLong": "Trip name must be 160 characters or fewer.",
       "endBeforeStart": "End date must be on or after the start date.",
       "invalidTimezone": "Enter a valid IANA timezone.",
-      "invalidCurrency": "Enter a valid three-letter currency code."
+      "invalidCurrency": "Enter a valid three-letter currency code.",
+      "invalidDecimalPlaces": "Choose a whole number from 0 to 4."
     }
   },
   "tripDetail": {
@@ -203,6 +208,8 @@
       "splitMethod": "Split method",
       "number": "Number",
       "equal": "Equal",
+      "byPercent": "By %",
+      "byAmount": "By {{currency}}",
       "includeMember": "Include {{name}}",
       "percentValidation": "Percentages must total 100% (currently {{total}}%).",
       "amountValidation": "Member amounts must equal the total.",
@@ -307,9 +314,9 @@
     "edit": "Edit",
     "editTitle": "Edit trip information",
     "ownerOnly": "Owner controls",
-    "version": "Version {{version}}",
     "timezone": "Timezone",
-    "defaultCurrency": "Default currency",
+    "defaultCurrency": "Currency",
+    "decimalPlaces": "Currency decimal places",
     "dayCount_one": "{{count}} day",
     "dayCount_other": "{{count}} days",
     "nightCount_one": "{{count}} night",

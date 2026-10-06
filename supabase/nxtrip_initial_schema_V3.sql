@@ -117,6 +117,7 @@ create table public.trips (
   timezone text not null default 'UTC' check (char_length(btrim(timezone)) between 1 and 80),
   status public.trip_status not null default 'planning',
   default_currency public.currency_code not null default 'VND',
+  currency_decimal_places smallint not null default 0 check (currency_decimal_places between 0 and 4),
   cover_image_path text,
   cover_thumbnail_path text,
   created_by uuid references public.profiles(id) on delete set null,

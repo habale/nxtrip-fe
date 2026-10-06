@@ -5,8 +5,9 @@ import { AppError } from '../../../shared/api/app-error';
 import {
   Badge,
   Button,
-  DatePicker,
+  DateRangePicker,
   Icon,
+  Select,
   TextArea,
   TextInput,
 } from '../../../shared/ui';
@@ -20,6 +21,11 @@ import {
   tripInstantToLocalDate,
 } from '../trip-date';
 import { useUpdateTripMetadata } from '../trip-hooks';
+import {
+  getCurrencyLabel,
+  getCurrencyOptions,
+  getTimezoneOptions,
+} from '../trip-options';
 import type { TripDetail, TripRepository } from '../trip-repository';
 
 type TripInfoPanelProps = {
@@ -36,6 +42,7 @@ function valuesFromDetail({ trip }: TripDetail): CreateTripFormValues {
     endDate: tripInstantToLocalDate(trip.end_at, trip.timezone),
     timezone: trip.timezone,
     defaultCurrency: trip.default_currency,
+    currencyDecimalPlaces: trip.currency_decimal_places,
   };
 }
 
@@ -101,7 +108,6 @@ export function TripInfoPanel({
             <p>{t('tripInfo.ownerOnly')}</p>
             <h2>{t('tripInfo.editTitle')}</h2>
           </div>
-          <span>{t('tripInfo.version', { version: trip.version })}</span>
         </div>
 
         <TextInput
@@ -119,44 +125,44 @@ export function TripInfoPanel({
           onValueChange={(value) => update('description', value)}
         />
 
-        <div className="trip-info-editor__dates">
-          <label>
-            <span>{t('createTrip.startDate')}</span>
-            <DatePicker
-              label={t('createTrip.startDate')}
-              value={values.startDate || undefined}
-              onValueChange={(value) => update('startDate', value.slice(0, 10))}
-            />
-          </label>
-          <label>
-            <span>{t('createTrip.endDate')}</span>
-            <DatePicker
-              label={t('createTrip.endDate')}
-              min={values.startDate || undefined}
-              value={values.endDate || undefined}
-              onValueChange={(value) => update('endDate', value.slice(0, 10))}
-            />
-            {errorText('endDate') && <small>{errorText('endDate')}</small>}
-          </label>
-        </div>
+        <DateRangePicker
+          endDate={values.endDate}
+          errorText={errorText('endDate')}
+          label={t('createTrip.datesTitle')}
+          startDate={values.startDate}
+          onValueChange={({ startDate, endDate }) =>
+            setValues((current) => ({ ...current, startDate, endDate }))
+          }
+        />
 
         <div className="trip-info-editor__settings">
-          <TextInput
+          <Select
             required
             errorText={errorText('timezone')}
             label={t('createTrip.timezone')}
+            options={getTimezoneOptions(values.timezone)}
             value={values.timezone}
-            onValueChange={(value) => update('timezone', value)}
+            onValueChange={(value) => update('timezone', String(value))}
           />
-          <TextInput
+          <Select
             required
+            disabled
             errorText={errorText('defaultCurrency')}
+            helperText={t('createTrip.currencyLocked')}
             label={t('createTrip.defaultCurrency')}
-            maxlength={3}
+            options={getCurrencyOptions(values.defaultCurrency, locale)}
             value={values.defaultCurrency}
             onValueChange={(value) =>
-              update('defaultCurrency', value.toUpperCase())
+              update('defaultCurrency', String(value).toUpperCase())
             }
+          />
+          <TextInput
+            disabled
+            helperText={t('createTrip.currencyDecimalPlacesLocked')}
+            inputMode="numeric"
+            label={t('createTrip.currencyDecimalPlaces')}
+            type="number"
+            value={String(values.currencyDecimalPlaces)}
           />
         </div>
 
@@ -223,16 +229,14 @@ export function TripInfoPanel({
       {trip.description && (
         <p className="trip-info-description">{trip.description}</p>
       )}
-      <dl className="trip-info-metadata">
-        <div>
-          <dt>{t('tripInfo.timezone')}</dt>
-          <dd>{trip.timezone}</dd>
-        </div>
-        <div>
-          <dt>{t('tripInfo.defaultCurrency')}</dt>
-          <dd>{trip.default_currency}</dd>
-        </div>
-      </dl>
+      <p className="trip-info-description trip-info-metadata">
+        {t('tripInfo.timezone')}: {trip.timezone}
+        <br />
+        {t('tripInfo.defaultCurrency')}:{' '}
+        {getCurrencyLabel(trip.default_currency, locale)}
+        <br />
+        {t('tripInfo.decimalPlaces')}: {trip.currency_decimal_places}
+      </p>
     </section>
   );
 }
