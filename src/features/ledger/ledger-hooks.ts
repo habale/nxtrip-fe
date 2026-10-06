@@ -5,7 +5,10 @@ import {
   getLedgerRepository,
   type LedgerRepository,
 } from './ledger-repository';
-import type { SaveLedgerEntryInput } from './ledger-types';
+import type {
+  RecordTripTransferInput,
+  SaveLedgerEntryInput,
+} from './ledger-types';
 
 export const ledgerKeys = {
   all: ['ledger'] as const,
@@ -43,17 +46,14 @@ export function useSaveLedgerEntry(repository?: LedgerRepository) {
   });
 }
 
-export function useMarkMemberSettled(
-  tripId: string,
-  repository?: LedgerRepository,
-) {
+export function useRecordTripTransfer(repository?: LedgerRepository) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (settlementIds: string[]) =>
-      (repository ?? getLedgerRepository()).markSettlementsDone(settlementIds),
-    onSuccess: async () => {
+    mutationFn: (input: RecordTripTransferInput) =>
+      (repository ?? getLedgerRepository()).recordTransfer(input),
+    onSuccess: async (_id, input) => {
       await queryClient.invalidateQueries({
-        queryKey: ledgerKeys.expenses(tripId),
+        queryKey: ledgerKeys.expenses(input.tripId),
       });
     },
   });

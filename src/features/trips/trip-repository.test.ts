@@ -1,4 +1,8 @@
-import { mapCreateTripInput, mapUpdateTripInput } from './trip-repository';
+import {
+  mapCreateTripInput,
+  mapUpdateTripInput,
+  resolveTreasurerUpdate,
+} from './trip-repository';
 
 describe('trip repository create mapping', () => {
   it('normalizes optional values and maps local dates in the trip timezone', () => {
@@ -61,5 +65,18 @@ describe('trip repository create mapping', () => {
       timezone: 'UTC',
       default_currency: 'USD',
     });
+  });
+});
+
+describe('treasurer updates', () => {
+  it('does not clear another treasurer when editing a regular member', () => {
+    expect(resolveTreasurerUpdate('treasurer-1', 'member-2', false)).toBe(
+      undefined,
+    );
+  });
+
+  it('sets and clears the edited member as treasurer', () => {
+    expect(resolveTreasurerUpdate(null, 'member-2', true)).toBe('member-2');
+    expect(resolveTreasurerUpdate('member-2', 'member-2', false)).toBeNull();
   });
 });

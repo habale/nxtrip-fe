@@ -10,6 +10,12 @@ export type LedgerShare = {
   amountMinor: number;
 };
 
+export type LedgerTransfer = {
+  transfer: Database['public']['Tables']['trip_transfers']['Row'];
+  fromMember: LedgerMember;
+  toMember: LedgerMember;
+};
+
 export type LedgerExpense = {
   expense: Database['public']['Tables']['expenses']['Row'];
   payer: LedgerMember | null;
@@ -27,21 +33,23 @@ export type LedgerData = {
     fundIsDefault: boolean;
   }>;
   members: LedgerMember[];
+  transfers: LedgerTransfer[];
+  currentMemberId: string | null;
+  treasurerMemberId: string | null;
   funds: Array<
     Pick<
       Database['public']['Tables']['trip_funds']['Row'],
       'id' | 'name' | 'currency'
     >
   >;
-  settlements: Database['public']['Tables']['settlements']['Row'][];
 };
 
-export type LedgerEntryType = 'expense' | 'sponsor' | 'deposit';
+export type LedgerEntryType = 'expense' | 'transfer';
 export type LedgerSplitMode = 'equal' | 'percent' | 'amount';
 
 export type SaveLedgerEntryInput = {
   tripId: string;
-  type: LedgerEntryType;
+  type: Exclude<LedgerEntryType, 'transfer'>;
   title: string;
   category: string;
   occurredAt: string;
@@ -51,6 +59,16 @@ export type SaveLedgerEntryInput = {
   splitMode: LedgerSplitMode;
   shares: Array<{ memberId: string; amountMinor: number }>;
   userId: string;
+};
+
+export type RecordTripTransferInput = {
+  tripId: string;
+  fromMemberId: string;
+  toMemberId: string;
+  amountMinor: number;
+  currency: string;
+  occurredAt: string;
+  note?: string;
 };
 
 export function formatMoney(

@@ -67,9 +67,17 @@ export function useAddGuestMember(repository?: TripRepository) {
       });
     },
     onSuccess: async (member) => {
-      await queryClient.invalidateQueries({
-        queryKey: tripKeys.members(member.member.trip_id),
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: tripKeys.members(member.member.trip_id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: tripKeys.detail(member.member.trip_id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['ledger', member.member.trip_id],
+        }),
+      ]);
     },
   });
 }
@@ -77,7 +85,11 @@ export function useAddGuestMember(repository?: TripRepository) {
 function useRefreshMembers() {
   const queryClient = useQueryClient();
   return (tripId: string) =>
-    queryClient.invalidateQueries({ queryKey: tripKeys.members(tripId) });
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: tripKeys.members(tripId) }),
+      queryClient.invalidateQueries({ queryKey: tripKeys.detail(tripId) }),
+      queryClient.invalidateQueries({ queryKey: ['ledger', tripId] }),
+    ]);
 }
 
 export function useUpdateGuestMember(repository?: TripRepository) {

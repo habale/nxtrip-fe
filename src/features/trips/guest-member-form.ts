@@ -2,6 +2,7 @@ export type GuestMemberFormValues = {
   displayName: string;
   email: string;
   note: string;
+  isTreasurer: boolean;
 };
 
 export type GuestMemberFormErrors = Partial<

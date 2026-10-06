@@ -300,6 +300,14 @@
   color: var(--color-negative);
 }
 
+.trip-member-form__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
 .trip-member-form__actions {
   display: flex;
   justify-content: flex-end;

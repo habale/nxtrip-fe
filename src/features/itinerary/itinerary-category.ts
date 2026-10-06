@@ -6,6 +6,7 @@ export type ItineraryCategory =
   | 'dining'
   | 'cafe'
   | 'activity'
+  | 'location'
   | 'sightseeing'
   | 'others'
   | 'misc'
@@ -29,6 +30,7 @@ export const iconKeyByCategory: Record<ItineraryCategory, string> = {
   dining: 'restaurant',
   cafe: 'cafe',
   activity: 'activity',
+  location: 'location',
   sightseeing: 'sightseeing',
   others: 'others',
   misc: 'misc',
@@ -64,7 +66,6 @@ const categoryByIcon: Record<string, ItineraryCategory> = {
   food: 'dining',
   hotel: 'lodging',
   location: 'sightseeing',
-  rail: 'moving',
   restaurant: 'dining',
   shopping: 'shopping',
   sightseeing: 'sightseeing',

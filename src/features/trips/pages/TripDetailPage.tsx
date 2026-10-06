@@ -185,6 +185,7 @@ export function TripDetailPage({
                 <TripMembersPanel
                   repository={repository}
                   tripId={trip.id}
+                  treasurerMemberId={trip.treasurer_member_id}
                   viewerRole={detail.role}
                 />
               </>

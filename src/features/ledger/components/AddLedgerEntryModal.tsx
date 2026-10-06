@@ -14,7 +14,7 @@ import {
 } from '../../../shared/ui';
 import type { Trip } from '../../trips/trip-repository';
 import type { IconName } from '../../../shared/ui/Icon';
-import { useSaveLedgerEntry } from '../ledger-hooks';
+import { useRecordTripTransfer, useSaveLedgerEntry } from '../ledger-hooks';
 import type { LedgerRepository } from '../ledger-repository';
 import type {
   LedgerData,
@@ -70,7 +70,8 @@ export function AddLedgerEntryModal({
 }: Props) {
   const { t, i18n } = useTranslation('common');
   const { t: tError } = useTranslation('errors');
-  const mutation = useSaveLedgerEntry(repository);
+  const entryMutation = useSaveLedgerEntry(repository);
+  const transferMutation = useRecordTripTransfer(repository);
   const sortedMembers = useMemo(
     () =>
       [...data.members].sort((left, right) =>
@@ -85,6 +86,7 @@ export function AddLedgerEntryModal({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('misc');
   const [payerId, setPayerId] = useState('');
+  const [receiverId, setReceiverId] = useState('');
   const [total, setTotal] = useState('');
   const [splitMode, setSplitMode] = useState<LedgerSplitMode>('equal');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -100,11 +102,20 @@ export function AddLedgerEntryModal({
 
   useEffect(() => {
     if (!open) return;
-    setPayerId((current) => current || data.members[0]?.id || '');
+    const defaultPayerId = data.currentMemberId ?? data.members[0]?.id ?? '';
+    /* eslint-disable react-hooks/set-state-in-effect -- initialize the reusable modal whenever it opens with freshly loaded trip members. */
+    setPayerId((current) => current || defaultPayerId);
+    setReceiverId((current) => {
+      if (current && current !== defaultPayerId) return current;
+      return data.treasurerMemberId !== defaultPayerId
+        ? (data.treasurerMemberId ?? '')
+        : '';
+    });
     setSelectedIds((current) =>
       current.length ? current : data.members.map(({ id }) => id),
     );
-  }, [data.members, open]);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [data.currentMemberId, data.members, data.treasurerMemberId, open]);
 
   const activeMembers = sortedMembers.filter(({ id }) =>
     selectedIds.includes(id),
@@ -155,18 +166,24 @@ export function AddLedgerEntryModal({
     (splitMode === 'percent' && Math.abs(percentTotal - 100) < 0.001) ||
     (splitMode === 'amount' && allocatedMinor === totalMinor);
   const canSave =
-    title.trim() &&
     payerId &&
     totalMinor > 0 &&
-    (type !== 'expense' || (activeMembers.length > 0 && allocationValid));
+    (type === 'transfer'
+      ? receiverId && receiverId !== payerId
+      : title.trim() &&
+        (type !== 'expense' || (activeMembers.length > 0 && allocationValid)));
+  const isPending = entryMutation.isPending || transferMutation.isPending;
+  const mutationError = entryMutation.error ?? transferMutation.error;
 
   const resetForm = () => {
-    mutation.reset();
+    entryMutation.reset();
+    transferMutation.reset();
     setType('expense');
     setDate(todayInputValue());
     setTitle('');
     setCategory('misc');
     setPayerId('');
+    setReceiverId('');
     setTotal('');
     setSplitMode('equal');
     setSelectedIds([]);
@@ -179,18 +196,30 @@ export function AddLedgerEntryModal({
   };
   const save = async () => {
     if (!canSave) return;
-    await mutation.mutateAsync({
-      tripId: trip.id,
-      type,
-      title,
-      category,
-      occurredAt: new Date(`${date}T12:00:00`).toISOString(),
-      amountMinor: totalMinor,
-      currency: trip.default_currency,
-      paidByMemberId: payerId,
-      splitMode,
-      shares: computedShares,
-    });
+    const occurredAt = new Date(`${date}T12:00:00`).toISOString();
+    if (type === 'transfer') {
+      await transferMutation.mutateAsync({
+        tripId: trip.id,
+        fromMemberId: payerId,
+        toMemberId: receiverId,
+        amountMinor: totalMinor,
+        currency: trip.default_currency,
+        occurredAt,
+      });
+    } else {
+      await entryMutation.mutateAsync({
+        tripId: trip.id,
+        type,
+        title,
+        category,
+        occurredAt,
+        amountMinor: totalMinor,
+        currency: trip.default_currency,
+        paidByMemberId: payerId,
+        splitMode,
+        shares: computedShares,
+      });
+    }
     resetAndDismiss();
   };
 
@@ -212,9 +241,9 @@ export function AddLedgerEntryModal({
           value={type}
           options={[
             { value: 'expense', label: t('ledger.modal.expense') },
-            { value: 'deposit', label: t('ledger.modal.deposit') },
-            { value: 'sponsor', label: t('ledger.modal.sponsor') },
+            { value: 'transfer', label: t('ledger.modal.transfer') },
           ]}
+          disabled={isPending}
           onValueChange={(value) => setType(value as LedgerEntryType)}
         />
 
@@ -227,22 +256,20 @@ export function AddLedgerEntryModal({
             type="date"
             value={date}
             required
+            disabled={isPending}
             onValueChange={setDate}
           />
-          <TextInput
-            label={t('ledger.modal.name')}
-            value={title}
-            required
-            maxlength={200}
-            placeholder={
-              type === 'expense'
-                ? t('ledger.modal.expensePlaceholder')
-                : t('ledger.modal.entryPlaceholder', {
-                    type: t(`ledger.modal.${type}`),
-                  })
-            }
-            onValueChange={setTitle}
-          />
+          {type !== 'transfer' && (
+            <TextInput
+              label={t('ledger.modal.name')}
+              value={title}
+              required
+              disabled={isPending}
+              maxlength={200}
+              placeholder={t('ledger.modal.expensePlaceholder')}
+              onValueChange={setTitle}
+            />
+          )}
           {type === 'expense' && (
             <div
               className="ledger-category-select"
@@ -258,6 +285,7 @@ export function AddLedgerEntryModal({
                     type="button"
                     variant="filter"
                     selected={category === option.value}
+                    disabled={isPending}
                     ariaLabel={t(`ledger.modal.categories.${option.value}`)}
                     onClick={() => setCategory(option.value)}
                   >
@@ -271,22 +299,51 @@ export function AddLedgerEntryModal({
 
         <fieldset>
           <legend>
-            <span>2</span> {t('ledger.modal.whoPaid')}
+            <span>2</span>{' '}
+            {type === 'transfer'
+              ? t('ledger.modal.transferFrom')
+              : t('ledger.modal.whoPaid')}
           </legend>
           <Select
             label={t('ledger.modal.member')}
             value={payerId}
+            disabled={isPending}
             options={sortedMembers.map((member) => ({
               value: member.id,
               label: member.display_name,
             }))}
-            onValueChange={(value) => setPayerId(String(value))}
+            onValueChange={(value) => {
+              const nextPayerId = String(value);
+              setPayerId(nextPayerId);
+              if (receiverId === nextPayerId) setReceiverId('');
+            }}
           />
         </fieldset>
 
+        {type === 'transfer' && (
+          <fieldset>
+            <legend>
+              <span>3</span> {t('ledger.modal.transferTo')}
+            </legend>
+            <Select
+              label={t('ledger.modal.member')}
+              value={receiverId}
+              disabled={isPending}
+              placeholder={t('ledger.modal.selectReceiver')}
+              options={sortedMembers
+                .filter(({ id }) => id !== payerId)
+                .map((member) => ({
+                  value: member.id,
+                  label: member.display_name,
+                }))}
+              onValueChange={(value) => setReceiverId(String(value))}
+            />
+          </fieldset>
+        )}
+
         <fieldset>
           <legend>
-            <span>3</span>{' '}
+            <span>{type === 'transfer' ? 4 : 3}</span>{' '}
             {type === 'expense'
               ? t('ledger.modal.totalAndSplit')
               : t('ledger.modal.amount')}
@@ -299,7 +356,7 @@ export function AddLedgerEntryModal({
             inputMode="decimal"
             value={displayedTotal}
             required
-            disabled={derivesTotal}
+            disabled={derivesTotal || isPending}
             onValueChange={setTotal}
           />
 
@@ -309,6 +366,7 @@ export function AddLedgerEntryModal({
                 <Button
                   type="button"
                   variant="quiet"
+                  disabled={isPending}
                   ariaLabel={
                     direction === 'total-to-split'
                       ? t('ledger.modal.calculateFromMembers')
@@ -339,6 +397,7 @@ export function AddLedgerEntryModal({
                 <Segment
                   label={t('ledger.modal.splitMethod')}
                   value={splitMode}
+                  disabled={isPending}
                   options={
                     direction === 'split-to-total'
                       ? [
@@ -382,6 +441,7 @@ export function AddLedgerEntryModal({
                           name: member.display_name,
                         })}
                         checked={checked}
+                        disabled={isPending}
                         onCheckedChange={(next) =>
                           setSelectedIds((current) =>
                             next
@@ -411,7 +471,7 @@ export function AddLedgerEntryModal({
                           type="number"
                           inputMode="decimal"
                           value={values[member.id] ?? ''}
-                          disabled={!checked}
+                          disabled={!checked || isPending}
                           onValueChange={(value) =>
                             setValues((current) => ({
                               ...current,
@@ -437,21 +497,26 @@ export function AddLedgerEntryModal({
           )}
         </fieldset>
 
-        {mutation.error && (
+        {mutationError && (
           <p className="ledger-form-error">
-            {mutation.error instanceof AppError
-              ? tError(`codes.${mutation.error.code}`, {
+            {mutationError instanceof AppError
+              ? tError(`codes.${mutationError.code}`, {
                   defaultValue: tError('generic'),
                 })
               : tError('generic')}
           </p>
         )}
         <div className="ledger-form-actions">
-          <Button type="button" variant="quiet" onClick={resetAndDismiss}>
+          <Button
+            type="button"
+            variant="quiet"
+            disabled={isPending}
+            onClick={resetAndDismiss}
+          >
             {t('actions.cancel')}
           </Button>
-          <Button type="submit" disabled={!canSave || mutation.isPending}>
-            {mutation.isPending
+          <Button type="submit" disabled={!canSave || isPending}>
+            {isPending
               ? t('ledger.modal.saving')
               : t('ledger.modal.add', { type: t(`ledger.modal.${type}`) })}
           </Button>

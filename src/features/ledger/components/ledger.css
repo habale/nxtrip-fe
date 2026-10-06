@@ -135,6 +135,15 @@
   color: #b00075;
   background: #efcce3;
 }
+
+.ledger-transfer-icon {
+  color: #0e6600;
+  background: #cfe0cc;
+}
+
+.ledger-transfer-card {
+  row-gap: 0;
+}
 .ledger-expense-main {
   min-width: 0;
 }
@@ -306,6 +315,52 @@
 .ledger-group-summary {
   display: grid;
   gap: 1rem;
+}
+
+.ledger-treasurer-note {
+  margin: -0.5rem 0 0;
+  color: var(--color-ink-muted);
+  text-align: center;
+}
+
+.ledger-transfer-suggestion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 1.5rem;
+  background: var(--color-surface);
+  box-shadow: 0 2px 7px rgb(21 24 39 / 5%);
+}
+
+.ledger-transfer-suggestion__route {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.ledger-transfer-suggestion__member {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.ledger-transfer-suggestion__member strong {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger-transfer-suggestion__route .ui-icon {
+  color: var(--color-primary);
 }
 
 .ledger-group-member-item {

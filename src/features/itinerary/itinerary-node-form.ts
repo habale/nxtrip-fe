@@ -153,6 +153,7 @@ function iconKeyByInitialCategory(category: ItineraryCategory) {
     dining: 'restaurant',
     cafe: 'cafe',
     activity: 'activity',
+    location: 'location',
     sightseeing: 'sightseeing',
     others: 'others',
     misc: 'misc',

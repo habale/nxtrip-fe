@@ -1,4 +1,4 @@
-// Derived from nxtrip_initial_schema_V2.sql, schema revision 1.3.
+// Derived from nxtrip_initial_schema_V3.sql plus migrate_V3_to_trip_transfers.sql.
 // Replace this file with Supabase CLI output after the schema is deployed.
 
 export type Json =
@@ -40,6 +40,7 @@ type TripRow = {
   status: Database['public']['Enums']['trip_status'];
   default_currency: string;
   currency_decimal_places: number;
+  treasurer_member_id: string | null;
   cover_image_path: string | null;
   cover_thumbnail_path: string | null;
   created_by: string | null;
@@ -226,27 +227,21 @@ type FundContributionRow = {
   version: number;
   deleted_at: string | null;
 };
-type SettlementRunRow = {
+type TripTransferRow = {
   id: string;
   trip_id: string;
-  status: Database['public']['Enums']['settlement_run_status'];
-  generated_by: string | null;
-  generated_at: string;
-  superseded_at: string | null;
-  calculation_meta: Json;
-};
-type SettlementRow = {
-  id: string;
-  trip_id: string;
-  settlement_run_id: string;
   from_member_id: string;
   to_member_id: string;
   amount_minor: number;
   currency: string;
-  status: Database['public']['Enums']['settlement_status'];
-  marked_done_by: string | null;
-  marked_done_at: string | null;
+  note: string | null;
+  occurred_at: string;
+  request_id: string;
+  created_by: string | null;
   created_at: string;
+  updated_at: string;
+  version: number;
+  deleted_at: string | null;
 };
 type DeviceInstallationRow = {
   id: string;
@@ -358,11 +353,9 @@ export type Database = {
         | 'amount_minor'
         | 'currency'
       >;
-      settlement_runs: DatabaseTable<SettlementRunRow, 'trip_id'>;
-      settlements: DatabaseTable<
-        SettlementRow,
+      trip_transfers: DatabaseTable<
+        TripTransferRow,
         | 'trip_id'
-        | 'settlement_run_id'
         | 'from_member_id'
         | 'to_member_id'
         | 'amount_minor'
@@ -395,8 +388,25 @@ export type Database = {
         Args: { p_code: string; p_request_id?: string };
         Returns: string;
       };
-      mark_settlement_done: {
-        Args: { p_settlement_id: string; p_request_id?: string };
+      record_trip_transfer: {
+        Args: {
+          p_trip_id: string;
+          p_from_member_id: string;
+          p_to_member_id: string;
+          p_amount_minor: number;
+          p_currency: string;
+          p_occurred_at?: string;
+          p_note?: string;
+          p_request_id?: string;
+        };
+        Returns: string;
+      };
+      set_trip_treasurer: {
+        Args: {
+          p_trip_id: string;
+          p_treasurer_member_id: string | null;
+          p_request_id?: string;
+        };
         Returns: undefined;
       };
       save_expense: {
@@ -441,8 +451,6 @@ export type Database = {
       notification_outbox_status:
         'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
       payment_source: 'member' | 'group_fund';
-      settlement_run_status: 'active' | 'superseded';
-      settlement_status: 'pending' | 'done';
       trip_status: 'planning' | 'ongoing' | 'pending_settlement' | 'completed';
     };
     CompositeTypes: Record<never, never>;

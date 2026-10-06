@@ -7,13 +7,19 @@ describe('guest member validation', () => {
         displayName: 'Kenji Mori',
         email: '',
         note: '',
+        isTreasurer: false,
       }),
     ).toEqual({});
   });
 
   it('requires a display name', () => {
     expect(
-      validateGuestMemberForm({ displayName: '  ', email: '', note: '' }),
+      validateGuestMemberForm({
+        displayName: '  ',
+        email: '',
+        note: '',
+        isTreasurer: false,
+      }),
     ).toMatchObject({ displayName: 'required' });
   });
 
@@ -23,6 +29,7 @@ describe('guest member validation', () => {
         displayName: 'Kenji',
         email: 'not-an-email',
         note: '',
+        isTreasurer: false,
       }),
     ).toMatchObject({ email: 'invalidEmail' });
   });

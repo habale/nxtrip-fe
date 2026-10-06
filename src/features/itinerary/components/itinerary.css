@@ -399,6 +399,11 @@
   --itinerary-category-background: var(--color-category-activity-bg);
 }
 
+.itinerary-category--location {
+  --itinerary-category-color: var(--color-category-location);
+  --itinerary-category-background: var(--color-category-location-bg);
+}
+
 .itinerary-category--sightseeing {
   --itinerary-category-color: var(--color-category-sightseeing);
   --itinerary-category-background: var(--color-category-sightseeing-bg);

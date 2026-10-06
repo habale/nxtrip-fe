@@ -5,6 +5,7 @@ export type IconName =
   | 'attachment'
   | 'back'
   | 'bookmark'
+  | 'bus'
   | 'calendar'
   | 'camera'
   | 'cafe'
@@ -34,6 +35,7 @@ export type IconName =
   | 'sightseeing'
   | 'ticket'
   | 'train'
+  | 'transfer'
   | 'trash'
   | 'tune'
   | 'vehicle'
@@ -54,6 +56,7 @@ const materialSymbolByName: Record<IconName, string> = {
   attachment: 'attach_file',
   back: 'arrow_back',
   bookmark: 'bookmark',
+  bus: 'directions_bus',
   calendar: 'calendar_month',
   camera: 'photo_camera',
   cafe: 'local_cafe',
@@ -83,6 +86,7 @@ const materialSymbolByName: Record<IconName, string> = {
   sightseeing: 'temple_buddhist',
   ticket: 'confirmation_number',
   train: 'train',
+  transfer: 'send_money',
   trash: 'delete',
   tune: 'tune',
   vehicle: 'directions_car',

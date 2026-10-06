@@ -3,20 +3,29 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Avatar,
+  ConfirmDialog,
   FabButton,
   Icon,
+  Segment,
   Skeleton,
   SwipeStartActionItem,
 } from '../../../shared/ui';
 import type { IconName } from '../../../shared/ui/Icon';
 import type { Trip } from '../../trips/trip-repository';
-import { useLedgerExpenses, useMarkMemberSettled } from '../ledger-hooks';
+import { useLedgerExpenses, useRecordTripTransfer } from '../ledger-hooks';
 import type { LedgerRepository } from '../ledger-repository';
+import { calculateLedgerBalanceMinor } from '../ledger-balance';
+import {
+  createDirectTransferSuggestions,
+  createTreasurerSuggestion,
+  type TransferSuggestion,
+} from '../ledger-transfer-suggestions';
 import {
   formatMoney,
   ledgerDateKey,
   type LedgerData,
   type LedgerExpense,
+  type LedgerTransfer,
 } from '../ledger-types';
 
 import './ledger.css';
@@ -248,11 +257,91 @@ function MemberExpenseCard({
   );
 }
 
+function TransferCard({
+  item,
+  locale,
+  decimalPlaces,
+}: {
+  item: LedgerTransfer;
+  locale: string;
+  decimalPlaces: number;
+}) {
+  const { t } = useTranslation('common');
+  return (
+    <article className="ledger-expense-card ledger-transfer-card">
+      <div className="ledger-expense-icon ledger-transfer-icon">
+        <Icon name="transfer" size="large" />
+      </div>
+      <div className="ledger-expense-main">
+        <h4>
+          {item.fromMember.display_name} <span aria-hidden="true">→</span>{' '}
+          {item.toMember.display_name}
+        </h4>
+        <p>{item.transfer.note || t('ledger.transfer')}</p>
+      </div>
+      <div className="ledger-expense-amount">
+        <strong>
+          {formatMoney(
+            item.transfer.amount_minor,
+            item.transfer.currency,
+            locale,
+            decimalPlaces,
+          )}
+        </strong>
+        <span>{t('ledger.transferred')}</span>
+      </div>
+    </article>
+  );
+}
+
+function MemberTransferCard({
+  item,
+  memberId,
+  locale,
+  decimalPlaces,
+}: {
+  item: LedgerTransfer;
+  memberId: string;
+  locale: string;
+  decimalPlaces: number;
+}) {
+  const { t } = useTranslation('common');
+  const sent = item.fromMember.id === memberId;
+  return (
+    <article className="ledger-member-expense-card">
+      <div className="ledger-expense-icon ledger-transfer-icon">
+        <Icon name="transfer" size="large" />
+      </div>
+      <div>
+        <h4>
+          {item.fromMember.display_name} <span aria-hidden="true">→</span>{' '}
+          {item.toMember.display_name}
+        </h4>
+        <p>
+          {t(sent ? 'ledger.sent' : 'ledger.received')}{' '}
+          <strong className={sent ? 'ledger-money--paid' : 'ledger-money--share'}>
+            {formatMoney(
+              item.transfer.amount_minor,
+              item.transfer.currency,
+              locale,
+              decimalPlaces,
+            )}
+          </strong>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 type LedgerContribution = LedgerData['contributions'][number];
 type LedgerMember = LedgerData['members'][number];
 type MemberTimelineItem =
   | { kind: 'expense'; value: LedgerExpense }
-  | { kind: 'contribution'; value: LedgerContribution };
+  | { kind: 'contribution'; value: LedgerContribution }
+  | { kind: 'transfer'; value: LedgerTransfer };
+type AllTimelineItem =
+  | { kind: 'expense'; value: LedgerExpense }
+  | { kind: 'transfer'; value: LedgerTransfer };
 
 type MemberFinancialSummary = {
   member: LedgerMember;
@@ -260,6 +349,8 @@ type MemberFinancialSummary = {
   shareMinor: number;
   depositMinor: number;
   sponsorMinor: number;
+  transferSentMinor: number;
+  transferReceivedMinor: number;
   balanceMinor: number;
 };
 
@@ -297,6 +388,16 @@ function calculateMemberSummary(
         : 0),
     0,
   );
+  const transferSentMinor = data.transfers.reduce(
+    (sum, item) =>
+      sum + (item.fromMember.id === member.id ? item.transfer.amount_minor : 0),
+    0,
+  );
+  const transferReceivedMinor = data.transfers.reduce(
+    (sum, item) =>
+      sum + (item.toMember.id === member.id ? item.transfer.amount_minor : 0),
+    0,
+  );
 
   return {
     member,
@@ -304,7 +405,15 @@ function calculateMemberSummary(
     shareMinor,
     depositMinor,
     sponsorMinor,
-    balanceMinor: paidMinor + depositMinor - shareMinor,
+    transferSentMinor,
+    transferReceivedMinor,
+    balanceMinor: calculateLedgerBalanceMinor({
+      paidMinor,
+      shareMinor,
+      depositMinor,
+      transferSentMinor,
+      transferReceivedMinor,
+    }),
   };
 }
 
@@ -314,20 +423,23 @@ function GroupSummaryCard({
   locale,
   decimalPlaces,
   onSelect,
-  pendingSettlementIds,
-  settling,
-  onSettle,
+  transferSuggestion,
+  transferring,
+  onTransfer,
 }: {
   summary: MemberFinancialSummary;
   currency: string;
   locale: string;
   decimalPlaces: number;
   onSelect: () => void;
-  pendingSettlementIds: string[];
-  settling: boolean;
-  onSettle: (settlementIds: string[]) => void;
+  transferSuggestion: TransferSuggestion | null;
+  transferring: boolean;
+  onTransfer: (suggestion: TransferSuggestion) => void;
 }) {
   const { t } = useTranslation('common');
+  const paidAndSentMinor = summary.paidMinor + summary.transferSentMinor;
+  const shareAndReceivedMinor =
+    summary.shareMinor + summary.transferReceivedMinor;
   const balanceClass =
     summary.balanceMinor > 0
       ? 'positive'
@@ -347,10 +459,12 @@ function GroupSummaryCard({
       actionLabel={t('ledger.viewAsMember')}
       icon="person"
       onAction={onSelect}
-      endActionLabel={t('ledger.markMemberSettled')}
+      endActionLabel={t('ledger.transferred')}
       endIcon="check"
-      endDisabled={pendingSettlementIds.length === 0 || settling}
-      onEndAction={() => onSettle(pendingSettlementIds)}
+      endDisabled={!transferSuggestion || transferring}
+      onEndAction={() => {
+        if (transferSuggestion) onTransfer(transferSuggestion);
+      }}
     >
       <article className="ledger-group-member">
         <Avatar
@@ -361,35 +475,18 @@ function GroupSummaryCard({
         <span className="ledger-group-member__info">
           <strong>{summary.member.display_name}</strong>
           <span>
-            {t('ledger.paid')}{' '}
-            {formatMoney(summary.paidMinor, currency, locale, decimalPlaces)}
+            {t('ledger.paidOut')}{' '}
+            {formatMoney(paidAndSentMinor, currency, locale, decimalPlaces)}
           </span>
           <span>
-            {t('ledger.share')}{' '}
-            {formatMoney(summary.shareMinor, currency, locale, decimalPlaces)}
+            {t('ledger.fairShare')}{' '}
+            {formatMoney(
+              shareAndReceivedMinor,
+              currency,
+              locale,
+              decimalPlaces,
+            )}
           </span>
-          {summary.depositMinor > 0 && (
-            <span>
-              {t('ledger.deposit')}{' '}
-              {formatMoney(
-                summary.depositMinor,
-                currency,
-                locale,
-                decimalPlaces,
-              )}
-            </span>
-          )}
-          {summary.sponsorMinor > 0 && (
-            <span>
-              {t('ledger.sponsor')}{' '}
-              {formatMoney(
-                summary.sponsorMinor,
-                currency,
-                locale,
-                decimalPlaces,
-              )}
-            </span>
-          )}
         </span>
         <span className="ledger-group-member__balance">
           <strong className={`ledger-balance ledger-balance--${balanceClass}`}>
@@ -402,6 +499,58 @@ function GroupSummaryCard({
           </strong>
           <span>{balanceLabel}</span>
         </span>
+      </article>
+    </SwipeStartActionItem>
+  );
+}
+
+function TransferSuggestionCard({
+  suggestion,
+  currency,
+  locale,
+  decimalPlaces,
+  transferring,
+  onTransfer,
+}: {
+  suggestion: TransferSuggestion;
+  currency: string;
+  locale: string;
+  decimalPlaces: number;
+  transferring: boolean;
+  onTransfer: (suggestion: TransferSuggestion) => void;
+}) {
+  const { t } = useTranslation('common');
+  return (
+    <SwipeStartActionItem
+      className="ledger-group-member-item"
+      endActionLabel={t('ledger.transferred')}
+      endIcon="check"
+      endDisabled={transferring}
+      onEndAction={() => onTransfer(suggestion)}
+    >
+      <article className="ledger-transfer-suggestion">
+        <span className="ledger-transfer-suggestion__route">
+          <span className="ledger-transfer-suggestion__member">
+            <Avatar
+              name={suggestion.fromMember.display_name}
+              src={suggestion.fromMember.avatar_url ?? undefined}
+              initialCount={2}
+            />
+            <strong>{suggestion.fromMember.display_name}</strong>
+          </span>
+          <Icon name="transfer" />
+          <span className="ledger-transfer-suggestion__member">
+            <Avatar
+              name={suggestion.toMember.display_name}
+              src={suggestion.toMember.avatar_url ?? undefined}
+              initialCount={2}
+            />
+            <strong>{suggestion.toMember.display_name}</strong>
+          </span>
+        </span>
+        <strong className="ledger-balance ledger-balance--positive">
+          {formatMoney(suggestion.amountMinor, currency, locale, decimalPlaces)}
+        </strong>
       </article>
     </SwipeStartActionItem>
   );
@@ -450,8 +599,9 @@ function MemberBalanceSummary({
   memberName,
   paidMinor,
   shareMinor,
-  sponsorMinor,
   depositMinor,
+  transferSentMinor,
+  transferReceivedMinor,
   currency,
   locale,
   decimalPlaces,
@@ -459,14 +609,23 @@ function MemberBalanceSummary({
   memberName: string;
   paidMinor: number;
   shareMinor: number;
-  sponsorMinor: number;
   depositMinor: number;
+  transferSentMinor: number;
+  transferReceivedMinor: number;
   currency: string;
   locale: string;
   decimalPlaces: number;
 }) {
   const { t } = useTranslation('common');
-  const balanceMinor = paidMinor + depositMinor - shareMinor;
+  const balanceMinor = calculateLedgerBalanceMinor({
+    paidMinor,
+    shareMinor,
+    depositMinor,
+    transferSentMinor,
+    transferReceivedMinor,
+  });
+  const paidAndSentMinor = paidMinor + transferSentMinor;
+  const shareAndReceivedMinor = shareMinor + transferReceivedMinor;
   const firstName = memberName.trim().split(/\s+/)[0] || memberName;
   const balanceLabel =
     balanceMinor > 0
@@ -488,25 +647,18 @@ function MemberBalanceSummary({
         <div>
           <dt>{t('ledger.paidOut')}</dt>
           <dd className="ledger-money--paid">
-            {formatMoney(paidMinor, currency, locale, decimalPlaces)}
+            {formatMoney(paidAndSentMinor, currency, locale, decimalPlaces)}
           </dd>
         </div>
         <div>
           <dt>{t('ledger.fairShare')}</dt>
           <dd className="ledger-money--share">
-            {formatMoney(shareMinor, currency, locale, decimalPlaces)}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('ledger.deposit')}</dt>
-          <dd className="ledger-money--deposit">
-            {formatMoney(depositMinor, currency, locale, decimalPlaces)}
-          </dd>
-        </div>
-        <div>
-          <dt>{t('ledger.sponsor')}</dt>
-          <dd className="ledger-money--sponsor">
-            {formatMoney(sponsorMinor, currency, locale, decimalPlaces)}
+            {formatMoney(
+              shareAndReceivedMinor,
+              currency,
+              locale,
+              decimalPlaces,
+            )}
           </dd>
         </div>
       </dl>
@@ -517,22 +669,37 @@ function MemberBalanceSummary({
 export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
   const { t } = useTranslation('common');
   const query = useLedgerExpenses(trip.id, repository);
-  const markMemberSettled = useMarkMemberSettled(trip.id, repository);
+  const recordTransfer = useRecordTripTransfer(repository);
   const [view, setView] = useState('all');
+  const [transferMode, setTransferMode] = useState<'direct' | 'treasurer'>(
+    'treasurer',
+  );
+  const [pendingTransfer, setPendingTransfer] =
+    useState<TransferSuggestion | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const groups = useMemo(() => {
-    const filtered = (query.data?.expenses ?? []).filter((item) =>
-      view.startsWith('member:')
-        ? item.shares.some(({ member }) => member.id === view.slice(7)) ||
-          item.payer?.id === view.slice(7)
-        : true,
+    const items: Array<{ occurredAt: string; item: AllTimelineItem }> = [
+      ...(query.data?.expenses ?? []).map((expense) => ({
+        occurredAt: expense.expense.occurred_at,
+        item: { kind: 'expense', value: expense } as const,
+      })),
+      ...(query.data?.transfers ?? []).map((transfer) => ({
+        occurredAt: transfer.transfer.occurred_at,
+        item: { kind: 'transfer', value: transfer } as const,
+      })),
+    ].sort(
+      (left, right) =>
+        Date.parse(right.occurredAt) - Date.parse(left.occurredAt),
     );
-    return filtered.reduce<Map<string, LedgerExpense[]>>((result, expense) => {
-      const key = ledgerDateKey(expense.expense.occurred_at, trip.timezone);
-      result.set(key, [...(result.get(key) ?? []), expense]);
-      return result;
-    }, new Map());
-  }, [query.data?.expenses, trip.timezone, view]);
+    return items.reduce<Map<string, AllTimelineItem[]>>(
+      (result, { occurredAt, item }) => {
+        const key = ledgerDateKey(occurredAt, trip.timezone);
+        result.set(key, [...(result.get(key) ?? []), item]);
+        return result;
+      },
+      new Map(),
+    );
+  }, [query.data?.expenses, query.data?.transfers, trip.timezone]);
   const selectedMember = query.data?.members.find(
     ({ id }) => view === `member:${id}`,
   );
@@ -559,6 +726,17 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
               {
                 occurredAt: contribution.contribution.occurred_at,
                 item: { kind: 'contribution', value: contribution } as const,
+              },
+            ]
+          : [],
+      ),
+      ...query.data.transfers.flatMap((transfer) =>
+        transfer.fromMember.id === selectedMember.id ||
+        transfer.toMember.id === selectedMember.id
+          ? [
+              {
+                occurredAt: transfer.transfer.occurred_at,
+                item: { kind: 'transfer', value: transfer } as const,
               },
             ]
           : [],
@@ -593,6 +771,13 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
             .map((member) => calculateMemberSummary(query.data!, member))
         : [],
     [query.data],
+  );
+  const treasurer = query.data?.members.find(
+    ({ id }) => id === query.data?.treasurerMemberId,
+  );
+  const directTransferSuggestions = useMemo(
+    () => createDirectTransferSuggestions(groupSummaries),
+    [groupSummaries],
   );
 
   if (query.isPending) {
@@ -649,6 +834,7 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
         >
           <option value="all">{t('ledger.allExpenses')}</option>
           <option value="summary">{t('ledger.groupSummary')}</option>
+          <option value="_" disabled>________________</option>
           {(query.data?.members ?? []).map((member) => (
             <option key={member.id} value={`member:${member.id}`}>
               {member.display_name}
@@ -667,11 +853,37 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
       )}
 
       {view === 'summary' && (
-        <p className="ledger-tip">
-          {t('ledger.groupSummaryTip')}
-          <br />
-          {t('ledger.groupSummarySettleTip')}
-        </p>
+        <>
+          <Segment
+            label={t('ledger.transferMode')}
+            value={transferMode}
+            options={[
+              { value: 'treasurer', label: t('ledger.viaTreasurer') },
+              { value: 'direct', label: t('ledger.directTransfers') },
+            ]}
+            onValueChange={(value) =>
+              setTransferMode(value as 'direct' | 'treasurer')
+            }
+          />
+          {transferMode === 'treasurer' && (
+            <p className="ledger-treasurer-note">
+              {treasurer
+                ? t('ledger.treasurerName', {
+                    name: treasurer.display_name,
+                  })
+                : t('ledger.noTreasurer')}
+            </p>
+          )}
+          <p className="ledger-tip">
+            {transferMode === 'treasurer' && (
+              <>
+                {t('ledger.groupSummaryTip')}
+                <br />
+              </>
+            )}
+            {t('ledger.groupSummaryTransferTip')}
+          </p>
+        </>
       )}
 
       {selectedMember && memberTotals && (
@@ -679,72 +891,38 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
           memberName={selectedMember.display_name}
           paidMinor={memberTotals.paidMinor}
           shareMinor={memberTotals.shareMinor}
-          sponsorMinor={memberTotals.sponsorMinor}
           depositMinor={memberTotals.depositMinor}
+          transferSentMinor={memberTotals.transferSentMinor}
+          transferReceivedMinor={memberTotals.transferReceivedMinor}
           currency={trip.default_currency}
           locale={locale}
           decimalPlaces={trip.currency_decimal_places}
         />
       )}
 
-      {view === 'all' && (query.data?.contributions.length ?? 0) > 0 && (
-        <section className="ledger-date-group">
-          <header>
-            <h3>{t('ledger.fundActivity')}</h3>
-          </header>
-          {query.data?.contributions.map(
-            ({ contribution, member, fundName, fundIsDefault }) => (
-              <article className="ledger-expense-card" key={contribution.id}>
-                <div
-                  className={`ledger-expense-icon ledger-contribution-icon${contribution.contribution_type === 'sponsor' ? ' ledger-contribution-icon--sponsor' : ''}`}
-                >
-                  <Icon
-                    name={
-                      contribution.contribution_type === 'sponsor'
-                        ? 'savings'
-                        : 'wallet'
-                    }
-                    size="large"
-                  />
-                </div>
-                <div className="ledger-expense-main">
-                  <h4>
-                    {contribution.note ||
-                      t(
-                        contribution.contribution_type === 'sponsor'
-                          ? 'ledger.sponsor'
-                          : 'ledger.deposit',
-                      )}
-                  </h4>
-                  <p>
-                    {member?.display_name ?? t('ledger.unknownMember')} ·{' '}
-                    {fundIsDefault ? t('ledger.defaultFund') : fundName}
-                  </p>
-                </div>
-                <div className="ledger-expense-amount">
-                  <strong>
-                    {formatMoney(
-                      contribution.amount_minor,
-                      contribution.currency,
-                      locale,
-                      trip.currency_decimal_places,
-                    )}
-                  </strong>
-                  <span>
-                    {t(
-                      contribution.contribution_type === 'sponsor'
-                        ? 'ledger.sponsor'
-                        : 'ledger.deposit',
-                    )}
-                  </span>
-                </div>
-              </article>
-            ),
-          )}
-        </section>
-      )}
-
-      {view === 'summary' ? (
+      {view === 'summary' && transferMode === 'direct' ? (
+        directTransferSuggestions.length === 0 ? (
+          <div className="ledger-state">
+            <Icon name="check" size="large" />
+            <h2>{t('ledger.noTransfersTitle')}</h2>
+            <p>{t('ledger.noTransfersDescription')}</p>
+          </div>
+        ) : (
+          <div className="ledger-group-summary">
+            {directTransferSuggestions.map((suggestion) => (
+              <TransferSuggestionCard
+                key={`${suggestion.fromMember.id}:${suggestion.toMember.id}`}
+                suggestion={suggestion}
+                currency={trip.default_currency}
+                locale={locale}
+                decimalPlaces={trip.currency_decimal_places}
+                transferring={recordTransfer.isPending}
+                onTransfer={setPendingTransfer}
+              />
+            ))}
+          </div>
+        )
+      ) : view === 'summary' ? (
         groupSummaries.length === 0 ? (
           <div className="ledger-state">
             <Icon name="person" size="large" />
@@ -761,18 +939,13 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                 locale={locale}
                 decimalPlaces={trip.currency_decimal_places}
                 onSelect={() => setView(`member:${summary.member.id}`)}
-                pendingSettlementIds={(query.data?.settlements ?? []).flatMap(
-                  (settlement) =>
-                    settlement.status === 'pending' &&
-                    (settlement.from_member_id === summary.member.id ||
-                      settlement.to_member_id === summary.member.id)
-                      ? [settlement.id]
-                      : [],
-                )}
-                settling={markMemberSettled.isPending}
-                onSettle={(settlementIds) =>
-                  markMemberSettled.mutate(settlementIds)
+                transferSuggestion={
+                  treasurer
+                    ? createTreasurerSuggestion(summary, treasurer)
+                    : null
                 }
+                transferring={recordTransfer.isPending}
+                onTransfer={setPendingTransfer}
               />
             ))}
           </div>
@@ -801,10 +974,18 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
                     locale={locale}
                     decimalPlaces={trip.currency_decimal_places}
                   />
-                ) : (
+                ) : item.kind === 'contribution' ? (
                   <MemberContributionCard
                     key={`contribution:${item.value.contribution.id}`}
                     item={item.value}
+                    locale={locale}
+                    decimalPlaces={trip.currency_decimal_places}
+                  />
+                ) : (
+                  <MemberTransferCard
+                    key={`transfer:${item.value.transfer.id}`}
+                    item={item.value}
+                    memberId={selectedMember.id}
                     locale={locale}
                     decimalPlaces={trip.currency_decimal_places}
                   />
@@ -820,34 +1001,49 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
           <p>{t('ledger.emptyDescription')}</p>
         </div>
       ) : (
-        [...groups.entries()].map(([dateKey, expenses]) => (
+        [...groups.entries()].map(([dateKey, items]) => (
           <section className="ledger-date-group" key={dateKey}>
             <header>
               <h3>
                 {formatGroupDate(dateKey, locale, trip.timezone, dateLabels)}
               </h3>
-              <span>
-                {t('ledger.total', {
-                  amount: formatMoney(
-                    expenses.reduce(
-                      (sum, item) => sum + item.expense.amount_minor,
-                      0,
+              {items.some((item) => item.kind === 'expense') && (
+                <span>
+                  {t('ledger.total', {
+                    amount: formatMoney(
+                      items.reduce(
+                        (sum, item) =>
+                          sum +
+                          (item.kind === 'expense'
+                            ? item.value.expense.amount_minor
+                            : 0),
+                        0,
+                      ),
+                      trip.default_currency,
+                      locale,
+                      trip.currency_decimal_places,
                     ),
-                    expenses[0].expense.currency,
-                    locale,
-                    trip.currency_decimal_places,
-                  ),
-                })}
-              </span>
+                  })}
+                </span>
+              )}
             </header>
-            {expenses.map((expense) => (
-              <ExpenseCard
-                key={expense.expense.id}
-                expense={expense}
-                locale={locale}
-                decimalPlaces={trip.currency_decimal_places}
-              />
-            ))}
+            {items.map((item) =>
+              item.kind === 'expense' ? (
+                <ExpenseCard
+                  key={`expense:${item.value.expense.id}`}
+                  expense={item.value}
+                  locale={locale}
+                  decimalPlaces={trip.currency_decimal_places}
+                />
+              ) : (
+                <TransferCard
+                  key={`transfer:${item.value.transfer.id}`}
+                  item={item.value}
+                  locale={locale}
+                  decimalPlaces={trip.currency_decimal_places}
+                />
+              ),
+            )}
           </section>
         ))
       )}
@@ -867,6 +1063,42 @@ export function LedgerPanel({ trip, locale, repository }: LedgerPanelProps) {
           />
         </>
       )}
+      <ConfirmDialog
+        open={Boolean(pendingTransfer)}
+        title={t('ledger.confirmTransferTitle')}
+        message={
+          pendingTransfer
+            ? t('ledger.confirmTransferMessage', {
+                from: pendingTransfer.fromMember.display_name,
+                to: pendingTransfer.toMember.display_name,
+                amount: formatMoney(
+                  pendingTransfer.amountMinor,
+                  trip.default_currency,
+                  locale,
+                  trip.currency_decimal_places,
+                ),
+              })
+            : ''
+        }
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('ledger.transferred')}
+        onCancel={() => setPendingTransfer(null)}
+        onConfirm={() => {
+          if (!pendingTransfer) return;
+          recordTransfer.mutate(
+            {
+              tripId: trip.id,
+              fromMemberId: pendingTransfer.fromMember.id,
+              toMemberId: pendingTransfer.toMember.id,
+              amountMinor: pendingTransfer.amountMinor,
+              currency: trip.default_currency,
+              occurredAt: new Date().toISOString(),
+              note: t('ledger.balanceTransferNote'),
+            },
+            { onSuccess: () => setPendingTransfer(null) },
+          );
+        }}
+      />
     </section>
   );
 }

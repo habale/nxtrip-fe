@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   ConfirmDialog,
+  Checkbox,
   Icon,
   Modal,
   SearchField,
@@ -29,6 +30,7 @@ import type { TripMemberDetail, TripRepository } from '../trip-repository';
 
 type TripMembersPanelProps = {
   tripId: string;
+  treasurerMemberId: string | null;
   viewerRole: 'owner' | 'member';
   repository?: TripRepository;
 };
@@ -37,10 +39,12 @@ const emptyValues: GuestMemberFormValues = {
   displayName: '',
   email: '',
   note: '',
+  isTreasurer: false,
 };
 
 export function TripMembersPanel({
   tripId,
+  treasurerMemberId,
   viewerRole,
   repository,
 }: TripMembersPanelProps) {
@@ -89,6 +93,7 @@ export function TripMembersPanel({
       displayName: target.member.display_name,
       email: target.member.email ?? '',
       note: target.member.note ?? '',
+      isTreasurer: target.member.id === treasurerMemberId,
     });
     updateGuest.reset();
   }
@@ -128,6 +133,7 @@ export function TripMembersPanel({
         tripId,
         memberId: editTarget.member.id,
         version: editTarget.member.version,
+        currentTreasurerMemberId: treasurerMemberId,
         ...editValues,
       })
       .catch(() => undefined);
@@ -218,6 +224,9 @@ export function TripMembersPanel({
                     {role === 'owner' && (
                       <Badge>{t('tripMembers.owner')}</Badge>
                     )}
+                    {member.id === treasurerMemberId && (
+                      <Badge tone="success">{t('tripMembers.treasurer')}</Badge>
+                    )}
                     {!member.is_active && (
                       <Badge tone="warning">{t('tripMembers.inactive')}</Badge>
                     )}
@@ -291,6 +300,17 @@ export function TripMembersPanel({
             value={values.note}
             onValueChange={(value) => update('note', value)}
           />
+          {viewerRole === 'owner' && (
+            <label className="trip-member-form__checkbox">
+              <Checkbox
+                ariaLabel={t('tripMembers.makeTreasurer')}
+                checked={values.isTreasurer}
+                disabled={addGuest.isPending}
+                onCheckedChange={(checked) => update('isTreasurer', checked)}
+              />
+              <span>{t('tripMembers.makeTreasurer')}</span>
+            </label>
+          )}
           {addGuest.error && (
             <p className="trip-member-form__error" role="alert">
               {t(
@@ -344,6 +364,19 @@ export function TripMembersPanel({
             value={editValues.note}
             onValueChange={(value) => updateEdit('note', value)}
           />
+          {viewerRole === 'owner' && (
+            <label className="trip-member-form__checkbox">
+              <Checkbox
+                ariaLabel={t('tripMembers.makeTreasurer')}
+                checked={editValues.isTreasurer}
+                disabled={updateGuest.isPending}
+                onCheckedChange={(checked) =>
+                  updateEdit('isTreasurer', checked)
+                }
+              />
+              <span>{t('tripMembers.makeTreasurer')}</span>
+            </label>
+          )}
           {updateGuest.error && (
             <p className="trip-member-form__error" role="alert">
               {t(

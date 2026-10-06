@@ -146,9 +146,9 @@ export function SwipeItem({
 
 export type SwipeStartActionItemProps = PropsWithChildren<{
   className?: string;
-  actionLabel: string;
+  actionLabel?: string;
   icon?: IconName;
-  onAction: () => void;
+  onAction?: () => void;
   endActionLabel?: string;
   endIcon?: IconName;
   endDisabled?: boolean;
@@ -170,7 +170,7 @@ export function SwipeStartActionItem({
 
   async function runAction() {
     await slidingRef.current?.close();
-    onAction();
+    onAction?.();
   }
 
   async function runEndAction() {
@@ -180,16 +180,18 @@ export function SwipeStartActionItem({
 
   return (
     <IonItemSliding ref={slidingRef} className="ui-swipe-item">
-      <IonItemOptions side="start" onIonSwipe={() => void runAction()}>
-        <IonItemOption
-          color="primary"
-          expandable
-          onClick={() => void runAction()}
-        >
-          <Icon name={icon} />
-          {actionLabel}
-        </IonItemOption>
-      </IonItemOptions>
+      {actionLabel && onAction && (
+        <IonItemOptions side="start" onIonSwipe={() => void runAction()}>
+          <IonItemOption
+            color="primary"
+            expandable
+            onClick={() => void runAction()}
+          >
+            <Icon name={icon} />
+            {actionLabel}
+          </IonItemOption>
+        </IonItemOptions>
+      )}
       <IonItem
         className={`ui-item${className ? ` ${className}` : ''}`}
         lines="none"

@@ -1,6 +1,6 @@
 -- SxTrip initial Supabase schema
 -- Generated from SxTrip Product Requirements v2.2
--- Schema revision: V3 (automatic default trip funds and fund-contribution RPC)
+-- Schema revision: V3.1 (trip transfers and optional treasurer)
 -- Target: Supabase PostgreSQL
 --
 -- Design principles:
@@ -15,8 +15,8 @@
 --   * Google Maps integration is URL-based for MVP; itinerary nodes do not store coordinates or Google place metadata.
 --   * File bytes live in Supabase Storage; public.attachments stores application metadata.
 --   * Expense shares are normalized rows, not JSON blobs.
---   * Deposits and sponsorships are stored distinctly. Their final combined settlement
---     semantics are intentionally NOT hard-coded here because that product rule is still open.
+--   * Completed member-to-member money movements are immutable trip_transfers. Suggested
+--     balance transfers are calculated by clients and are never persisted as pending records.
 --   * Every trip has one active default fund in its default currency. Fund creation is a
 --     backend invariant and is not exposed as a prerequisite in the contribution UI.
 --   * Mutable collaborative records use UUIDs, version counters, timestamps, and (where useful)
@@ -61,16 +61,6 @@ create type public.access_status as enum (
 create type public.payment_source as enum (
   'member',
   'group_fund'
-);
-
-create type public.settlement_run_status as enum (
-  'active',
-  'superseded'
-);
-
-create type public.settlement_status as enum (
-  'pending',
-  'done'
 );
 
 create type public.notification_outbox_status as enum (
@@ -118,6 +108,7 @@ create table public.trips (
   status public.trip_status not null default 'planning',
   default_currency public.currency_code not null default 'VND',
   currency_decimal_places smallint not null default 0 check (currency_decimal_places between 0 and 4),
+  treasurer_member_id uuid,
   cover_image_path text,
   cover_thumbnail_path text,
   created_by uuid references public.profiles(id) on delete set null,
@@ -143,6 +134,11 @@ create table public.trip_members (
   deleted_at timestamptz,
   unique (trip_id, id)
 );
+
+alter table public.trips
+  add constraint trips_treasurer_member_fk
+  foreign key (id, treasurer_member_id)
+  references public.trip_members(trip_id, id);
 
 create table public.trip_access_memberships (
   id uuid primary key default gen_random_uuid(),
@@ -471,46 +467,29 @@ create table public.fund_contributions (
     references public.trip_members(trip_id, id)
 );
 
-create table public.settlement_runs (
+create table public.trip_transfers (
   id uuid primary key default gen_random_uuid(),
   trip_id uuid not null references public.trips(id) on delete cascade,
-  status public.settlement_run_status not null default 'active',
-  generated_by uuid references public.profiles(id) on delete set null,
-  generated_at timestamptz not null default now(),
-  superseded_at timestamptz,
-  calculation_meta jsonb not null default '{}'::jsonb
-    check (jsonb_typeof(calculation_meta) = 'object'),
-  unique (trip_id, id)
-);
-
-create unique index settlement_runs_one_active_per_trip_uidx
-  on public.settlement_runs (trip_id)
-  where status = 'active';
-
-create table public.settlements (
-  id uuid primary key default gen_random_uuid(),
-  trip_id uuid not null,
-  settlement_run_id uuid not null,
   from_member_id uuid not null,
   to_member_id uuid not null,
   amount_minor bigint not null check (amount_minor > 0),
   currency public.currency_code not null,
-  status public.settlement_status not null default 'pending',
-  marked_done_by uuid references public.profiles(id) on delete set null,
-  marked_done_at timestamptz,
+  note text,
+  occurred_at timestamptz not null default now(),
+  request_id uuid not null unique,
+  created_by uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now(),
-  constraint settlements_members_distinct_chk check (from_member_id <> to_member_id),
-  constraint settlements_run_fk
-    foreign key (trip_id, settlement_run_id)
-    references public.settlement_runs(trip_id, id)
-    on delete cascade,
-  constraint settlements_from_member_fk
+  updated_at timestamptz not null default now(),
+  version bigint not null default 1 check (version > 0),
+  deleted_at timestamptz,
+  constraint trip_transfers_members_distinct_chk check (from_member_id <> to_member_id),
+  constraint trip_transfers_from_member_fk
     foreign key (trip_id, from_member_id)
     references public.trip_members(trip_id, id),
-  constraint settlements_to_member_fk
+  constraint trip_transfers_to_member_fk
     foreign key (trip_id, to_member_id)
     references public.trip_members(trip_id, id),
-  unique (settlement_run_id, from_member_id, to_member_id, currency)
+  unique (trip_id, id)
 );
 
 -- -----------------------------------------------------------------------------
@@ -660,7 +639,9 @@ create index fund_contributions_member_idx
   on public.fund_contributions (member_id, occurred_at desc)
   where deleted_at is null;
 
-create index settlements_trip_status_idx on public.settlements (trip_id, status);
+create index trip_transfers_trip_occurred_idx
+  on public.trip_transfers (trip_id, occurred_at desc)
+  where deleted_at is null;
 
 create index device_installations_user_idx on public.device_installations (user_id, platform);
 
@@ -706,6 +687,23 @@ begin
 end;
 $$;
 
+create or replace function private.clear_inactive_trip_treasurer()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if (old.is_active = true and new.is_active = false)
+     or (old.deleted_at is null and new.deleted_at is not null) then
+    update public.trips
+    set treasurer_member_id = null
+    where id = new.trip_id and treasurer_member_id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
 create trigger profiles_set_updated_at
 before update on public.profiles
 for each row execute function private.set_updated_at();
@@ -717,6 +715,10 @@ for each row execute function private.bump_version_and_updated_at();
 create trigger trip_members_bump_version
 before update on public.trip_members
 for each row execute function private.bump_version_and_updated_at();
+
+create trigger trip_members_clear_inactive_treasurer
+after update of is_active, deleted_at on public.trip_members
+for each row execute function private.clear_inactive_trip_treasurer();
 
 create trigger trip_access_memberships_bump_version
 before update on public.trip_access_memberships
@@ -760,6 +762,10 @@ for each row execute function private.bump_version_and_updated_at();
 
 create trigger fund_contributions_bump_version
 before update on public.fund_contributions
+for each row execute function private.bump_version_and_updated_at();
+
+create trigger trip_transfers_bump_version
+before update on public.trip_transfers
 for each row execute function private.bump_version_and_updated_at();
 
 create trigger device_installations_set_updated_at
@@ -1851,11 +1857,115 @@ revoke all on function public.soft_delete_expense(uuid, uuid) from public;
 grant execute on function public.soft_delete_expense(uuid, uuid) to authenticated;
 
 -- -----------------------------------------------------------------------------
--- 14. Business RPC: mark settlement done
+-- 14. Business RPCs: record transfer and select treasurer
 -- -----------------------------------------------------------------------------
 
-create or replace function public.mark_settlement_done(
-  p_settlement_id uuid,
+create or replace function public.record_trip_transfer(
+  p_trip_id uuid,
+  p_from_member_id uuid,
+  p_to_member_id uuid,
+  p_amount_minor bigint,
+  p_currency public.currency_code,
+  p_occurred_at timestamptz default now(),
+  p_note text default null,
+  p_request_id uuid default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public, auth, pg_temp
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_request_id uuid := coalesce(p_request_id, gen_random_uuid());
+  v_transfer_id uuid;
+  v_currency public.currency_code;
+begin
+  if v_user_id is null then
+    perform private.raise_app_error(401, 'AUTH_REQUIRED', v_request_id, 'auth.uid() is null');
+  end if;
+
+  select id into v_transfer_id
+  from public.trip_transfers
+  where request_id = v_request_id;
+  if found then
+    return v_transfer_id;
+  end if;
+
+  if not private.can_edit_ledger(p_trip_id) then
+    perform private.raise_app_error(409, 'LEDGER_NOT_EDITABLE', v_request_id, format('trip_id=%s', p_trip_id));
+  end if;
+
+  if not (
+    private.has_trip_role(p_trip_id, array['owner']::public.access_role[])
+    or private.is_linked_trip_member(p_trip_id, p_from_member_id)
+    or private.is_linked_trip_member(p_trip_id, p_to_member_id)
+  ) then
+    perform private.raise_app_error(403, 'TRANSFER_RECORD_FORBIDDEN', v_request_id, format('trip_id=%s', p_trip_id));
+  end if;
+
+  if p_from_member_id = p_to_member_id then
+    perform private.raise_app_error(422, 'TRANSFER_MEMBERS_SAME', v_request_id, 'sender and receiver are identical');
+  end if;
+  if p_amount_minor is null or p_amount_minor <= 0 then
+    perform private.raise_app_error(422, 'TRANSFER_AMOUNT_INVALID', v_request_id, format('amount_minor=%s', p_amount_minor));
+  end if;
+
+  select default_currency into v_currency
+  from public.trips
+  where id = p_trip_id and deleted_at is null;
+  if not found then
+    perform private.raise_app_error(404, 'TRIP_NOT_FOUND', v_request_id, format('trip_id=%s', p_trip_id));
+  end if;
+  if p_currency <> v_currency then
+    perform private.raise_app_error(422, 'TRANSFER_CURRENCY_INVALID', v_request_id, format('currency=%s expected=%s', p_currency, v_currency));
+  end if;
+
+  if (
+    select count(*)
+    from public.trip_members
+    where trip_id = p_trip_id
+      and id in (p_from_member_id, p_to_member_id)
+      and is_active = true
+      and deleted_at is null
+  ) <> 2 then
+    perform private.raise_app_error(422, 'TRANSFER_MEMBER_INVALID', v_request_id, 'sender or receiver is not an active trip member');
+  end if;
+
+  insert into public.trip_transfers (
+    trip_id, from_member_id, to_member_id, amount_minor, currency,
+    note, occurred_at, request_id, created_by
+  ) values (
+    p_trip_id, p_from_member_id, p_to_member_id, p_amount_minor, v_currency,
+    nullif(btrim(p_note), ''), coalesce(p_occurred_at, now()), v_request_id, v_user_id
+  )
+  returning id into v_transfer_id;
+
+  perform private.write_audit_event(
+    p_trip_id, v_user_id, v_request_id, 'trip_transfer', v_transfer_id,
+    'trip_transfer.create',
+    jsonb_build_object(
+      'from_member_id', p_from_member_id,
+      'to_member_id', p_to_member_id,
+      'amount_minor', p_amount_minor,
+      'currency', v_currency
+    )
+  );
+
+  return v_transfer_id;
+end;
+$$;
+
+revoke all on function public.record_trip_transfer(
+  uuid, uuid, uuid, bigint, public.currency_code, timestamptz, text, uuid
+) from public;
+grant execute on function public.record_trip_transfer(
+  uuid, uuid, uuid, bigint, public.currency_code, timestamptz, text, uuid
+) to authenticated;
+
+create or replace function public.set_trip_treasurer(
+  p_trip_id uuid,
+  p_treasurer_member_id uuid,
   p_request_id uuid default null
 )
 returns void
@@ -1866,68 +1976,37 @@ as $$
 declare
   v_user_id uuid := auth.uid();
   v_request_id uuid := coalesce(p_request_id, gen_random_uuid());
-  v_row public.settlements%rowtype;
 begin
-  raise log 'sxtrip_rpc_start request_id=% rpc=mark_settlement_done settlement_id=% user_id=%',
-    v_request_id, p_settlement_id, v_user_id;
-
   if v_user_id is null then
     perform private.raise_app_error(401, 'AUTH_REQUIRED', v_request_id, 'auth.uid() is null');
   end if;
-
-  select *
-    into v_row
-  from public.settlements
-  where id = p_settlement_id
-  for update;
-
-  if not found then
-    perform private.raise_app_error(404, 'SETTLEMENT_NOT_FOUND', v_request_id, format('settlement_id=%s', p_settlement_id));
+  if not private.has_trip_role(p_trip_id, array['owner']::public.access_role[]) then
+    perform private.raise_app_error(403, 'TREASURER_UPDATE_FORBIDDEN', v_request_id, format('trip_id=%s', p_trip_id));
   end if;
-
-  if not private.has_trip_access(v_row.trip_id) then
-    perform private.raise_app_error(403, 'TRIP_ACCESS_DENIED', v_request_id, format('trip_id=%s user_id=%s', v_row.trip_id, v_user_id));
-  end if;
-
-  if not (
-    private.has_trip_role(v_row.trip_id, array['owner']::public.access_role[])
-    or private.is_linked_trip_member(v_row.trip_id, v_row.from_member_id)
-    or private.is_linked_trip_member(v_row.trip_id, v_row.to_member_id)
+  if p_treasurer_member_id is not null and not exists (
+    select 1 from public.trip_members
+    where trip_id = p_trip_id and id = p_treasurer_member_id
+      and is_active = true and deleted_at is null
   ) then
-    perform private.raise_app_error(403, 'SETTLEMENT_MARK_FORBIDDEN', v_request_id, format('settlement_id=%s user_id=%s', p_settlement_id, v_user_id));
+    perform private.raise_app_error(422, 'TREASURER_MEMBER_INVALID', v_request_id, format('member_id=%s', p_treasurer_member_id));
   end if;
 
-  if v_row.status = 'done' then
-    perform private.raise_app_error(409, 'SETTLEMENT_ALREADY_DONE', v_request_id, format('settlement_id=%s', p_settlement_id));
+  update public.trips
+  set treasurer_member_id = p_treasurer_member_id
+  where id = p_trip_id and deleted_at is null;
+  if not found then
+    perform private.raise_app_error(404, 'TRIP_NOT_FOUND', v_request_id, format('trip_id=%s', p_trip_id));
   end if;
-
-  update public.settlements
-  set status = 'done',
-      marked_done_by = v_user_id,
-      marked_done_at = now()
-  where id = p_settlement_id;
 
   perform private.write_audit_event(
-    v_row.trip_id,
-    v_user_id,
-    v_request_id,
-    'settlement',
-    p_settlement_id,
-    'settlement.mark_done',
-    jsonb_build_object(
-      'from_member_id', v_row.from_member_id,
-      'to_member_id', v_row.to_member_id,
-      'currency', v_row.currency
-    )
+    p_trip_id, v_user_id, v_request_id, 'trip', p_trip_id,
+    'trip.treasurer_update', jsonb_build_object('treasurer_member_id', p_treasurer_member_id)
   );
-
-  raise log 'sxtrip_rpc_success request_id=% rpc=mark_settlement_done trip_id=% settlement_id=%',
-    v_request_id, v_row.trip_id, p_settlement_id;
 end;
 $$;
 
-revoke all on function public.mark_settlement_done(uuid, uuid) from public;
-grant execute on function public.mark_settlement_done(uuid, uuid) to authenticated;
+revoke all on function public.set_trip_treasurer(uuid, uuid, uuid) from public;
+grant execute on function public.set_trip_treasurer(uuid, uuid, uuid) to authenticated;
 
 -- -----------------------------------------------------------------------------
 -- 15. Row Level Security
@@ -1948,8 +2027,7 @@ alter table public.expenses enable row level security;
 alter table public.expense_shares enable row level security;
 alter table public.expense_attachments enable row level security;
 alter table public.fund_contributions enable row level security;
-alter table public.settlement_runs enable row level security;
-alter table public.settlements enable row level security;
+alter table public.trip_transfers enable row level security;
 alter table public.device_installations enable row level security;
 alter table public.notification_preferences enable row level security;
 alter table public.notification_outbox enable row level security;
@@ -2249,18 +2327,11 @@ for delete
 to authenticated
 using (private.has_trip_access(trip_id));
 
--- Settlements are backend-generated. Clients can read them and use mark_settlement_done().
-create policy settlement_runs_select_member
-on public.settlement_runs
+create policy trip_transfers_select_member
+on public.trip_transfers
 for select
 to authenticated
-using (private.has_trip_access(trip_id));
-
-create policy settlements_select_member
-on public.settlements
-for select
-to authenticated
-using (private.has_trip_access(trip_id));
+using (deleted_at is null and private.has_trip_access(trip_id));
 
 -- Devices / notification preferences
 create policy device_installations_select_owner
@@ -2399,10 +2470,12 @@ revoke all on public.notification_outbox from anon, authenticated;
 -- Audit rows are created only by trusted security-definer business RPCs. Owners receive
 -- read access through RLS, but clients cannot insert/update/delete audit history directly.
 revoke insert, update, delete on public.audit_events from anon, authenticated;
+revoke insert, update, delete on public.trip_transfers from anon, authenticated;
 
 -- Keep private trigger functions private.
 revoke all on function private.set_updated_at() from public;
 revoke all on function private.bump_version_and_updated_at() from public;
+revoke all on function private.clear_inactive_trip_treasurer() from public;
 revoke all on function private.ensure_default_trip_fund(uuid, public.currency_code) from public;
 revoke all on function private.handle_trip_default_fund() from public;
 revoke all on function private.handle_new_trip_owner() from public;
@@ -2417,12 +2490,13 @@ revoke all on function private.handle_new_trip_owner() from public;
 
 commit;
 
+-- Ask PostgREST to recognize the business RPC signatures immediately.
+notify pgrst, 'reload schema';
+
 -- -----------------------------------------------------------------------------
 -- Notes for the next migration(s)
 -- -----------------------------------------------------------------------------
--- 1. Add the finalized group-fund/deposit/sponsor balance + settlement calculation once the
---    accounting semantics are approved. Do not guess that rule in this initial migration.
--- 2. Add a complete_trip / reopen_trip RPC around that finalized settlement calculation.
+-- 1. Add a complete_trip / reopen_trip RPC when trip lifecycle automation enters scope.
 -- 3. If you later use Supabase Postgres Changes directly, add only the required tables to the
 --    supabase_realtime publication. For higher-scale collaboration, prefer scoped Broadcast /
 --    Presence patterns instead of publishing every table indiscriminately.

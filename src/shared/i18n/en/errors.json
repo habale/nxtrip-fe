@@ -28,8 +28,12 @@
     "CONTRIBUTION_TYPE_INVALID": "Choose either Deposit or Sponsor.",
     "CONTRIBUTION_AMOUNT_INVALID": "Enter an amount greater than zero.",
     "CONTRIBUTION_MEMBER_INVALID": "The selected contributing member is unavailable.",
-    "SETTLEMENT_NOT_FOUND": "This settlement could not be found.",
-    "SETTLEMENT_MARK_FORBIDDEN": "You don't have permission to update this settlement.",
-    "SETTLEMENT_ALREADY_DONE": "This settlement is already marked as done."
+    "TRANSFER_RECORD_FORBIDDEN": "You don't have permission to confirm this transfer.",
+    "TRANSFER_MEMBERS_SAME": "Choose two different members for this transfer.",
+    "TRANSFER_AMOUNT_INVALID": "Enter a transfer amount greater than zero.",
+    "TRANSFER_CURRENCY_INVALID": "The transfer must use the trip currency.",
+    "TRANSFER_MEMBER_INVALID": "Choose active trip members for this transfer.",
+    "TREASURER_UPDATE_FORBIDDEN": "Only a trip owner can change the treasurer.",
+    "TREASURER_MEMBER_INVALID": "Choose an active trip member as treasurer."
   }
 }

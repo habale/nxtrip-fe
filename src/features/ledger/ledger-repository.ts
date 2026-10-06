@@ -4,13 +4,14 @@ import { getSupabaseClient } from '../../shared/api/supabase-client';
 import type {
   LedgerData,
   LedgerMember,
+  RecordTripTransferInput,
   SaveLedgerEntryInput,
 } from './ledger-types';
 
 export type LedgerRepository = {
   listExpenses: (tripId: string) => Promise<LedgerData>;
   saveEntry: (input: SaveLedgerEntryInput) => Promise<string>;
-  markSettlementsDone: (settlementIds: string[]) => Promise<void>;
+  recordTransfer: (input: RecordTripTransferInput) => Promise<string>;
 };
 
 export function createLedgerRepository(): LedgerRepository {
@@ -18,13 +19,23 @@ export function createLedgerRepository(): LedgerRepository {
 
   return {
     async listExpenses(tripId) {
+      const { data: authData, error: authError } = await client.auth.getUser();
+      if (authError) throw mapSupabaseError(authError);
+
       const [
+        tripResult,
         expensesResult,
         membersResult,
         fundsResult,
         contributionsResult,
-        settlementRunsResult,
+        transfersResult,
+        currentMembershipResult,
       ] = await Promise.all([
+        client
+          .from('trips')
+          .select('treasurer_member_id')
+          .eq('id', tripId)
+          .single(),
         client
           .from('expenses')
           .select('*')
@@ -49,58 +60,57 @@ export function createLedgerRepository(): LedgerRepository {
           .is('deleted_at', null)
           .order('occurred_at', { ascending: false }),
         client
-          .from('settlement_runs')
+          .from('trip_transfers')
           .select('*')
           .eq('trip_id', tripId)
+          .is('deleted_at', null)
+          .order('occurred_at', { ascending: false }),
+        client
+          .from('trip_access_memberships')
+          .select('trip_member_id')
+          .eq('trip_id', tripId)
+          .eq('user_id', authData.user.id)
           .eq('status', 'active')
-          .limit(1),
+          .maybeSingle(),
       ]);
 
+      if (tripResult.error) throw mapSupabaseError(tripResult.error);
       if (expensesResult.error) throw mapSupabaseError(expensesResult.error);
       if (membersResult.error) throw mapSupabaseError(membersResult.error);
       if (fundsResult.error) throw mapSupabaseError(fundsResult.error);
       if (contributionsResult.error)
         throw mapSupabaseError(contributionsResult.error);
-      if (settlementRunsResult.error)
-        throw mapSupabaseError(settlementRunsResult.error);
+      if (transfersResult.error) throw mapSupabaseError(transfersResult.error);
+      if (currentMembershipResult.error)
+        throw mapSupabaseError(currentMembershipResult.error);
 
       const expenseIds = expensesResult.data.map(({ id }) => id);
       const nodeIds = expensesResult.data.flatMap(({ itinerary_node_id }) =>
         itinerary_node_id ? [itinerary_node_id] : [],
       );
       const emptyRelated = { data: [], error: null };
-      const activeSettlementRunId = settlementRunsResult.data[0]?.id;
-      const [sharesResult, attachmentsResult, nodesResult, settlementsResult] =
-        await Promise.all([
-          expenseIds.length
-            ? client
-                .from('expense_shares')
-                .select('*')
-                .in('expense_id', expenseIds)
-            : Promise.resolve(emptyRelated),
-          expenseIds.length
-            ? client
-                .from('expense_attachments')
-                .select('*')
-                .in('expense_id', expenseIds)
-            : Promise.resolve(emptyRelated),
-          nodeIds.length
-            ? client.from('itinerary_nodes').select('*').in('id', nodeIds)
-            : Promise.resolve(emptyRelated),
-          activeSettlementRunId
-            ? client
-                .from('settlements')
-                .select('*')
-                .eq('settlement_run_id', activeSettlementRunId)
-            : Promise.resolve(emptyRelated),
-        ]);
+      const [sharesResult, attachmentsResult, nodesResult] = await Promise.all([
+        expenseIds.length
+          ? client
+              .from('expense_shares')
+              .select('*')
+              .in('expense_id', expenseIds)
+          : Promise.resolve(emptyRelated),
+        expenseIds.length
+          ? client
+              .from('expense_attachments')
+              .select('*')
+              .in('expense_id', expenseIds)
+          : Promise.resolve(emptyRelated),
+        nodeIds.length
+          ? client.from('itinerary_nodes').select('*').in('id', nodeIds)
+          : Promise.resolve(emptyRelated),
+      ]);
 
       if (sharesResult.error) throw mapSupabaseError(sharesResult.error);
       if (attachmentsResult.error)
         throw mapSupabaseError(attachmentsResult.error);
       if (nodesResult.error) throw mapSupabaseError(nodesResult.error);
-      if (settlementsResult.error)
-        throw mapSupabaseError(settlementsResult.error);
 
       const members: LedgerMember[] = membersResult.data.map((member) => ({
         id: member.id,
@@ -115,7 +125,15 @@ export function createLedgerRepository(): LedgerRepository {
 
       return {
         members,
-        settlements: settlementsResult.data,
+        currentMemberId: currentMembershipResult.data?.trip_member_id ?? null,
+        treasurerMemberId: tripResult.data.treasurer_member_id,
+        transfers: transfersResult.data.flatMap((transfer) => {
+          const fromMember = memberById.get(transfer.from_member_id);
+          const toMember = memberById.get(transfer.to_member_id);
+          return fromMember && toMember
+            ? [{ transfer, fromMember, toMember }]
+            : [];
+        }),
         funds: fundsResult.data.map((fund) => ({
           id: fund.id,
           name: fund.name,
@@ -184,16 +202,26 @@ export function createLedgerRepository(): LedgerRepository {
       return data;
     },
 
-    async markSettlementsDone(settlementIds) {
-      await Promise.all(
-        settlementIds.map(async (settlementId) => {
-          const { error } = await client.rpc('mark_settlement_done', {
-            p_settlement_id: settlementId,
-            p_request_id: createRequestId(),
-          });
-          if (error) throw mapSupabaseError(error);
-        }),
-      );
+    async recordTransfer(input) {
+      if (input.fromMemberId === input.toMemberId) {
+        throw new Error('A transfer requires two different members.');
+      }
+      if (input.amountMinor <= 0) {
+        throw new Error('A transfer amount must be greater than zero.');
+      }
+
+      const { data, error } = await client.rpc('record_trip_transfer', {
+        p_trip_id: input.tripId,
+        p_from_member_id: input.fromMemberId,
+        p_to_member_id: input.toMemberId,
+        p_amount_minor: input.amountMinor,
+        p_currency: input.currency,
+        p_occurred_at: input.occurredAt,
+        p_note: input.note?.trim() || undefined,
+        p_request_id: createRequestId(),
+      });
+      if (error) throw mapSupabaseError(error);
+      return data;
     },
   };
 }

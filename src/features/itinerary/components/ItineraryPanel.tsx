@@ -59,7 +59,6 @@ const iconByKey: Record<string, IconName> = {
   hotel: 'hotel',
   misc: 'misc',
   others: 'others',
-  rail: 'train',
   restaurant: 'restaurant',
   shopping: 'shopping',
   sightseeing: 'sightseeing',

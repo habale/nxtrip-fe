@@ -65,12 +65,14 @@ export type AddGuestMemberInput = {
   displayName: string;
   email: string;
   note: string;
+  isTreasurer: boolean;
   createdBy: string;
 };
 
 export type UpdateGuestMemberInput = Omit<AddGuestMemberInput, 'createdBy'> & {
   memberId: string;
   version: number;
+  currentTreasurerMemberId: string | null;
 };
 
 export type DeactivateGuestMemberInput = Pick<
@@ -95,6 +97,16 @@ export type TripRepository = {
     input: DeactivateGuestMemberInput,
   ) => Promise<TripMemberDetail>;
 };
+
+export function resolveTreasurerUpdate(
+  currentTreasurerMemberId: string | null,
+  memberId: string,
+  isTreasurer: boolean,
+): string | null | undefined {
+  if (isTreasurer && currentTreasurerMemberId !== memberId) return memberId;
+  if (!isTreasurer && currentTreasurerMemberId === memberId) return null;
+  return undefined;
+}
 
 function zonedDateToIso(date: string, timezone: string) {
   const [year, month, day] = date.split('-').map(Number);
@@ -163,6 +175,18 @@ export function mapUpdateTripInput(input: UpdateTripInput) {
 
 export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
+
+  async function setTripTreasurer(
+    tripId: string,
+    treasurerMemberId: string | null,
+  ) {
+    const { error } = await client.rpc('set_trip_treasurer', {
+      p_trip_id: tripId,
+      p_treasurer_member_id: treasurerMemberId,
+      p_request_id: createRequestId(),
+    });
+    if (error) throw mapSupabaseError(error);
+  }
 
   return {
     async joinByCode(code) {
@@ -233,6 +257,9 @@ export function createTripRepository(): TripRepository {
         .single();
 
       if (error) throw mapSupabaseError(error);
+      if (input.isTreasurer) {
+        await setTripTreasurer(input.tripId, data.id);
+      }
       return {
         member: data,
         linkedUserId: null,
@@ -257,6 +284,14 @@ export function createTripRepository(): TripRepository {
 
       if (error) throw mapSupabaseError(error);
       if (!data) throw new AppError('UNKNOWN');
+      const treasurerUpdate = resolveTreasurerUpdate(
+        input.currentTreasurerMemberId,
+        input.memberId,
+        input.isTreasurer,
+      );
+      if (treasurerUpdate !== undefined) {
+        await setTripTreasurer(input.tripId, treasurerUpdate);
+      }
       return {
         member: data,
         linkedUserId: null,

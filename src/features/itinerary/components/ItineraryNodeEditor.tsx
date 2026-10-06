@@ -34,6 +34,7 @@ const categoryIcon: Record<ItineraryNodeFormValues['category'], IconName> = {
   dining: 'restaurant',
   cafe: 'cafe',
   activity: 'activity',
+  location: 'location',
   sightseeing: 'sightseeing',
   others: 'others',
   misc: 'misc',
@@ -49,7 +50,7 @@ const stopIcons: Array<{
   { category: 'dining', iconKey: 'restaurant', icon: 'restaurant' },
   { category: 'cafe', iconKey: 'cafe', icon: 'cafe' },
   { category: 'activity', iconKey: 'activity', icon: 'activity' },
-  { category: 'sightseeing', iconKey: 'location', icon: 'location' },
+  { category: 'location', iconKey: 'location', icon: 'location' },
   { category: 'sightseeing', iconKey: 'sightseeing', icon: 'sightseeing' },
   { category: 'shopping', iconKey: 'shopping', icon: 'shopping' },
   { category: 'others', iconKey: 'others', icon: 'others' },
@@ -58,8 +59,7 @@ const stopIcons: Array<{
 
 const moveIcons: Array<{ iconKey: string; icon: IconName }> = [
   { iconKey: 'car', icon: 'vehicle' },
-  { iconKey: 'bus', icon: 'vehicle' },
-  { iconKey: 'rail', icon: 'train' },
+  { iconKey: 'bus', icon: 'bus' },
   { iconKey: 'train', icon: 'train' },
   { iconKey: 'flight', icon: 'flight' },
   { iconKey: 'ferry', icon: 'ferry' },
