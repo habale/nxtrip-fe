@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
@@ -10,6 +10,7 @@ import {
   Icon,
   Page,
   Select,
+  Skeleton,
   TextArea,
   TextInput,
 } from '../../../shared/ui';
@@ -17,8 +18,14 @@ import {
   type CreateTripFormValues,
   validateCreateTripForm,
 } from '../create-trip-form';
-import { useCreateTrip } from '../trip-hooks';
+import { tripInstantToLocalDate } from '../trip-date';
+import {
+  useCreateTrip,
+  useTripDetail,
+  useUpdateTripMetadata,
+} from '../trip-hooks';
 import { getCurrencyOptions, getTimezoneOptions } from '../trip-options';
+import type { Trip } from '../trip-repository';
 
 import './create-trip.css';
 
@@ -34,19 +41,45 @@ function getInitialValues(): CreateTripFormValues {
   };
 }
 
+function getValuesFromTrip(trip: Trip): CreateTripFormValues {
+  return {
+    name: trip.name,
+    description: trip.description ?? '',
+    startDate: tripInstantToLocalDate(trip.start_at, trip.timezone),
+    endDate: tripInstantToLocalDate(trip.end_at, trip.timezone),
+    timezone: trip.timezone,
+    defaultCurrency: trip.default_currency,
+    currencyDecimalPlaces: trip.currency_decimal_places,
+  };
+}
+
 export function CreateTripPage() {
   const { t, i18n } = useTranslation('common');
   const navigate = useNavigate();
+  const { tripId } = useParams<{ tripId: string }>();
+  const editing = Boolean(tripId);
+  const tripQuery = useTripDetail(tripId ?? '');
   const createTrip = useCreateTrip();
-  const [values, setValues] = useState(getInitialValues);
+  const updateTrip = useUpdateTripMetadata();
+  const [draftValues, setDraftValues] = useState<CreateTripFormValues | null>(
+    () => (editing ? null : getInitialValues()),
+  );
   const [submitted, setSubmitted] = useState(false);
+  const trip = tripQuery.data?.trip;
+  const initialValues = trip ? getValuesFromTrip(trip) : getInitialValues();
+  const values = draftValues ?? initialValues;
   const errors = submitted ? validateCreateTripForm(values) : {};
+  const mutation = editing ? updateTrip : createTrip;
+  const cancelPath = editing && tripId ? routes.tripInfo(tripId) : routes.home;
 
   function update<Field extends keyof CreateTripFormValues>(
     field: Field,
     value: CreateTripFormValues[Field],
   ) {
-    setValues((current) => ({ ...current, [field]: value }));
+    setDraftValues((current) => ({
+      ...(current ?? initialValues),
+      [field]: value,
+    }));
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -54,8 +87,20 @@ export function CreateTripPage() {
     setSubmitted(true);
     if (Object.keys(validateCreateTripForm(values)).length > 0) return;
 
-    const tripId = await createTrip.mutateAsync(values).catch(() => undefined);
-    if (tripId) navigate(routes.tripInfo(tripId), { replace: true });
+    if (editing && trip) {
+      const updated = await updateTrip
+        .mutateAsync({ ...values, tripId: trip.id, version: trip.version })
+        .catch(() => undefined);
+      if (updated) navigate(routes.tripInfo(updated.id), { replace: true });
+      return;
+    }
+
+    const createdTripId = await createTrip
+      .mutateAsync(values)
+      .catch(() => undefined);
+    if (createdTripId) {
+      navigate(routes.tripInfo(createdTripId), { replace: true });
+    }
   }
 
   const errorText = (field: keyof CreateTripFormValues) => {
@@ -63,21 +108,43 @@ export function CreateTripPage() {
     return code ? t(`createTrip.validation.${code}`) : undefined;
   };
 
+  if (editing && tripQuery.isPending) {
+    return (
+      <Page hideHeader padded={false}>
+        <main className="create-trip-page">
+          <div className="create-trip-form">
+            <Skeleton height="5rem" />
+            <Skeleton height="16rem" />
+            <Skeleton height="16rem" />
+          </div>
+        </main>
+      </Page>
+    );
+  }
+
+  if (editing && (!tripQuery.data || tripQuery.data.role !== 'owner')) {
+    return (
+      <Navigate replace to={tripId ? routes.tripInfo(tripId) : routes.home} />
+    );
+  }
+
   return (
     <Page hideHeader padded={false}>
       <main className="create-trip-page">
         <header className="create-trip-header">
           <Button
             ariaLabel={t('actions.back')}
-            href={routes.home}
+            href={cancelPath}
             navigationDirection="back"
             variant="quiet"
           >
             <Icon name="back" size="large" />
           </Button>
           <div>
-            <p>{t('createTrip.eyebrow')}</p>
-            <h1>{t('createTrip.title')}</h1>
+            <p>
+              {t(editing ? 'createTrip.editEyebrow' : 'createTrip.eyebrow')}
+            </p>
+            <h1>{t(editing ? 'createTrip.editTitle' : 'createTrip.title')}</h1>
           </div>
         </header>
 
@@ -112,8 +179,8 @@ export function CreateTripPage() {
               label={t('createTrip.datesTitle')}
               startDate={values.startDate}
               onValueChange={({ startDate, endDate }) =>
-                setValues((current) => ({
-                  ...current,
+                setDraftValues((current) => ({
+                  ...(current ?? initialValues),
                   startDate,
                   endDate,
                 }))
@@ -133,7 +200,9 @@ export function CreateTripPage() {
             />
             <Select
               required
+              disabled={editing}
               errorText={errorText('defaultCurrency')}
+              helperText={editing ? t('createTrip.currencyLocked') : undefined}
               label={t('createTrip.defaultCurrency')}
               options={getCurrencyOptions(
                 values.defaultCurrency,
@@ -146,8 +215,13 @@ export function CreateTripPage() {
             />
             <TextInput
               required
+              disabled={editing}
               errorText={errorText('currencyDecimalPlaces')}
-              helperText={t('createTrip.currencyDecimalPlacesHelp')}
+              helperText={
+                editing
+                  ? t('createTrip.currencyDecimalPlacesLocked')
+                  : t('createTrip.currencyDecimalPlacesHelp')
+              }
               inputMode="numeric"
               label={t('createTrip.currencyDecimalPlaces')}
               type="number"
@@ -158,24 +232,24 @@ export function CreateTripPage() {
             />
           </section>
 
-          {createTrip.error && (
+          {mutation.error && (
             <p className="create-trip-submit-error" role="alert">
               {t(
-                createTrip.error instanceof AppError
-                  ? createTrip.error.translationKey
+                mutation.error instanceof AppError
+                  ? mutation.error.translationKey
                   : 'errors:generic',
               )}
             </p>
           )}
 
           <div className="create-trip-actions">
-            <Button block href={routes.home} variant="quiet">
+            <Button block href={cancelPath} variant="quiet">
               {t('actions.cancel')}
             </Button>
-            <Button block loading={createTrip.isPending} type="submit">
-              {createTrip.isPending
-                ? t('createTrip.creating')
-                : t('createTrip.submit')}
+            <Button block loading={mutation.isPending} type="submit">
+              {mutation.isPending
+                ? t(editing ? 'tripInfo.saving' : 'createTrip.creating')
+                : t(editing ? 'actions.save' : 'createTrip.submit')}
             </Button>
           </div>
         </form>

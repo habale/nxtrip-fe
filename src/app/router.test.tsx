@@ -29,7 +29,7 @@ describe('application routes', () => {
 
   it.each([
     ['/home', 'Hi, Traveler!'],
-    ['/trips/add', 'Add or Join Trip'],
+    ['/trips/add', 'Join or Add Trip'],
     ['/trips/new', 'Create a trip'],
     ['/bookmarks', 'Bookmarks'],
     ['/settings', 'Profile & Settings'],

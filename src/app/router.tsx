@@ -76,6 +76,14 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         }
       />
       <Route
+        path={ROUTE_PATHS.editTrip}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <CreateTripPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path={ROUTE_PATHS.bookmarks}
         element={
           <ProtectedPage

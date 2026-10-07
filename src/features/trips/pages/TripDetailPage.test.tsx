@@ -118,7 +118,10 @@ describe('TripDetailPage', () => {
       'aria-current',
       'page',
     );
-    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.getByText('Edit')).toHaveAttribute(
+      'router-link',
+      '/trips/trip-123/edit',
+    );
   });
 
   it('keeps metadata editing hidden from non-owners', async () => {

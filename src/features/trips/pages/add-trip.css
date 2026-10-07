@@ -30,9 +30,7 @@
 .add-trip-intro h2,
 .add-trip-intro p,
 .add-trip-card h2,
-.add-trip-card p,
-.pending-invites h2,
-.pending-invites p {
+.add-trip-card p {
   margin: 0;
 }
 
@@ -151,41 +149,6 @@
 .add-trip-error {
   color: var(--color-negative) !important;
   font-size: 0.875rem !important;
-}
-
-.pending-invites {
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem 0;
-}
-
-.pending-invites__heading {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.pending-invites__heading h2 {
-  font-size: 1.25rem;
-}
-
-.pending-invites__heading span {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-secondary);
-  color: var(--color-secondary-strong);
-  font-weight: 800;
-}
-
-.pending-invites__empty {
-  padding: 1.25rem;
-  border-radius: var(--radius-control);
-  background: var(--color-surface-muted);
-  color: var(--color-ink-muted);
-  text-align: center;
 }
 
 @media (min-width: 700px) {

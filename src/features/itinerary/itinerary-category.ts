@@ -65,7 +65,7 @@ const categoryByIcon: Record<string, ItineraryCategory> = {
   flight: 'moving',
   food: 'dining',
   hotel: 'lodging',
-  location: 'sightseeing',
+  location: 'location',
   restaurant: 'dining',
   shopping: 'shopping',
   sightseeing: 'sightseeing',

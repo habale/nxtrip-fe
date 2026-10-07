@@ -100,7 +100,7 @@ export function AddTripPage() {
                 )}
               </p>
             )}
-            <Button block variant="secondary" loading={joinTrip.isPending} type="submit">
+            <Button block variant="primary" loading={joinTrip.isPending} type="submit">
               {joinTrip.isPending
                 ? t('addTrip.joining')
                 : t('addTrip.joinAction')}
@@ -114,24 +114,12 @@ export function AddTripPage() {
           <section className="add-trip-card add-trip-card--create">
             <h2>{t('addTrip.createTitle')}</h2>
             <p>{t('addTrip.createDescription')}</p>
-            <Button block href={routes.newTrip} navigationDirection="forward">
+            <Button block href={routes.newTrip} variant="secondary" navigationDirection="forward">
               <span className="add-trip-button-label">
                 {t('addTrip.createAction')}
                 <Icon name="forward" />
               </span>
             </Button>
-          </section>
-
-          <section className="pending-invites" aria-labelledby="pending-title">
-            <div className="pending-invites__heading">
-              <h2 id="pending-title">{t('addTrip.pendingInvites')}</h2>
-              <span aria-label={t('addTrip.pendingCount', { count: 0 })}>
-                0
-              </span>
-            </div>
-            <p className="pending-invites__empty">
-              {t('addTrip.noPendingInvites')}
-            </p>
           </section>
         </div>
       </main>

@@ -82,12 +82,13 @@
   flex: 0 0 auto;
   min-height: 2.75rem;
   place-items: center;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
   border-bottom: 3px solid transparent;
   color: var(--color-ink-muted);
   font-weight: 650;
   text-decoration: none;
   white-space: nowrap;
+  font-size: 0.8rem;
 }
 
 .trip-detail-nav .ui-tab-link .ui-icon {
@@ -108,7 +109,7 @@
 .trip-invite-panel {
   display: grid;
   gap: 1rem;
-  padding: 1.25rem;
+  padding: clamp(1.5rem, 6vw, 2.5rem);
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);

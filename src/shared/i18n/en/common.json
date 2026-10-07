@@ -63,9 +63,9 @@
     "showAll": "Show all trips"
   },
   "addTrip": {
-    "title": "Add or Join Trip",
+    "title": "Join or Add Trip",
     "heading": "Ready for your next journey?",
-    "description": "Start fresh with a blank canvas or jump into an existing crew itinerary.",
+    "description": "Jump into an existing crew or start fresh with a blank journey.",
     "createTitle": "Start a New Trip",
     "createDescription": "Set dates, pin must-visit spots, organize shared day-by-day itineraries, and effortlessly balance group expenses.",
     "createAction": "Create New Trip",
@@ -88,6 +88,8 @@
   "createTrip": {
     "eyebrow": "New adventure",
     "title": "Create a trip",
+    "editEyebrow": "Trip settings",
+    "editTitle": "Edit trip",
     "name": "Trip name",
     "namePlaceholder": "e.g. Summer in Japan",
     "description": "Description (optional)",
