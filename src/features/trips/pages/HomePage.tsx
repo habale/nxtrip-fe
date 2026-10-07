@@ -25,7 +25,8 @@ const filters: TripFilter[] = [
 export function HomePage() {
   const { t } = useTranslation('common');
   const { user } = useAuth();
-  const { data: profile } = useCurrentProfile();
+  const profileQuery = useCurrentProfile();
+  const profile = profileQuery.data;
   const tripQuery = useTripList();
   const [filter, setFilter] = useState<TripFilter>('all');
   const displayName =
@@ -47,6 +48,9 @@ export function HomePage() {
 
   return (
     <Page
+      onRefresh={() =>
+        Promise.all([profileQuery.refetch(), tripQuery.refetch()])
+      }
       headerStart={<span className="home-wordmark">NxTrip</span>}
       headerEnd={
         <div className="home-profile-action">

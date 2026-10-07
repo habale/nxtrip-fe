@@ -36,9 +36,13 @@ function bookmarkMetadata(bookmark: Bookmark) {
   return categories.find((item) => item.iconKey === iconKey) ?? categories[0];
 }
 
-type Props = { trip: Trip; repository?: BookmarkRepository };
+type Props = {
+  trip: Trip;
+  canAdd?: boolean;
+  repository?: BookmarkRepository;
+};
 
-export function BookmarksPanel({ trip, repository }: Props) {
+export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
   const { t } = useTranslation('common');
   const bookmarks = useTripBookmarks(trip.id, repository);
   const createBookmark = useCreateBookmark(repository);
@@ -85,9 +89,11 @@ export function BookmarksPanel({ trip, repository }: Props) {
 
   return (
     <section className="bookmarks-panel">
-      {!adding ? (
-        <Button variant="quiet" onClick={() => setAdding(true)}>{t('bookmarks.add')}</Button>
-      ) : (
+      {canAdd && !adding ? (
+        <Button variant="quiet" onClick={() => setAdding(true)}>
+          {t('bookmarks.add')}
+        </Button>
+      ) : canAdd && adding ? (
         <section
           className={`bookmark-editor itinerary-category--${category.category}`}
         >
@@ -156,7 +162,7 @@ export function BookmarksPanel({ trip, repository }: Props) {
             </Button>
           </div>
         </section>
-      )}
+      ) : null}
 
       {bookmarks.isPending ? (
         <div className="bookmarks-list">

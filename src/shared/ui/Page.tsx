@@ -2,6 +2,8 @@ import {
   IonContent,
   IonHeader,
   IonPage,
+  IonRefresher,
+  IonRefresherContent,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -18,6 +20,7 @@ export type PageProps = PropsWithChildren<{
   secondaryToolbarClassName?: string;
   padded?: boolean;
   hideHeader?: boolean;
+  onRefresh?: () => Promise<unknown> | unknown;
 }>;
 
 export function Page({
@@ -31,6 +34,7 @@ export function Page({
   secondaryToolbarClassName,
   padded = true,
   hideHeader,
+  onRefresh,
   children,
 }: PageProps) {
   return (
@@ -54,6 +58,18 @@ export function Page({
         </IonHeader>
       )}
       <IonContent className={padded ? 'ion-padding' : undefined}>
+        {onRefresh && (
+          <IonRefresher
+            slot="fixed"
+            onIonRefresh={(event) => {
+              Promise.resolve(onRefresh()).finally(() => {
+                event.detail.complete();
+              });
+            }}
+          >
+            <IonRefresherContent />
+          </IonRefresher>
+        )}
         {children}
       </IonContent>
     </IonPage>

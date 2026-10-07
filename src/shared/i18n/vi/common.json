@@ -7,6 +7,7 @@
     "description": "Lưu mọi điểm đến, chi phí chung và thông tin chuyến đi tại một nơi.",
     "continueWithGoogle": "Tiếp tục với Google",
     "accessAsGuest": "Truy cập với tư cách khách",
+    "betaVersion": "Phiên bản Beta",
     "comingSoon": "Sắp ra mắt",
     "restoringSession": "Đang khôi phục phiên đăng nhập…",
     "signOut": "Đăng xuất",
@@ -28,6 +29,7 @@
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Đang lưu tùy chọn ngôn ngữ…",
+    "reloadApp": "Tải lại ứng dụng",
     "changePhotoComingSoon": "Đổi ảnh hồ sơ — sắp ra mắt"
   },
   "home": {

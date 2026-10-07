@@ -157,12 +157,18 @@
   width: 100%;
 }
 
+.settings-logout {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .settings-logout .auth-actions,
-.settings-logout .ui-button {
+.settings-logout .auth-actions .ui-button,
+.settings-logout > .ui-button {
   width: 100%;
 }
 
-.settings-logout .ui-button {
+.settings-logout .auth-actions .ui-button {
   min-height: 4rem;
   --background: var(--color-negative-soft);
   --background-activated: #ffc7c1;
@@ -170,9 +176,23 @@
   --color: var(--color-negative);
 }
 
-.settings-logout .ui-button::part(native) {
+.settings-logout .auth-actions .ui-button::part(native) {
   background: var(--color-negative-soft);
   color: var(--color-negative);
+}
+
+.settings-logout > .ui-button {
+  min-height: 4rem;
+  --background: var(--color-soft);
+  --background-activated: #dbe4ff;
+  --background-hover: #e0e7ff;
+  --color: var(--color-primary);
+}
+
+.settings-logout > .ui-button::part(native) {
+  gap: 0.5rem;
+  background: var(--color-soft);
+  color: var(--color-primary);
 }
 
 .settings-error {

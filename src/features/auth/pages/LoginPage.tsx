@@ -93,6 +93,8 @@ export function LoginPage() {
             )}
           </div>
         </div>
+
+        <p className="auth-version">{t('auth.betaVersion')}</p>
       </main>
     </Page>
   );

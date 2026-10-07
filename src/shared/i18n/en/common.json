@@ -7,6 +7,7 @@
     "description": "Keep every stop, shared expense, and trip detail in one place.",
     "continueWithGoogle": "Continue with Google",
     "accessAsGuest": "Access as Guest",
+    "betaVersion": "Beta Version",
     "comingSoon": "Coming soon",
     "restoringSession": "Restoring your session…",
     "signOut": "Sign out",
@@ -28,6 +29,7 @@
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Saving language preference…",
+    "reloadApp": "Reload app",
     "changePhotoComingSoon": "Change profile photo — coming soon"
   },
   "home": {

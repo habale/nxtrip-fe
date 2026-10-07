@@ -5,7 +5,7 @@
   overflow: hidden;
   place-items: center;
   padding: max(3.5rem, env(safe-area-inset-top)) 1.5rem
-    max(2rem, env(safe-area-inset-bottom));
+    max(3.5rem, calc(env(safe-area-inset-bottom) + 2rem));
   background: var(--color-primary);
   color: var(--color-surface);
 }
@@ -142,6 +142,20 @@
   --color: var(--color-surface);
   --padding-start: 0.65rem;
   --padding-end: 0.65rem;
+}
+
+.auth-version {
+  position: absolute;
+  right: 1rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: 1rem;
+  margin: 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .auth-error {

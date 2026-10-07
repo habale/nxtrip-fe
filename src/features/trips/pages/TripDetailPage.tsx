@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { routes } from '../../../app/routes';
 import { AppError } from '../../../shared/api/app-error';
@@ -13,7 +14,7 @@ import { TripInfoPanel } from '../components/TripInfoPanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
 import { TripInvitePanel } from '../components/TripInvitePanel';
 import { formatTripDateRange } from '../trip-date';
-import { useTripDetail } from '../trip-hooks';
+import { tripKeys, useTripDetail } from '../trip-hooks';
 import type { TripRepository } from '../trip-repository';
 
 import './trip-detail.css';
@@ -53,6 +54,7 @@ export function TripDetailPage({
   ledgerRepository,
 }: TripDetailPageProps) {
   const { t, i18n } = useTranslation('common');
+  const queryClient = useQueryClient();
   const { tripId = '', section: routeSection } = useParams();
   const section =
     sectionOverride ?? (isTripSection(routeSection) ? routeSection : 'info');
@@ -60,12 +62,7 @@ export function TripDetailPage({
   const detail = tripQuery.data;
   const trip = detail?.trip;
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
-  const sections: TripSection[] = [
-    'info',
-    'itinerary',
-    'ledger',
-    'bookmarks',
-  ];
+  const sections: TripSection[] = ['info', 'itinerary', 'ledger', 'bookmarks'];
 
   if (tripQuery.isPending) {
     return (
@@ -127,6 +124,18 @@ export function TripDetailPage({
   return (
     <Page
       padded={false}
+      onRefresh={() =>
+        Promise.all([
+          tripQuery.refetch(),
+          queryClient.invalidateQueries({
+            queryKey: tripKeys.members(trip.id),
+          }),
+          queryClient.invalidateQueries({ queryKey: tripKeys.invite(trip.id) }),
+          queryClient.invalidateQueries({ queryKey: ['itinerary', trip.id] }),
+          queryClient.invalidateQueries({ queryKey: ['ledger', trip.id] }),
+          queryClient.invalidateQueries({ queryKey: ['bookmarks', trip.id] }),
+        ])
+      }
       headerClassName="trip-detail-ion-header"
       toolbarClassName="trip-detail-title-toolbar"
       secondaryToolbarClassName="trip-detail-nav-toolbar"
@@ -207,7 +216,7 @@ export function TripDetailPage({
                 locale={locale}
               />
             ) : section === 'bookmarks' ? (
-              <BookmarksPanel trip={trip} />
+              <BookmarksPanel canAdd={detail.role === 'owner'} trip={trip} />
             ) : (
               <section className="trip-detail-placeholder">
                 <Icon name={sectionIcons[section]} size="large" />
