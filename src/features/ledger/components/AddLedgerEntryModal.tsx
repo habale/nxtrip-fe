@@ -494,6 +494,7 @@ export function AddLedgerEntryModal({
                       <Avatar
                         name={member.display_name}
                         src={member.avatar_url ?? undefined}
+                        size="small"
                         initialCount={2}
                       />
                       <span className="ledger-split-member__name">

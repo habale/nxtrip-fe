@@ -141,7 +141,7 @@ function ExpenseCard({
       <div
         className={`ledger-expense-icon ledger-expense-icon--${expenseIcon(expense)}`}
       >
-        <Icon name={expenseIcon(expense)} size="large" />
+        <Icon name={expenseIcon(expense)} />
       </div>
       <div className="ledger-expense-main">
         <h4>{expense.expense.title}</h4>
@@ -220,7 +220,7 @@ function MemberExpenseCard({
       <div
         className={`ledger-expense-icon ledger-expense-icon--${expenseIcon(expense)}`}
       >
-        <Icon name={expenseIcon(expense)} size="large" />
+        <Icon name={expenseIcon(expense)} />
       </div>
       <div>
         <h4>{expense.expense.title}</h4>
@@ -271,7 +271,7 @@ function TransferCard({
   return (
     <article className="ledger-expense-card ledger-transfer-card">
       <div className="ledger-expense-icon ledger-transfer-icon">
-        <Icon name="transfer" size="large" />
+        <Icon name="transfer" />
       </div>
       <div className="ledger-expense-main">
         <h4>
@@ -311,7 +311,7 @@ function MemberTransferCard({
   return (
     <article className="ledger-member-expense-card">
       <div className="ledger-expense-icon ledger-transfer-icon">
-        <Icon name="transfer" size="large" />
+        <Icon name="transfer" />
       </div>
       <div>
         <h4>
@@ -1065,11 +1065,13 @@ export function LedgerPanel({
       )}
       {canEdit && query.data && (
         <>
-          <FabButton
-            label={t('ledger.addEntry')}
-            icon="add"
-            onClick={() => setAddOpen(true)}
-          />
+          {!addOpen && (
+            <FabButton
+              label={t('ledger.addEntry')}
+              icon="add"
+              onClick={() => setAddOpen(true)}
+            />
+          )}
           <AddLedgerEntryModal
             open={addOpen}
             trip={trip}

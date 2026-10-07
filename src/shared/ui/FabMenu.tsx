@@ -1,5 +1,12 @@
-import { IonFab, IonFabButton, IonFabList } from '@ionic/react';
+import {
+  IonFab,
+  IonFabButton,
+  IonFabList,
+  useIonViewDidEnter,
+  useIonViewWillLeave,
+} from '@ionic/react';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Icon, type IconName } from './Icon';
 
@@ -69,23 +76,35 @@ export function FabButton({
   hideWhenKeyboardOpen = false,
   onClick,
 }: FabButtonProps) {
+  const [pageActive, setPageActive] = useState(true);
   const keyboardOpen = useKeyboardOpen(hideWhenKeyboardOpen);
-  if (keyboardOpen) return null;
+  useIonViewDidEnter(() => setPageActive(true));
+  useIonViewWillLeave(() => setPageActive(false));
+  if (keyboardOpen || !pageActive) return null;
 
-  return (
+  return createPortal(
     <IonFab className="ui-fab-menu" horizontal="end" vertical="bottom">
       <IonFabButton aria-label={label} onClick={onClick}>
         <Icon name={icon} size="large" />
         <span className="sr-only">{label}</span>
       </IonFabButton>
-    </IonFab>
+    </IonFab>,
+    document.body,
   );
 }
 
 export function FabMenu({ label, icon = 'more', actions }: FabMenuProps) {
   const [open, setOpen] = useState(false);
+  const [pageActive, setPageActive] = useState(true);
+  useIonViewDidEnter(() => setPageActive(true));
+  useIonViewWillLeave(() => {
+    setOpen(false);
+    setPageActive(false);
+  });
 
-  return (
+  if (!pageActive) return null;
+
+  return createPortal(
     <IonFab
       activated={open}
       className="ui-fab-menu"
@@ -117,6 +136,7 @@ export function FabMenu({ label, icon = 'more', actions }: FabMenuProps) {
           </IonFabButton>
         ))}
       </IonFabList>
-    </IonFab>
+    </IonFab>,
+    document.body,
   );
 }

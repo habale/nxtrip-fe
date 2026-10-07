@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -175,9 +175,9 @@ const MoveConnector = memo(function MoveConnector({
             <div className="itinerary-move__summary">
               <Icon name={nodeIcon(node)} />
               {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
-              <span>{title}</span>
             </div>
           </div>
+          <h3 className="itinerary-move__title">{title}</h3>
           {node.additionalLines.length > 0 && (
             <div className="itinerary-move__lines">
               {node.additionalLines.map((line, index) => (
@@ -227,7 +227,7 @@ const StopCard = memo(function StopCard({
             />
             <div className="itinerary-stop__hero-content">
               <div className="itinerary-stop__icon">
-                <Icon name={nodeIcon(node)} size="large" />
+                <Icon name={nodeIcon(node)} />
               </div>
               <div className="itinerary-stop__summary">
                 {time && (
@@ -253,7 +253,7 @@ const StopCard = memo(function StopCard({
         <div className="itinerary-stop__layout">
           <div className="itinerary-stop__header">
             <div className="itinerary-stop__icon">
-              <Icon name={nodeIcon(node)} size="large" />
+              <Icon name={nodeIcon(node)} />
             </div>
             <div className="itinerary-stop__summary">
               {time && <time dateTime={node.startAt ?? undefined}>{time}</time>}
@@ -289,8 +289,6 @@ export function ItineraryPanel({
   const { t, i18n } = useTranslation('common');
   const initial = useMemo(() => getInitialItineraryWindow(trip), [trip]);
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
-  const dayNavigationRef = useRef<HTMLDivElement>(null);
-  const [dayNavigationScrollable, setDayNavigationScrollable] = useState(false);
   const window = useMemo(
     () => getItineraryWindowForDate(trip, selectedDate),
     [selectedDate, trip],
@@ -352,58 +350,6 @@ export function ItineraryPanel({
     dateStyle: 'full',
     timeZone: 'UTC',
   });
-
-  useEffect(() => {
-    const navigation = dayNavigationRef.current;
-    if (!navigation) return;
-
-    const updateScrollable = () => {
-      const buttons = Array.from(
-        navigation.querySelectorAll<HTMLElement>('[data-itinerary-day]'),
-      );
-      const gap =
-        Number.parseFloat(getComputedStyle(navigation).columnGap) || 0;
-      const contentWidth =
-        buttons.reduce((total, button) => total + button.offsetWidth, 0) +
-        Math.max(0, buttons.length - 1) * gap;
-      setDayNavigationScrollable(contentWidth > navigation.clientWidth + 1);
-    };
-
-    updateScrollable();
-    const resizeObserver = globalThis.ResizeObserver
-      ? new ResizeObserver(updateScrollable)
-      : null;
-    resizeObserver?.observe(navigation);
-    navigation
-      .querySelectorAll<HTMLElement>('[data-itinerary-day]')
-      .forEach((button) => resizeObserver?.observe(button));
-    globalThis.addEventListener('resize', updateScrollable);
-
-    return () => {
-      resizeObserver?.disconnect();
-      globalThis.removeEventListener('resize', updateScrollable);
-    };
-  }, [days, locale]);
-
-  useEffect(() => {
-    if (!dayNavigationScrollable) return;
-    const navigation = dayNavigationRef.current;
-    const selectedButton = navigation?.querySelector<HTMLElement>(
-      `[data-itinerary-day="${selectedDate}"]`,
-    );
-    if (!navigation || !selectedButton) return;
-
-    const left =
-      selectedButton.offsetLeft -
-      (navigation.clientWidth - selectedButton.offsetWidth) / 2;
-    const reduceMotion =
-      globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
-      false;
-    navigation.scrollTo?.({
-      left: Math.max(0, left),
-      behavior: reduceMotion ? 'auto' : 'smooth',
-    });
-  }, [dayNavigationScrollable, selectedDate]);
 
   function moveNode(from: number, to: number) {
     if (
@@ -482,12 +428,7 @@ export function ItineraryPanel({
           document.body,
         )}
       <div className="itinerary-day-navigation">
-        <div
-          ref={dayNavigationRef}
-          className={`itinerary-day-navigation__days${
-            dayNavigationScrollable ? ' is-scrollable' : ''
-          }`}
-        >
+        <div className="itinerary-day-navigation__days">
           {days.map((day) => (
             <button
               key={day}
