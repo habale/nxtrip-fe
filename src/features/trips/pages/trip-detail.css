@@ -93,6 +93,8 @@
 
 .trip-detail-nav .ui-tab-link .ui-icon {
   font-size: 1.4rem;
+  position: relative;
+  top: 2px;
 }
 
 .trip-detail-nav .ui-tab-link--selected {

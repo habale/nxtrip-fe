@@ -416,6 +416,16 @@
       "invalidEmail": "Enter a valid email address."
     }
   },
+  "bookmarks": {
+    "add": "+ Add bookmark",
+    "addTitle": "Add bookmark",
+    "chooseIcon": "Choose an icon",
+    "title": "Title",
+    "titleRequired": "Title is required.",
+    "notes": "Notes",
+    "mapsUrl": "Google Maps link",
+    "openLink": "Directions"
+  },
   "dateRange": {
     "placeholder": "Select trip dates",
     "selectedRange": "{{start}} – {{end}}",

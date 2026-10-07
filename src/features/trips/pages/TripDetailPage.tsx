@@ -7,6 +7,7 @@ import { Button, Icon, Page, Skeleton, TabLink } from '../../../shared/ui';
 import { ItineraryPanel } from '../../itinerary/components/ItineraryPanel';
 import type { ItineraryRepository } from '../../itinerary/itinerary-repository';
 import { LedgerPanel } from '../../ledger/components/LedgerPanel';
+import { BookmarksPanel } from '../../bookmarks/components/BookmarksPanel';
 import type { LedgerRepository } from '../../ledger/ledger-repository';
 import { TripInfoPanel } from '../components/TripInfoPanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
@@ -63,7 +64,6 @@ export function TripDetailPage({
     'info',
     'itinerary',
     'ledger',
-    'attachments',
     'bookmarks',
   ];
 
@@ -206,6 +206,8 @@ export function TripDetailPage({
                 trip={trip}
                 locale={locale}
               />
+            ) : section === 'bookmarks' ? (
+              <BookmarksPanel trip={trip} />
             ) : (
               <section className="trip-detail-placeholder">
                 <Icon name={sectionIcons[section]} size="large" />

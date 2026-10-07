@@ -1,0 +1,94 @@
+.bookmarks-panel {
+  display: grid;
+  gap: 1rem;
+}
+.bookmarks-panel > .app-button:first-child {
+  justify-self: start;
+}
+.bookmark-editor {
+  display: grid;
+  gap: 1rem;
+}
+.bookmark-editor h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.bookmark-editor__card,
+.bookmark-card {
+  background: var(--color-surface);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+.bookmark-editor__card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+.bookmark-editor__icons {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+.bookmark-editor__icons button {
+  align-items: center;
+  background: var(--color-surface-muted);
+  border: 0;
+  border-radius: 50%;
+  color: var(--color-ink-muted);
+  display: inline-flex;
+  flex: 0 0 3rem;
+  height: 3rem;
+  justify-content: center;
+}
+.bookmark-editor__icons button[aria-pressed='true'] {
+  background: var(--itinerary-category-background);
+  color: var(--itinerary-category-color);
+}
+.bookmark-editor__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.bookmarks-list {
+  display: grid;
+  gap: 0.85rem;
+}
+.bookmark-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+.bookmark-card__icon {
+  align-items: center;
+  background: var(--itinerary-category-background);
+  border-radius: 50%;
+  color: var(--itinerary-category-color);
+  display: inline-flex;
+  height: 3.5rem;
+  justify-content: center;
+  width: 3.5rem;
+}
+.bookmark-card h2 {
+  font-size: 1.05rem;
+  margin: 0.15rem 0 0.35rem;
+}
+.bookmark-card p {
+  color: var(--color-ink-muted);
+  margin: 0 0 0.65rem;
+  white-space: pre-wrap;
+}
+.bookmark-card a {
+  align-items: center;
+  color: var(--color-primary);
+  display: inline-flex;
+  gap: 0.35rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.bookmarks-empty {
+  color: var(--color-ink-muted);
+  padding: 3rem 1rem;
+  text-align: center;
+}

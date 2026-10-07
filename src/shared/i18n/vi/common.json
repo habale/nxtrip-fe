@@ -413,6 +413,16 @@
       "invalidEmail": "Nhập địa chỉ email hợp lệ."
     }
   },
+  "bookmarks": {
+    "add": "+ Thêm dấu trang",
+    "addTitle": "Thêm dấu trang",
+    "chooseIcon": "Chọn biểu tượng",
+    "title": "Tiêu đề",
+    "titleRequired": "Tiêu đề là bắt buộc.",
+    "notes": "Ghi chú",
+    "mapsUrl": "Liên kết Google Maps",
+    "openLink": "Chỉ đường"
+  },
   "dateRange": {
     "placeholder": "Chọn ngày chuyến đi",
     "selectedRange": "{{start}} – {{end}}",
