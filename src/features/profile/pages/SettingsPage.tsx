@@ -6,7 +6,6 @@ import {
   Avatar,
   Button,
   Icon,
-  IconButton,
   Page,
   Segment,
   Skeleton,
