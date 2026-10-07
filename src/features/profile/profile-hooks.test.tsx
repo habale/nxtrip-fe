@@ -5,7 +5,11 @@ import userEvent from '@testing-library/user-event';
 import type { PropsWithChildren } from 'react';
 
 import { AuthContext, type AuthContextValue } from '../auth/auth-context';
-import { i18n, LANGUAGE_STORAGE_KEY } from '../../shared/i18n';
+import {
+  i18n,
+  LANGUAGE_STORAGE_KEY,
+  PENDING_SIGNUP_LANGUAGE_KEY,
+} from '../../shared/i18n';
 import { useCurrentProfile, useUpdateProfileLanguage } from './profile-hooks';
 import type { Profile, ProfileRepository } from './profile-repository';
 
@@ -20,13 +24,13 @@ const profile: Profile = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-function createWrapper() {
+function createWrapper(user: User = { id: profile.id } as User) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   const auth: AuthContextValue = {
     session: null,
-    user: { id: profile.id } as User,
+    user,
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
@@ -62,6 +66,7 @@ function ProfileProbe({ repository }: { repository: ProfileRepository }) {
 describe('profile hooks', () => {
   beforeEach(() => {
     localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+    sessionStorage.removeItem(PENDING_SIGNUP_LANGUAGE_KEY);
   });
 
   it('loads the current profile and synchronizes its language', async () => {
@@ -98,5 +103,32 @@ describe('profile hooks', () => {
     );
     await waitFor(() => expect(i18n.language).toBe('en'));
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
+  });
+
+  it('applies the device language only on the first sign-in', async () => {
+    sessionStorage.setItem(PENDING_SIGNUP_LANGUAGE_KEY, 'vi');
+    const englishProfile = { ...profile, language: 'en' };
+    const repository = {
+      getCurrent: vi.fn(async () => englishProfile),
+      updateLanguage: vi.fn(async () => ({
+        ...englishProfile,
+        language: 'vi',
+      })),
+    } satisfies ProfileRepository;
+    const newUser = {
+      id: profile.id,
+      created_at: '2026-01-01T00:00:00.000Z',
+      last_sign_in_at: '2026-01-01T00:00:01.000Z',
+    } as User;
+
+    render(<ProfileProbe repository={repository} />, {
+      wrapper: createWrapper(newUser),
+    });
+
+    await waitFor(() =>
+      expect(repository.updateLanguage).toHaveBeenCalledWith(profile.id, 'vi'),
+    );
+    await waitFor(() => expect(i18n.language).toBe('vi'));
+    expect(sessionStorage.getItem(PENDING_SIGNUP_LANGUAGE_KEY)).toBeNull();
   });
 });

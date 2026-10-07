@@ -28,7 +28,6 @@
   min-height: 4rem;
   grid-template-columns: 3.25rem minmax(0, 1fr);
   align-items: center;
-  gap: 0.5rem;
   padding: 0 0.75rem;
 }
 

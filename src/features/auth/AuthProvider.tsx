@@ -13,6 +13,10 @@ import {
   type AuthStatus,
 } from './auth-context';
 import { getAuthClient, type AuthClient } from './auth-client';
+import {
+  clearPendingSignupLanguage,
+  rememberSignupLanguage,
+} from '../../shared/i18n';
 
 type AuthProviderProps = PropsWithChildren<{
   client?: AuthClient;
@@ -91,6 +95,7 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
         returnTo.startsWith('/') && !returnTo.startsWith('//')
           ? returnTo
           : '/home';
+      rememberSignupLanguage();
       const { error: signInError } = await authClient.signInWithOAuth({
         provider: 'google',
         options: {
@@ -99,6 +104,7 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
       });
 
       if (signInError) {
+        clearPendingSignupLanguage();
         setError(signInError);
         throw signInError;
       }

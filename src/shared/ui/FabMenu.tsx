@@ -63,6 +63,31 @@ function useKeyboardOpen(enabled: boolean) {
   return enabled && (focusedField || viewportReduced);
 }
 
+function useModalOpen() {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      setModalOpen(
+        Boolean(document.querySelector('ion-modal:not(.overlay-hidden)')),
+      );
+    };
+    const observer = new MutationObserver(update);
+
+    update();
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return modalOpen;
+}
+
 export type FabButtonProps = {
   label: string;
   icon: IconName;
@@ -78,9 +103,10 @@ export function FabButton({
 }: FabButtonProps) {
   const [pageActive, setPageActive] = useState(true);
   const keyboardOpen = useKeyboardOpen(hideWhenKeyboardOpen);
+  const modalOpen = useModalOpen();
   useIonViewDidEnter(() => setPageActive(true));
   useIonViewWillLeave(() => setPageActive(false));
-  if (keyboardOpen || !pageActive) return null;
+  if (keyboardOpen || modalOpen || !pageActive) return null;
 
   return createPortal(
     <IonFab className="ui-fab-menu" horizontal="end" vertical="bottom">
@@ -96,13 +122,14 @@ export function FabButton({
 export function FabMenu({ label, icon = 'more', actions }: FabMenuProps) {
   const [open, setOpen] = useState(false);
   const [pageActive, setPageActive] = useState(true);
+  const modalOpen = useModalOpen();
   useIonViewDidEnter(() => setPageActive(true));
   useIonViewWillLeave(() => {
     setOpen(false);
     setPageActive(false);
   });
 
-  if (!pageActive) return null;
+  if (modalOpen || !pageActive) return null;
 
   return createPortal(
     <IonFab

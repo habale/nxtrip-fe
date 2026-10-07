@@ -13,6 +13,7 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const FALLBACK_LANGUAGE: SupportedLanguage = 'en';
 export const LANGUAGE_STORAGE_KEY = 'sxtrip.language';
+export const PENDING_SIGNUP_LANGUAGE_KEY = 'nxtrip.pending-signup-language';
 
 const resources = {
   en: { common: enCommon, errors: enErrors, navigation: enNavigation },
@@ -35,20 +36,55 @@ function readPersistedLanguage() {
   }
 }
 
-function readBrowserLanguage() {
+export function detectDeviceLanguage(): SupportedLanguage {
   if (typeof navigator === 'undefined') {
-    return undefined;
+    return FALLBACK_LANGUAGE;
   }
 
   const browserLanguages = [...(navigator.languages ?? []), navigator.language];
 
-  return browserLanguages
-    .map(toSupportedLanguage)
-    .find((language): language is SupportedLanguage => language !== undefined);
+  return (
+    browserLanguages
+      .map(toSupportedLanguage)
+      .find(
+        (language): language is SupportedLanguage => language !== undefined,
+      ) ?? FALLBACK_LANGUAGE
+  );
 }
 
 export function detectLanguage(): SupportedLanguage {
-  return readPersistedLanguage() ?? readBrowserLanguage() ?? FALLBACK_LANGUAGE;
+  return readPersistedLanguage() ?? detectDeviceLanguage();
+}
+
+export function rememberSignupLanguage() {
+  try {
+    globalThis.sessionStorage?.setItem(
+      PENDING_SIGNUP_LANGUAGE_KEY,
+      detectDeviceLanguage(),
+    );
+  } catch {
+    // Authentication still works when session storage is unavailable.
+  }
+}
+
+export function clearPendingSignupLanguage() {
+  try {
+    globalThis.sessionStorage?.removeItem(PENDING_SIGNUP_LANGUAGE_KEY);
+  } catch {
+    // Nothing to clear when session storage is unavailable.
+  }
+}
+
+export function takePendingSignupLanguage(): SupportedLanguage | undefined {
+  try {
+    const language = toSupportedLanguage(
+      globalThis.sessionStorage?.getItem(PENDING_SIGNUP_LANGUAGE_KEY),
+    );
+    globalThis.sessionStorage?.removeItem(PENDING_SIGNUP_LANGUAGE_KEY);
+    return language;
+  } catch {
+    return undefined;
+  }
 }
 
 export function createI18n(language: string = detectLanguage()): I18nInstance {

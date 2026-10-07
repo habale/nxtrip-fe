@@ -78,9 +78,7 @@ export function SettingsPage() {
 
           <section className="settings-preferences">
             <div className="settings-section-title">
-              <span aria-hidden="true">
-                <Icon name="tune" />
-              </span>
+              <Icon name="tune" />
               <h2>{t('settings.preferences')}</h2>
             </div>
 

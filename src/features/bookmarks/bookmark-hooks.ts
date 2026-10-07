@@ -8,8 +8,7 @@ import {
 } from './bookmark-repository';
 
 export const bookmarkKeys = {
-  trip: (tripId: string, userId: string) =>
-    ['bookmarks', tripId, userId] as const,
+  trip: (tripId: string) => ['bookmarks', tripId] as const,
 };
 
 export function useTripBookmarks(
@@ -18,13 +17,9 @@ export function useTripBookmarks(
 ) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: bookmarkKeys.trip(tripId, user?.id ?? 'anonymous'),
+    queryKey: bookmarkKeys.trip(tripId),
     enabled: Boolean(tripId && user),
-    queryFn: () =>
-      (repository ?? getBookmarkRepository()).listForTrip(
-        tripId,
-        user?.id ?? '',
-      ),
+    queryFn: () => (repository ?? getBookmarkRepository()).listForTrip(tripId),
   });
 }
 
@@ -41,10 +36,7 @@ export function useCreateBookmark(repository?: BookmarkRepository) {
     },
     onSuccess: (bookmark) =>
       queryClient.invalidateQueries({
-        queryKey: bookmarkKeys.trip(
-          bookmark.source_trip_id ?? '',
-          bookmark.owner_user_id,
-        ),
+        queryKey: bookmarkKeys.trip(bookmark.source_trip_id ?? ''),
       }),
   });
 }

@@ -5,6 +5,10 @@ import userEvent from '@testing-library/user-event';
 import { useAuth } from './auth-context';
 import type { AuthClient } from './auth-client';
 import { AuthProvider } from './AuthProvider';
+import {
+  detectDeviceLanguage,
+  PENDING_SIGNUP_LANGUAGE_KEY,
+} from '../../shared/i18n';
 
 function createSession(id = 'user-123'): Session {
   return {
@@ -71,6 +75,10 @@ function AuthProbe() {
 }
 
 describe('AuthProvider', () => {
+  beforeEach(() => {
+    sessionStorage.removeItem(PENDING_SIGNUP_LANGUAGE_KEY);
+  });
+
   it('restores the persisted session and follows auth state changes', async () => {
     const auth = createAuthClient(createSession());
 
@@ -103,6 +111,9 @@ describe('AuthProvider', () => {
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/home` },
     });
+    expect(sessionStorage.getItem(PENDING_SIGNUP_LANGUAGE_KEY)).toBe(
+      detectDeviceLanguage(),
+    );
   });
 
   it('starts an anonymous guest session', async () => {

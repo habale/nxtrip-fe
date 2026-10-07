@@ -6,12 +6,13 @@ import {
   ConfirmDialog,
   FabButton,
   Icon,
+  Modal,
   Segment,
   Skeleton,
   SwipeStartActionItem,
 } from '../../../shared/ui';
 import type { IconName } from '../../../shared/ui/Icon';
-import type { Trip } from '../../trips/trip-repository';
+import type { Trip, TripDetail } from '../../trips/trip-repository';
 import { useLedgerExpenses, useRecordTripTransfer } from '../ledger-hooks';
 import type { LedgerRepository } from '../ledger-repository';
 import { calculateLedgerBalanceMinor } from '../ledger-balance';
@@ -34,6 +35,7 @@ import { AddLedgerEntryModal } from './AddLedgerEntryModal';
 type LedgerPanelProps = {
   trip: Trip;
   locale: string;
+  viewerRole: TripDetail['role'];
   canEdit?: boolean;
   repository?: LedgerRepository;
 };
@@ -676,19 +678,21 @@ function MemberBalanceSummary({
 export function LedgerPanel({
   trip,
   locale,
+  viewerRole,
   canEdit = true,
   repository,
 }: LedgerPanelProps) {
   const { t } = useTranslation('common');
   const query = useLedgerExpenses(trip.id, repository);
   const recordTransfer = useRecordTripTransfer(repository);
-  const [view, setView] = useState('all');
+  const [view, setView] = useState<string | null>(null);
   const [transferMode, setTransferMode] = useState<'direct' | 'treasurer'>(
     'treasurer',
   );
   const [pendingTransfer, setPendingTransfer] =
     useState<TransferSuggestion | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [viewPickerOpen, setViewPickerOpen] = useState(false);
   const groups = useMemo(() => {
     const items: Array<{ occurredAt: string; item: AllTimelineItem }> = [
       ...(query.data?.expenses ?? []).map((expense) => ({
@@ -712,9 +716,27 @@ export function LedgerPanel({
       new Map(),
     );
   }, [query.data?.expenses, query.data?.transfers, trip.timezone]);
+  const defaultView =
+    viewerRole === 'member' &&
+    query.data?.currentMemberId &&
+    query.data.currentMemberId !== query.data.treasurerMemberId
+      ? `member:${query.data.currentMemberId}`
+      : 'all';
+  const activeView = view ?? defaultView;
   const selectedMember = query.data?.members.find(
-    ({ id }) => view === `member:${id}`,
+    ({ id }) => activeView === `member:${id}`,
   );
+  const currentMember = query.data?.members.find(
+    ({ id }) => id === query.data?.currentMemberId,
+  );
+  const otherMembers = (query.data?.members ?? []).filter(
+    ({ id }) => id !== currentMember?.id,
+  );
+
+  function selectView(nextView: string) {
+    setView(nextView);
+    setViewPickerOpen(false);
+  }
   const memberGroups = useMemo(() => {
     if (!selectedMember || !query.data) {
       return new Map<string, MemberTimelineItem[]>();
@@ -818,7 +840,12 @@ export function LedgerPanel({
 
   return (
     <section className="ledger-panel">
-      <label className="ledger-view-picker">
+      <button
+        aria-haspopup="dialog"
+        className="ledger-view-picker"
+        type="button"
+        onClick={() => setViewPickerOpen(true)}
+      >
         <span className="ledger-view-avatar">
           {selectedMember ? (
             <Avatar
@@ -826,39 +853,117 @@ export function LedgerPanel({
               src={selectedMember.avatar_url ?? undefined}
               initialCount={2}
             />
+          ) : activeView === 'summary' ? (
+            <Icon name="wallet" />
           ) : (
-            'GS'
+            <Icon name="others" />
           )}
         </span>
         <span className="ledger-view-copy">
           <small>{t('ledger.viewingAs')}</small>
           <strong>
             {selectedMember?.display_name ??
-              (view === 'summary'
+              (activeView === 'summary'
                 ? t('ledger.groupSummary')
                 : t('ledger.allExpenses'))}
           </strong>
         </span>
-        <select
-          aria-label={t('ledger.viewingAs')}
-          value={view}
-          onChange={(event) => setView(event.target.value)}
-        >
-          <option value="all">{t('ledger.allExpenses')}</option>
-          <option value="summary">{t('ledger.groupSummary')}</option>
-          <option value="_" disabled>
-            __________________
-          </option>
-          {(query.data?.members ?? []).map((member) => (
-            <option key={member.id} value={`member:${member.id}`}>
-              {member.display_name}
-            </option>
-          ))}
-        </select>
         <Icon name="forward" />
-      </label>
+      </button>
 
-      {canEdit && view === 'all' && (
+      <Modal
+        open={viewPickerOpen}
+        title={t('ledger.chooseView')}
+        onDismiss={() => setViewPickerOpen(false)}
+      >
+        <div className="ledger-view-options">
+          <button
+            aria-pressed={activeView === 'all'}
+            className="ledger-view-option"
+            type="button"
+            onClick={() => selectView('all')}
+          >
+            <span className="ledger-view-option__avatar">
+              <Icon name="others" />
+            </span>
+            <span>
+              <strong>{t('ledger.allExpenses')}</strong>
+              <small>{t('ledger.allExpensesDescription')}</small>
+            </span>
+            {activeView === 'all' && <Icon name="check" />}
+          </button>
+          <button
+            aria-pressed={activeView === 'summary'}
+            className="ledger-view-option"
+            type="button"
+            onClick={() => selectView('summary')}
+          >
+            <span className="ledger-view-option__avatar">
+              <Icon name="wallet" />
+            </span>
+            <span>
+              <strong>{t('ledger.groupSummary')}</strong>
+              <small>{t('ledger.groupSummaryDescription')}</small>
+            </span>
+            {activeView === 'summary' && <Icon name="check" />}
+          </button>
+
+          {currentMember && (
+            <section className="ledger-view-options__group">
+              <h3>{t('ledger.thisMember')}</h3>
+              <button
+                aria-pressed={activeView === `member:${currentMember.id}`}
+                className="ledger-view-option"
+                type="button"
+                onClick={() => selectView(`member:${currentMember.id}`)}
+              >
+                <Avatar
+                  initialCount={2}
+                  name={currentMember.display_name}
+                  src={currentMember.avatar_url ?? undefined}
+                />
+                <span>
+                  <strong>{currentMember.display_name}</strong>
+                  <small>{t('ledger.memberViewDescription')}</small>
+                </span>
+                {activeView === `member:${currentMember.id}` && (
+                  <Icon name="check" />
+                )}
+              </button>
+            </section>
+          )}
+
+          {otherMembers.length > 0 && (
+            <section className="ledger-view-options__group">
+              <h3>{t('ledger.otherMembers')}</h3>
+              {otherMembers.map((member) => (
+                <button
+                  key={member.id}
+                  aria-pressed={activeView === `member:${member.id}`}
+                  className="ledger-view-option"
+                  type="button"
+                  onClick={() => selectView(`member:${member.id}`)}
+                >
+                  <Avatar
+                    initialCount={2}
+                    name={member.display_name}
+                    src={member.avatar_url ?? undefined}
+                  />
+                  <span>
+                    <strong>{member.display_name}</strong>
+                    <small>{t('ledger.memberViewDescription')}</small>
+                  </span>
+                  {activeView === `member:${member.id}` && (
+                    <Icon name="check" />
+                  )}
+                </button>
+              ))}
+            </section>
+          )}
+        </div>
+      </Modal>
+
+      {canEdit && activeView === 'all' && (
         <p className="ledger-tip">
           {t('ledger.tipDetails')}
           <br />
@@ -866,7 +971,7 @@ export function LedgerPanel({
         </p>
       )}
 
-      {view === 'summary' && (
+      {activeView === 'summary' && (
         <>
           <Segment
             label={t('ledger.transferMode')}
@@ -914,7 +1019,7 @@ export function LedgerPanel({
         />
       )}
 
-      {view === 'summary' && transferMode === 'direct' ? (
+      {activeView === 'summary' && transferMode === 'direct' ? (
         directTransferSuggestions.length === 0 ? (
           <div className="ledger-state">
             <Icon name="check" size="large" />
@@ -937,7 +1042,7 @@ export function LedgerPanel({
             ))}
           </div>
         )
-      ) : view === 'summary' ? (
+      ) : activeView === 'summary' ? (
         groupSummaries.length === 0 ? (
           <div className="ledger-state">
             <Icon name="person" size="large" />
@@ -1065,7 +1170,7 @@ export function LedgerPanel({
       )}
       {canEdit && query.data && (
         <>
-          {!addOpen && (
+          {!addOpen && !viewPickerOpen && (
             <FabButton
               label={t('ledger.addEntry')}
               icon="add"

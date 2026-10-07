@@ -15,7 +15,7 @@ export type CreateBookmarkInput = {
 };
 
 export type BookmarkRepository = {
-  listForTrip: (tripId: string, ownerUserId: string) => Promise<Bookmark[]>;
+  listForTrip: (tripId: string) => Promise<Bookmark[]>;
   create: (input: CreateBookmarkInput) => Promise<Bookmark>;
 };
 
@@ -23,11 +23,10 @@ export function createBookmarkRepository(): BookmarkRepository {
   const client = getSupabaseClient();
 
   return {
-    async listForTrip(tripId, ownerUserId) {
+    async listForTrip(tripId) {
       const { data, error } = await client
         .from('bookmarks')
         .select('*')
-        .eq('owner_user_id', ownerUserId)
         .eq('source_trip_id', tripId)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });

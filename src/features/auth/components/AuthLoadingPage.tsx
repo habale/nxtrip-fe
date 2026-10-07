@@ -6,7 +6,7 @@ export function AuthLoadingPage() {
   const { t } = useTranslation('common');
 
   return (
-    <Page title={t('app.name')}>
+    <Page hideHeader title={t('app.name')}>
       <main className="auth-loading">
         <Spinner label={t('auth.restoringSession')} size="large" />
         <p>{t('auth.restoringSession')}</p>

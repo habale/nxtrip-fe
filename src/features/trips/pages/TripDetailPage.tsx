@@ -214,6 +214,7 @@ export function TripDetailPage({
                 repository={ledgerRepository}
                 trip={trip}
                 locale={locale}
+                viewerRole={detail.role}
               />
             ) : section === 'bookmarks' ? (
               <BookmarksPanel canAdd={detail.role === 'owner'} trip={trip} />
