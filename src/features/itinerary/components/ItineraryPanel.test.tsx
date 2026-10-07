@@ -204,8 +204,9 @@ describe('ItineraryPanel', () => {
       screen.getByText('Itinerary actions').closest('ion-fab-button')!,
     );
     await user.click(
-      screen.getByText('Edit itinerary').closest('ion-fab-button')!,
+      screen.getByText('Edit Itinerary').closest('ion-fab-button')!,
     );
+    expect(screen.getByRole('status')).toHaveTextContent('Edit Itinerary');
     expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(
       nodes.length + 1,
     );
@@ -223,14 +224,15 @@ describe('ItineraryPanel', () => {
     await user.click(betweenAddButtons[1]);
     expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
     await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
-    await user.click(screen.getByText('Done').closest('ion-fab-button')!);
+    await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await user.click(
       screen.getByText('Itinerary actions').closest('ion-fab-button')!,
     );
     await user.click(
-      screen.getByText('Rearrange itinerary').closest('ion-fab-button')!,
+      screen.getByText('Rearrange Itinerary').closest('ion-fab-button')!,
     );
+    expect(screen.getByRole('status')).toHaveTextContent('Rearrange Itinerary');
     expect(document.querySelectorAll('ion-reorder')).toHaveLength(nodes.length);
     expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(0);
   });

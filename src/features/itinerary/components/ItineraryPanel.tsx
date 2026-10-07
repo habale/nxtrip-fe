@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Button,
   ConfirmDialog,
-  FabButton,
   FabMenu,
   Icon,
   Item,
@@ -457,6 +456,27 @@ export function ItineraryPanel({
 
   return (
     <section className="itinerary-panel">
+      {canEdit && activeMode !== 'view' && (
+        <div className="itinerary-mode-bar" role="status">
+          <strong>
+            {t(
+              activeMode === 'edit'
+                ? 'itinerary.editor.editItinerary'
+                : 'itinerary.editor.rearrangeItinerary',
+            )}
+          </strong>
+          <button
+            aria-label={t('itinerary.editor.done')}
+            type="button"
+            onClick={() => {
+              setMode('view');
+              setEditor(null);
+            }}
+          >
+            <Icon name="check" size="large" />
+          </button>
+        </div>
+      )}
       <div className="itinerary-day-navigation">
         <div
           ref={dayNavigationRef}
@@ -682,23 +702,11 @@ export function ItineraryPanel({
               {
                 icon: 'drag',
                 label: t('itinerary.editor.rearrangeItinerary'),
-                disabled: selectedNodes.length < 2,
                 onClick: () => setMode('reorder'),
               },
             ]}
           />
         )}
-      {canEdit && activeMode !== 'view' && (
-        <FabButton
-          hideWhenKeyboardOpen
-          icon="check"
-          label={t('itinerary.editor.done')}
-          onClick={() => {
-            setMode('view');
-            setEditor(null);
-          }}
-        />
-      )}
     </section>
   );
 }

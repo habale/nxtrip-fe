@@ -1,3 +1,42 @@
+.itinerary-mode-bar {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  min-height: calc(6.75rem + env(safe-area-inset-top));
+  align-items: center;
+  justify-content: space-between;
+  padding: env(safe-area-inset-top) 1rem 0;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  box-shadow: 0 0.5rem 1.5rem rgb(21 62 174 / 24%);
+}
+
+.itinerary-mode-bar strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.itinerary-mode-bar button {
+  display: inline-grid;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  place-items: center;
+}
+
+.itinerary-mode-bar button:focus-visible {
+  outline: 2px solid var(--color-surface);
+  outline-offset: 2px;
+}
+
 .itinerary-panel {
   display: grid;
   gap: 1.75rem;

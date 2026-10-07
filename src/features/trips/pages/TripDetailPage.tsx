@@ -140,13 +140,6 @@ export function TripDetailPage({
             <h1>{trip.name}</h1>
             {dateRange && <p>{dateRange}</p>}
           </div>
-          <Button
-            disabled
-            ariaLabel={t('tripDetail.moreActions')}
-            variant="quiet"
-          >
-            <Icon name="more" size="large" />
-          </Button>
         </header>
 
         <div className="trip-detail-layout">

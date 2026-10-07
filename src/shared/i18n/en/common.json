@@ -271,8 +271,8 @@
     "editor": {
       "editMode": "Edit",
       "actionsMenu": "Itinerary actions",
-      "editItinerary": "Edit itinerary",
-      "rearrangeItinerary": "Rearrange itinerary",
+      "editItinerary": "Edit Itinerary",
+      "rearrangeItinerary": "Rearrange Itinerary",
       "done": "Done",
       "addAtEnd": "Add at end",
       "addBetween": "Add itinerary item",
