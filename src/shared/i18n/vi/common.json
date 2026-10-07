@@ -416,6 +416,7 @@
     "treasurer": "Thủ quỹ",
     "makeTreasurer": "Đặt làm thủ quỹ chuyến đi",
     "linked": "Đã liên kết",
+    "linkedEmailLocked": "Email được quản lý bởi tài khoản đã liên kết.",
     "guest": "Khách",
     "inactive": "Không hoạt động",
     "empty": "Chưa có thành viên chuyến đi.",

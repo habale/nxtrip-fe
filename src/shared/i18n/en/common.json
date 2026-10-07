@@ -419,6 +419,7 @@
     "treasurer": "Treasurer",
     "makeTreasurer": "Set as trip treasurer",
     "linked": "Linked",
+    "linkedEmailLocked": "Email is managed by the linked account.",
     "guest": "Guest",
     "inactive": "Inactive",
     "empty": "No trip members yet.",

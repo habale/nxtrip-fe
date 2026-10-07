@@ -393,8 +393,16 @@ export function TripMembersPanel({
           />
           <TextInput
             errorText={editErrorText('email')}
+            helperText={
+              editTarget?.linkedUserId
+                ? t('tripMembers.linkedEmailLocked')
+                : undefined
+            }
             label={t('tripMembers.email')}
             type="email"
+            disabled={
+              Boolean(editTarget?.linkedUserId) || updateGuest.isPending
+            }
             value={editValues.email}
             onValueChange={(value) => updateEdit('email', value)}
           />
