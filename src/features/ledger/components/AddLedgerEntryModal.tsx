@@ -8,6 +8,7 @@ import {
   Checkbox,
   Icon,
   Modal,
+  SearchField,
   Segment,
   Select,
   TextInput,
@@ -89,6 +90,7 @@ export function AddLedgerEntryModal({
   const [receiverId, setReceiverId] = useState('');
   const [total, setTotal] = useState('');
   const [splitMode, setSplitMode] = useState<LedgerSplitMode>('equal');
+  const [memberSearch, setMemberSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
   const [direction, setDirection] = useState<
@@ -120,6 +122,15 @@ export function AddLedgerEntryModal({
   const activeMembers = sortedMembers.filter(({ id }) =>
     selectedIds.includes(id),
   );
+  const normalizedMemberSearch = memberSearch.trim().toLocaleLowerCase();
+  const visibleMembers = sortedMembers.filter(
+    ({ display_name }) =>
+      !normalizedMemberSearch ||
+      display_name.toLocaleLowerCase().includes(normalizedMemberSearch),
+  );
+  const allVisibleMembersSelected =
+    visibleMembers.length > 0 &&
+    visibleMembers.every(({ id }) => selectedIds.includes(id));
   const enteredAmountsTotalMinor = activeMembers.reduce(
     (sum, member) =>
       sum + toStoredAmount(Number(values[member.id]) || 0, decimalPlaces),
@@ -186,6 +197,7 @@ export function AddLedgerEntryModal({
     setReceiverId('');
     setTotal('');
     setSplitMode('equal');
+    setMemberSearch('');
     setSelectedIds([]);
     setValues({});
     setDirection('total-to-split');
@@ -428,8 +440,37 @@ export function AddLedgerEntryModal({
                 />
               </div>
 
+              <div className="ledger-split-members__toolbar">
+                <Checkbox
+                  ariaLabel={t(
+                    allVisibleMembersSelected
+                      ? 'ledger.modal.deselectAll'
+                      : 'ledger.modal.selectAll',
+                  )}
+                  checked={allVisibleMembersSelected}
+                  disabled={isPending || visibleMembers.length === 0}
+                  onCheckedChange={() => {
+                    const visibleIds = new Set(
+                      visibleMembers.map(({ id }) => id),
+                    );
+                    setSelectedIds((current) =>
+                      allVisibleMembersSelected
+                        ? current.filter((id) => !visibleIds.has(id))
+                        : [...new Set([...current, ...visibleIds])],
+                    );
+                  }}
+                />
+                <SearchField
+                  label={t('ledger.modal.searchMembers')}
+                  placeholder={t('ledger.modal.searchMembersPlaceholder')}
+                  value={memberSearch}
+                  disabled={isPending}
+                  onValueChange={setMemberSearch}
+                />
+              </div>
+
               <div className="ledger-split-members">
-                {sortedMembers.map((member) => {
+                {visibleMembers.map((member) => {
                   const checked = selectedIds.includes(member.id);
                   const computed = computedShares.find(
                     ({ memberId }) => memberId === member.id,
@@ -483,6 +524,11 @@ export function AddLedgerEntryModal({
                     </div>
                   );
                 })}
+                {visibleMembers.length === 0 && (
+                  <p className="ledger-split-members__empty">
+                    {t('ledger.modal.noMemberResults')}
+                  </p>
+                )}
               </div>
               {!allocationValid && (
                 <p className="ledger-form-error">
