@@ -63,8 +63,11 @@ describe('App', () => {
       </AppProviders>,
     );
     await user.click(await screen.findByText('Sign out'));
+    expect(await screen.findByText('Sign out of NxTrip?')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Sign out' }));
 
     expect(authClient.signOut).toHaveBeenCalledWith({ scope: 'local' });
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
+    expect(await screen.findByLabelText('NxTrip')).toBeInTheDocument();
   });
 });

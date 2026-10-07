@@ -10,6 +10,8 @@
     "comingSoon": "Coming soon",
     "restoringSession": "Restoring your session…",
     "signOut": "Sign out",
+    "signOutTitle": "Sign out of NxTrip?",
+    "signOutDescription": "You’ll need to sign in again to access your trips.",
     "unexpectedError": "An unexpected authentication error occurred."
   },
   "language": {
@@ -23,7 +25,6 @@
     "profile": "Profile",
     "preferences": "App Preferences",
     "language": "Language",
-    "languageDescription": "Default travel locale",
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Saving language preference…",

@@ -57,14 +57,6 @@ export function SettingsPage() {
                     src={profile.avatar_url ?? undefined}
                     size="large"
                   />
-                  <div className="settings-camera">
-                    <IconButton
-                      disabled
-                      icon="camera"
-                      label={t('settings.changePhotoComingSoon')}
-                      variant="primary"
-                    />
-                  </div>
                 </div>
                 <h2>{profile.display_name}</h2>
                 {profile.email && <p>{profile.email}</p>}
@@ -90,7 +82,6 @@ export function SettingsPage() {
 
             <div className="settings-field">
               <h3>{t('settings.language')}</h3>
-              <p>{t('settings.languageDescription')}</p>
               <Segment
                 disabled={!profile || languageMutation.isPending}
                 label={t('language.label')}

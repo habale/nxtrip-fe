@@ -10,6 +10,8 @@
     "comingSoon": "Sắp ra mắt",
     "restoringSession": "Đang khôi phục phiên đăng nhập…",
     "signOut": "Đăng xuất",
+    "signOutTitle": "Đăng xuất khỏi NxTrip?",
+    "signOutDescription": "Bạn sẽ cần đăng nhập lại để truy cập các chuyến đi.",
     "unexpectedError": "Đã xảy ra lỗi xác thực không mong muốn."
   },
   "language": {
@@ -23,7 +25,6 @@
     "profile": "Hồ sơ",
     "preferences": "Tùy chọn ứng dụng",
     "language": "Ngôn ngữ",
-    "languageDescription": "Ngôn ngữ mặc định khi du lịch",
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Đang lưu tùy chọn ngôn ngữ…",
