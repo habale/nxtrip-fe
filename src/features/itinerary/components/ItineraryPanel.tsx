@@ -1,10 +1,11 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
   Button,
   ConfirmDialog,
+  FabButton,
   FabMenu,
   Icon,
   Item,
@@ -308,6 +309,12 @@ export function ItineraryPanel({
     useState<ItineraryNode | null>(null);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [reorderKeyError, setReorderKeyError] = useState(false);
+  const [nowTarget, setNowTarget] = useState<{
+    date: string;
+    instant: number;
+  } | null>(null);
+  const autoFocusStarted = useRef(false);
+  const dayNavigation = useRef<HTMLDivElement>(null);
   const query = useItineraryWindow(window, repository);
   usePrefetchItineraryWindows(adjacentWindows, repository);
   const removeNode = useRemoveItineraryNode(repository);
@@ -351,6 +358,78 @@ export function ItineraryPanel({
     dateStyle: 'full',
     timeZone: 'UTC',
   });
+
+  const goToNow = useCallback(() => {
+    const now = new Date();
+    const today = localDateForInstant(now, trip.timezone);
+    const bounds = getTripItineraryBounds(trip, today);
+    const date =
+      today < bounds.startDate
+        ? bounds.startDate
+        : today > bounds.endDate
+          ? bounds.endDate
+          : today;
+
+    setNowTarget({ date, instant: now.getTime() });
+    setSelectedDate(date);
+  }, [trip]);
+
+  useEffect(() => {
+    if (autoFocusStarted.current || trip.status !== 'ongoing') {
+      return;
+    }
+
+    autoFocusStarted.current = true;
+    goToNow();
+  }, [goToNow, trip.status]);
+
+  useEffect(() => {
+    if (
+      !nowTarget ||
+      selectedDate !== nowTarget.date ||
+      query.isPending ||
+      query.isError
+    ) {
+      return;
+    }
+
+    const nextNode = selectedNodes
+      .filter((node) => {
+        if (!node.startAt || node.allDay) return false;
+        const start = Date.parse(node.startAt);
+        return Number.isFinite(start) && start >= nowTarget.instant;
+      })
+      .sort(
+        (left, right) => Date.parse(left.startAt!) - Date.parse(right.startAt!),
+      )[0];
+
+    const frame = requestAnimationFrame(() => {
+      setNowTarget(null);
+      const navigation = dayNavigation.current;
+      const selectedDay = navigation?.querySelector<HTMLElement>(
+        `[data-itinerary-day="${nowTarget.date}"]`,
+      );
+      if (
+        navigation &&
+        selectedDay &&
+        navigation.scrollWidth > navigation.clientWidth
+      ) {
+        navigation.scrollTo({
+          behavior: 'smooth',
+          left:
+            selectedDay.offsetLeft -
+            (navigation.clientWidth - selectedDay.offsetWidth) / 2,
+        });
+      }
+      if (nextNode) {
+        document
+          .getElementById(`itinerary-node-${nextNode.id}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [nowTarget, query.isError, query.isPending, selectedDate, selectedNodes]);
 
   function moveNode(from: number, to: number) {
     if (
@@ -430,7 +509,7 @@ export function ItineraryPanel({
           document.body,
         )}
       <div className="itinerary-day-navigation">
-        <div className="itinerary-day-navigation__days">
+        <div ref={dayNavigation} className="itinerary-day-navigation__days">
           {days.map((day) => (
             <button
               key={day}
@@ -511,6 +590,7 @@ export function ItineraryPanel({
               {selectedNodes.map((node, index) => (
                 <div
                   key={node.id}
+                  id={`itinerary-node-${node.id}`}
                   className={`itinerary-node-context${
                     activeMode === 'reorder'
                       ? ' itinerary-node-context--reordering'
@@ -644,6 +724,15 @@ export function ItineraryPanel({
             icon="edit"
             label={t('itinerary.editor.actionsMenu')}
             actions={[
+              ...(trip.status === 'ongoing'
+                ? [
+                    {
+                      icon: 'today' as const,
+                      label: t('itinerary.now'),
+                      onClick: goToNow,
+                    },
+                  ]
+                : []),
               {
                 icon: 'edit',
                 label: t('itinerary.editor.editItinerary'),
@@ -655,6 +744,16 @@ export function ItineraryPanel({
                 onClick: () => setMode('reorder'),
               },
             ]}
+          />
+        )}
+      {!canEdit &&
+        trip.status === 'ongoing' &&
+        !query.isPending &&
+        !query.isError && (
+          <FabButton
+            icon="today"
+            label={t('itinerary.now')}
+            onClick={goToNow}
           />
         )}
     </section>

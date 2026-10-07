@@ -256,6 +256,7 @@
     }
   },
   "itinerary": {
+    "now": "Hiện tại",
     "dayLabel": "Ngày {{day}} trong lịch trình",
     "dayOption": "N{{day}} · {{date}}",
     "directions": "Chỉ đường",

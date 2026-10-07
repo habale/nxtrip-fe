@@ -38,6 +38,7 @@ export type IconName =
   | 'shopping'
   | 'sightseeing'
   | 'ticket'
+  | 'today'
   | 'train'
   | 'transfer'
   | 'trash'
@@ -93,6 +94,7 @@ const materialSymbolByName: Record<IconName, string> = {
   shopping: 'shopping_bag',
   sightseeing: 'temple_buddhist',
   ticket: 'confirmation_number',
+  today: 'today',
   train: 'train',
   transfer: 'send_money',
   trash: 'delete',

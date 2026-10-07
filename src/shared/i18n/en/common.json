@@ -257,6 +257,7 @@
     }
   },
   "itinerary": {
+    "now": "Now",
     "dayLabel": "Itinerary Day {{day}}",
     "dayOption": "D{{day}} · {{date}}",
     "directions": "Directions",

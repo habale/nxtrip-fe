@@ -153,6 +153,7 @@
   display: grid;
   gap: 0.75rem;
   border-radius: var(--radius-card);
+  scroll-margin-top: 0.8rem;
 }
 
 .itinerary-node-context > .ui-button {
