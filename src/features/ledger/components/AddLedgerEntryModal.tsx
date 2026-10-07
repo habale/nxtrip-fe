@@ -24,6 +24,7 @@ import type {
 } from '../ledger-types';
 import {
   formatAmountInput,
+  formatMoney,
   getCurrencySymbol,
   toStoredAmount,
 } from '../ledger-types';
@@ -105,6 +106,7 @@ export function AddLedgerEntryModal({
     trip.default_currency,
     i18n.resolvedLanguage ?? i18n.language,
   );
+  const locale = i18n.resolvedLanguage ?? i18n.language;
 
   useEffect(() => {
     if (!open) return;
@@ -556,8 +558,10 @@ export function AddLedgerEntryModal({
                       </span>
                       {splitMode === 'equal' ? (
                         <strong>
-                          {formatAmountInput(
+                          {formatMoney(
                             computed?.amountMinor ?? 0,
+                            trip.default_currency,
+                            locale,
                             decimalPlaces,
                           )}
                         </strong>
