@@ -325,13 +325,6 @@
   --highlight-color-focused: var(--color-primary);
 }
 
-@media (max-width: 767px) {
-  .ui-input[type='date']::part(native),
-  .ui-input[type='time']::part(native) {
-    transform: translateY(0.4rem);
-  }
-}
-
 .ui-segment {
   padding: 0.35rem;
   border-radius: var(--radius-pill);

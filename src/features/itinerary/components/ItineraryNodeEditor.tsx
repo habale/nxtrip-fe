@@ -81,6 +81,7 @@ type ItineraryNodeEditorProps = {
   node?: ItineraryNode;
   repository?: ItineraryRepository;
   onClose: () => void;
+  onIconPickerOpenChange?: (open: boolean) => void;
 };
 
 export function ItineraryNodeEditor({
@@ -90,6 +91,7 @@ export function ItineraryNodeEditor({
   node,
   repository,
   onClose,
+  onIconPickerOpenChange,
 }: ItineraryNodeEditorProps) {
   const { t } = useTranslation('common');
   const createNode = useCreateItineraryNode(repository);
@@ -102,6 +104,12 @@ export function ItineraryNodeEditor({
   const [persistedNode, setPersistedNode] = useState(node);
   const [submitted, setSubmitted] = useState(false);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+
+  useEffect(() => {
+    onIconPickerOpenChange?.(iconPickerOpen);
+
+    return () => onIconPickerOpenChange?.(false);
+  }, [iconPickerOpen, onIconPickerOpenChange]);
   const [mapsOpen, setMapsOpen] = useState(Boolean(node?.googleMapsUrl));
   const [cover, setCover] = useState<File>();
   const [coverPreview, setCoverPreview] = useState<string>();

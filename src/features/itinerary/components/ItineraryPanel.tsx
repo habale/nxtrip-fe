@@ -306,6 +306,7 @@ export function ItineraryPanel({
   >(null);
   const [nodePendingRemoval, setNodePendingRemoval] =
     useState<ItineraryNode | null>(null);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [reorderKeyError, setReorderKeyError] = useState(false);
   const query = useItineraryWindow(window, repository);
   usePrefetchItineraryWindows(adjacentWindows, repository);
@@ -405,6 +406,7 @@ export function ItineraryPanel({
     <section className="itinerary-panel">
       {canEdit &&
         activeMode !== 'view' &&
+        !iconPickerOpen &&
         createPortal(
           <div className="itinerary-mode-bar" role="status">
             <strong>
@@ -490,6 +492,7 @@ export function ItineraryPanel({
               sortKey={editor.sortKey}
               trip={trip}
               onClose={() => setEditor(null)}
+              onIconPickerOpenChange={setIconPickerOpen}
             />
           )}
 
@@ -578,6 +581,7 @@ export function ItineraryPanel({
                         sortKey={editor.sortKey}
                         trip={trip}
                         onClose={() => setEditor(null)}
+                        onIconPickerOpenChange={setIconPickerOpen}
                       />
                     )}
                   {canEdit &&
@@ -589,6 +593,7 @@ export function ItineraryPanel({
                         repository={repository}
                         trip={trip}
                         onClose={() => setEditor(null)}
+                        onIconPickerOpenChange={setIconPickerOpen}
                       />
                     )}
                 </div>
