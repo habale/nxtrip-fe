@@ -10,5 +10,6 @@ should therefore require changing these files and the theme rather than every fe
 Global brand decisions live in `src/theme/theme.css`. Prefer its semantic tokens such as
 `--color-primary`, `--radius-card`, and `--radius-pill` over one-off values in features.
 
-Typography uses Plus Jakarta Sans and the `Icon` adapter maps app-owned icon names to
-Google Material Symbols Rounded. Both font families are loaded in `index.html`.
+Typography uses the bundled Plus Jakarta Sans font, and the `Icon` adapter maps app-owned
+icon names to the bundled Material Symbols Outlined font. Both fonts are preloaded from
+`public/fonts` in `index.html` so icon ligatures do not briefly render as raw names.

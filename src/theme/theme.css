@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  src: url('/fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+
 :root {
   /* NxTrip brand palette */
   --color-primary: #1d4ed8;
@@ -243,7 +259,7 @@
 .ui-icon {
   display: inline-block;
   flex: 0 0 auto;
-  font-family: 'Material Symbols Rounded';
+  font-family: 'Material Symbols Outlined';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
