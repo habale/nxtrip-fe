@@ -70,12 +70,14 @@ export function HomePage() {
           <div>
             <h1>{t('home.greeting', { name: firstName })}</h1>
           </div>
-          <Button href={routes.addTrip} navigationDirection="forward">
-            <span className="home-new-trip">
-              <Icon name="add" />
-              {t('home.newTrip')}
-            </span>
-          </Button>
+          {!user?.is_anonymous && (
+            <Button href={routes.addTrip} navigationDirection="forward">
+              <span className="home-new-trip">
+                <Icon name="add" />
+                {t('home.newTrip')}
+              </span>
+            </Button>
+          )}
         </section>
 
         {!tripQuery.isPending && !tripQuery.isError && trips.length > 0 && (

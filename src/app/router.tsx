@@ -17,6 +17,7 @@ import { PublicRouteShell } from './shell/PublicRouteShell';
 
 type RouterProps = {
   isAuthenticated: boolean;
+  isGuest?: boolean;
 };
 
 type ProtectedPageProps = RouterProps & {
@@ -40,7 +41,8 @@ function ProtectedPage({
   );
 }
 
-export function AppRoutes({ isAuthenticated }: RouterProps) {
+export function AppRoutes({ isAuthenticated, isGuest = false }: RouterProps) {
+  const canCreateTrips = isAuthenticated && !isGuest;
   return (
     <IonRouterOutlet>
       <Route
@@ -62,7 +64,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
       <Route
         path={ROUTE_PATHS.addTrip}
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <ProtectedRoute isAuthenticated={canCreateTrips}>
             <AddTripPage />
           </ProtectedRoute>
         }
@@ -70,7 +72,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
       <Route
         path={ROUTE_PATHS.newTrip}
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <ProtectedRoute isAuthenticated={canCreateTrips}>
             <CreateTripPage />
           </ProtectedRoute>
         }
@@ -78,7 +80,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
       <Route
         path={ROUTE_PATHS.editTrip}
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <ProtectedRoute isAuthenticated={canCreateTrips}>
             <CreateTripPage />
           </ProtectedRoute>
         }
@@ -124,10 +126,10 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
   );
 }
 
-export function AppRouter({ isAuthenticated }: RouterProps) {
+export function AppRouter({ isAuthenticated, isGuest = false }: RouterProps) {
   return (
     <IonReactRouter>
-      <AppRoutes isAuthenticated={isAuthenticated} />
+      <AppRoutes isAuthenticated={isAuthenticated} isGuest={isGuest} />
     </IonReactRouter>
   );
 }
