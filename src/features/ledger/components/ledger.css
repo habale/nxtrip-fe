@@ -3,6 +3,9 @@
   gap: 1.5rem;
   padding: 0.4rem 0 5rem;
 }
+.ledger-panel ion-label {
+  font-size: 0.85rem;
+}
 .ledger-view-picker {
   display: grid;
   width: 100%;
@@ -114,6 +117,7 @@
   color: var(--color-ink-muted);
   text-align: center;
   line-height: 1.35;
+  font-size: 0.85rem;
 }
 .ledger-date-group {
   display: grid;
@@ -225,6 +229,7 @@
   align-items: center;
   gap: 0.9rem;
   color: var(--color-ink-muted);
+  font-size: 0.85rem;
 }
 .ledger-member-stack {
   display: flex;
@@ -380,8 +385,8 @@
 
 .ledger-treasurer-note {
   margin: -0.5rem 0 0;
-  color: var(--color-ink-muted);
   text-align: center;
+  font-weight: 700;
 }
 
 .ledger-transfer-suggestion {
@@ -464,6 +469,7 @@
   display: grid;
   min-width: 0;
   gap: 0.2rem;
+  font-size: 0.85rem;
 }
 
 .ledger-group-member__info > strong {

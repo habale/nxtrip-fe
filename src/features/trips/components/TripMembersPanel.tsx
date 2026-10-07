@@ -319,7 +319,6 @@ export function TripMembersPanel({
         onDismiss={closeModal}
       >
         <div className="trip-member-form">
-          <p>{t('tripMembers.addGuestDescription')}</p>
           <TextInput
             required
             errorText={errorText('displayName')}

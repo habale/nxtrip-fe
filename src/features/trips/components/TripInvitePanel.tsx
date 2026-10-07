@@ -59,7 +59,6 @@ export function TripInvitePanel({
     <section className="trip-invite-panel">
       <div className="trip-invite-panel__heading">
         <div>
-          <p>{t('tripInvite.ownerOnly')}</p>
           <h2>{t('tripInvite.title')}</h2>
         </div>
       </div>
