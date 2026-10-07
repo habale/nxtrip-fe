@@ -325,6 +325,32 @@
   --highlight-color-focused: var(--color-primary);
 }
 
+.ui-temporal-field {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.ui-temporal-field__label {
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ui-input--temporal {
+  min-height: 3.5rem;
+  font-size: 1rem;
+  line-height: normal;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
+}
+
+.ui-input--temporal::part(native) {
+  min-height: 1.5rem;
+  line-height: 1.5rem;
+}
+
 .ui-segment {
   padding: 0.35rem;
   border-radius: var(--radius-pill);

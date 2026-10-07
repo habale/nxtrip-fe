@@ -60,18 +60,20 @@ export function TextInput({
   onValueChange,
   onBlur,
 }: TextInputProps) {
-  return (
+  const temporal = type === 'date' || type === 'time';
+  const input = (
     <IonInput
+      aria-label={temporal ? label : undefined}
       aria-invalid={Boolean(errorText)}
       autocomplete={autocomplete}
-      className="ui-input"
+      className={`ui-input${temporal ? ' ui-input--temporal' : ''}`}
       disabled={disabled}
       errorText={errorText}
       fill="outline"
       helperText={helperText}
       inputMode={inputMode}
-      label={label}
-      labelPlacement="stacked"
+      label={temporal ? undefined : label}
+      labelPlacement={temporal ? undefined : 'stacked'}
       maxlength={maxlength}
       mode="md"
       name={name}
@@ -83,5 +85,17 @@ export function TextInput({
       onIonBlur={onBlur}
       onIonInput={(event) => onValueChange?.(event.detail.value ?? '')}
     />
+  );
+
+  if (!temporal) return input;
+
+  return (
+    <div className="ui-temporal-field">
+      <span className="ui-temporal-field__label">
+        {label}
+        {required && <span aria-hidden="true"> *</span>}
+      </span>
+      {input}
+    </div>
   );
 }
