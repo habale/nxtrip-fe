@@ -373,7 +373,7 @@
     "createMember": "Create member link",
     "createViewer": "Create guest link",
     "creating": "Creating invite…",
-    "share": "Share invite",
+    "share": "Share",
     "shareText": "{{name}}, join my {{trip}} trip on NxTrip.",
     "revoke": "Revoke link",
     "expires": "This link expires {{date}}.",

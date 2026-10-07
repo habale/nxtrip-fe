@@ -393,15 +393,19 @@ export function ItineraryPanel({
       return;
     }
 
-    const nextNode = selectedNodes
+    const timedNodes = selectedNodes
       .filter((node) => {
         if (!node.startAt || node.allDay) return false;
         const start = Date.parse(node.startAt);
-        return Number.isFinite(start) && start >= nowTarget.instant;
+        return Number.isFinite(start);
       })
       .sort(
         (left, right) => Date.parse(left.startAt!) - Date.parse(right.startAt!),
-      )[0];
+      );
+    const nextNode =
+      timedNodes.find(
+        (node) => Date.parse(node.startAt!) >= nowTarget.instant,
+      ) ?? timedNodes.at(-1);
 
     const frame = requestAnimationFrame(() => {
       setNowTarget(null);
