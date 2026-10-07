@@ -11,6 +11,11 @@ export type PageProps = PropsWithChildren<{
   title?: string;
   headerStart?: ReactNode;
   headerEnd?: ReactNode;
+  headerContent?: ReactNode;
+  secondaryHeaderContent?: ReactNode;
+  headerClassName?: string;
+  toolbarClassName?: string;
+  secondaryToolbarClassName?: string;
   padded?: boolean;
   hideHeader?: boolean;
 }>;
@@ -19,6 +24,11 @@ export function Page({
   title,
   headerStart,
   headerEnd,
+  headerContent,
+  secondaryHeaderContent,
+  headerClassName,
+  toolbarClassName,
+  secondaryToolbarClassName,
   padded = true,
   hideHeader,
   children,
@@ -26,12 +36,21 @@ export function Page({
   return (
     <IonPage>
       {!hideHeader && (
-        <IonHeader>
-          <IonToolbar>
-            {headerStart && <div slot="start">{headerStart}</div>}
-            {title && <IonTitle>{title}</IonTitle>}
-            {headerEnd && <div slot="end">{headerEnd}</div>}
+        <IonHeader className={headerClassName}>
+          <IonToolbar className={toolbarClassName}>
+            {headerContent ?? (
+              <>
+                {headerStart && <div slot="start">{headerStart}</div>}
+                {title && <IonTitle>{title}</IonTitle>}
+                {headerEnd && <div slot="end">{headerEnd}</div>}
+              </>
+            )}
           </IonToolbar>
+          {secondaryHeaderContent && (
+            <IonToolbar className={secondaryToolbarClassName}>
+              {secondaryHeaderContent}
+            </IonToolbar>
+          )}
         </IonHeader>
       )}
       <IonContent className={padded ? 'ion-padding' : undefined}>

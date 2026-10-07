@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -456,27 +457,30 @@ export function ItineraryPanel({
 
   return (
     <section className="itinerary-panel">
-      {canEdit && activeMode !== 'view' && (
-        <div className="itinerary-mode-bar" role="status">
-          <strong>
-            {t(
-              activeMode === 'edit'
-                ? 'itinerary.editor.editItinerary'
-                : 'itinerary.editor.rearrangeItinerary',
-            )}
-          </strong>
-          <button
-            aria-label={t('itinerary.editor.done')}
-            type="button"
-            onClick={() => {
-              setMode('view');
-              setEditor(null);
-            }}
-          >
-            <Icon name="check" size="large" />
-          </button>
-        </div>
-      )}
+      {canEdit &&
+        activeMode !== 'view' &&
+        createPortal(
+          <div className="itinerary-mode-bar" role="status">
+            <strong>
+              {t(
+                activeMode === 'edit'
+                  ? 'itinerary.editor.editItinerary'
+                  : 'itinerary.editor.rearrangeItinerary',
+              )}
+            </strong>
+            <button
+              aria-label={t('itinerary.editor.done')}
+              type="button"
+              onClick={() => {
+                setMode('view');
+                setEditor(null);
+              }}
+            >
+              <Icon name="check" size="large" />
+            </button>
+          </div>,
+          document.body,
+        )}
       <div className="itinerary-day-navigation">
         <div
           ref={dayNavigationRef}

@@ -44,9 +44,12 @@ export function AddTripPage() {
   }
 
   return (
-    <Page hideHeader padded={false}>
-      <main className="add-trip-page">
-        <header className="add-trip-header">
+    <Page
+      padded={false}
+      headerClassName="add-trip-ion-header"
+      toolbarClassName="add-trip-toolbar"
+      headerContent={
+        <div className="add-trip-header">
           <Button
             ariaLabel={t('actions.back')}
             href={routes.home}
@@ -56,8 +59,10 @@ export function AddTripPage() {
             <Icon name="back" size="large" />
           </Button>
           <h1>{t('addTrip.title')}</h1>
-        </header>
-
+        </div>
+      }
+    >
+      <main className="add-trip-page">
         <div className="add-trip-content">
           <section className="add-trip-intro">
             <h2>{t('addTrip.heading')}</h2>
@@ -100,7 +105,12 @@ export function AddTripPage() {
                 )}
               </p>
             )}
-            <Button block variant="primary" loading={joinTrip.isPending} type="submit">
+            <Button
+              block
+              variant="primary"
+              loading={joinTrip.isPending}
+              type="submit"
+            >
               {joinTrip.isPending
                 ? t('addTrip.joining')
                 : t('addTrip.joinAction')}
@@ -114,7 +124,12 @@ export function AddTripPage() {
           <section className="add-trip-card add-trip-card--create">
             <h2>{t('addTrip.createTitle')}</h2>
             <p>{t('addTrip.createDescription')}</p>
-            <Button block href={routes.newTrip} variant="secondary" navigationDirection="forward">
+            <Button
+              block
+              href={routes.newTrip}
+              variant="secondary"
+              navigationDirection="forward"
+            >
               <span className="add-trip-button-label">
                 {t('addTrip.createAction')}
                 <Icon name="forward" />

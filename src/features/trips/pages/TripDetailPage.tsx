@@ -125,9 +125,13 @@ export function TripDetailPage({
   };
 
   return (
-    <Page hideHeader padded={false}>
-      <div className="trip-detail-page">
-        <header className="trip-detail-header">
+    <Page
+      padded={false}
+      headerClassName="trip-detail-ion-header"
+      toolbarClassName="trip-detail-title-toolbar"
+      secondaryToolbarClassName="trip-detail-nav-toolbar"
+      headerContent={
+        <div className="trip-detail-header">
           <Button
             ariaLabel={t('actions.back')}
             href={routes.home}
@@ -140,33 +144,36 @@ export function TripDetailPage({
             <h1>{trip.name}</h1>
             {dateRange && <p>{dateRange}</p>}
           </div>
-        </header>
-
+        </div>
+      }
+      secondaryHeaderContent={
+        <nav
+          className="trip-detail-nav"
+          aria-label={t('tripDetail.navigation')}
+        >
+          {sections.map((item) => (
+            <TabLink
+              key={item}
+              ariaLabel={
+                item === 'attachments' || item === 'bookmarks'
+                  ? t(`tripDetail.sections.${item}`)
+                  : undefined
+              }
+              href={sectionPath(item)}
+              selected={section === item}
+            >
+              {item === 'attachments' || item === 'bookmarks' ? (
+                <Icon name={sectionIcons[item]} />
+              ) : (
+                t(`tripDetail.sections.${item}`)
+              )}
+            </TabLink>
+          ))}
+        </nav>
+      }
+    >
+      <div className="trip-detail-page">
         <div className="trip-detail-layout">
-          <nav
-            className="trip-detail-nav"
-            aria-label={t('tripDetail.navigation')}
-          >
-            {sections.map((item) => (
-              <TabLink
-                key={item}
-                ariaLabel={
-                  item === 'attachments' || item === 'bookmarks'
-                    ? t(`tripDetail.sections.${item}`)
-                    : undefined
-                }
-                href={sectionPath(item)}
-                selected={section === item}
-              >
-                {item === 'attachments' || item === 'bookmarks' ? (
-                  <Icon name={sectionIcons[item]} />
-                ) : (
-                  t(`tripDetail.sections.${item}`)
-                )}
-              </TabLink>
-            ))}
-          </nav>
-
           <main className="trip-detail-content">
             {section === 'info' ? (
               <>

@@ -1,3 +1,21 @@
+.trip-detail-ion-header {
+  box-shadow: none;
+}
+
+.trip-detail-title-toolbar {
+  --min-height: 4rem;
+  --border-color: var(--color-border);
+  --border-width: 0 0 1px;
+}
+
+.trip-detail-nav-toolbar {
+  --min-height: 2.75rem;
+  --border-color: var(--color-border);
+  --border-width: 0 0 1px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
 .trip-detail-page {
   min-height: 100%;
   background: var(--color-canvas);
@@ -5,17 +23,13 @@
 }
 
 .trip-detail-header {
-  position: sticky;
-  z-index: 20;
-  top: 0;
   display: grid;
+  width: 100%;
   min-height: 4rem;
-  grid-template-columns: 3.25rem minmax(0, 1fr) 3.25rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
   align-items: center;
   gap: 0.5rem;
-  padding: env(safe-area-inset-top) 0.75rem 0;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+  padding: 0 0.75rem;
 }
 
 .trip-detail-header .ui-button {
@@ -62,14 +76,12 @@
 }
 
 .trip-detail-nav {
-  position: sticky;
-  z-index: 15;
-  top: 4rem;
   display: flex;
+  width: min(100%, 72rem);
+  min-height: 2.75rem;
+  margin: 0 auto;
   overflow-x: auto;
   padding: 0 0.75rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
   scrollbar-width: none;
 }
 
@@ -584,7 +596,6 @@
   }
 
   .trip-detail-nav {
-    top: 5.75rem;
     justify-content: center;
   }
 

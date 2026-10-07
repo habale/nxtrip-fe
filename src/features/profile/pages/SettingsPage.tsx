@@ -23,9 +23,12 @@ export function SettingsPage() {
   const language = profile?.language === 'vi' ? 'vi' : 'en';
 
   return (
-    <Page hideHeader padded={false}>
-      <main className="settings-page">
-        <header className="settings-header">
+    <Page
+      padded={false}
+      headerClassName="settings-ion-header"
+      toolbarClassName="settings-toolbar"
+      headerContent={
+        <div className="settings-header">
           <Button
             ariaLabel={t('actions.back')}
             href={routes.home}
@@ -35,8 +38,10 @@ export function SettingsPage() {
             <Icon name="back" size="large" />
           </Button>
           <h1>{t('settings.title')}</h1>
-        </header>
-
+        </div>
+      }
+    >
+      <main className="settings-page">
         <div className="settings-content">
           <section
             className="settings-profile"

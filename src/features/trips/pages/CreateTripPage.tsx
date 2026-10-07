@@ -71,6 +71,22 @@ export function CreateTripPage() {
   const errors = submitted ? validateCreateTripForm(values) : {};
   const mutation = editing ? updateTrip : createTrip;
   const cancelPath = editing && tripId ? routes.tripInfo(tripId) : routes.home;
+  const pageHeader = (
+    <div className="create-trip-header">
+      <Button
+        ariaLabel={t('actions.back')}
+        href={cancelPath}
+        navigationDirection="back"
+        variant="quiet"
+      >
+        <Icon name="back" size="large" />
+      </Button>
+      <div>
+        <p>{t(editing ? 'createTrip.editEyebrow' : 'createTrip.eyebrow')}</p>
+        <h1>{t(editing ? 'createTrip.editTitle' : 'createTrip.title')}</h1>
+      </div>
+    </div>
+  );
 
   function update<Field extends keyof CreateTripFormValues>(
     field: Field,
@@ -110,7 +126,12 @@ export function CreateTripPage() {
 
   if (editing && tripQuery.isPending) {
     return (
-      <Page hideHeader padded={false}>
+      <Page
+        padded={false}
+        headerClassName="create-trip-ion-header"
+        toolbarClassName="create-trip-toolbar"
+        headerContent={pageHeader}
+      >
         <main className="create-trip-page">
           <div className="create-trip-form">
             <Skeleton height="5rem" />
@@ -129,25 +150,13 @@ export function CreateTripPage() {
   }
 
   return (
-    <Page hideHeader padded={false}>
+    <Page
+      padded={false}
+      headerClassName="create-trip-ion-header"
+      toolbarClassName="create-trip-toolbar"
+      headerContent={pageHeader}
+    >
       <main className="create-trip-page">
-        <header className="create-trip-header">
-          <Button
-            ariaLabel={t('actions.back')}
-            href={cancelPath}
-            navigationDirection="back"
-            variant="quiet"
-          >
-            <Icon name="back" size="large" />
-          </Button>
-          <div>
-            <p>
-              {t(editing ? 'createTrip.editEyebrow' : 'createTrip.eyebrow')}
-            </p>
-            <h1>{t(editing ? 'createTrip.editTitle' : 'createTrip.title')}</h1>
-          </div>
-        </header>
-
         <form className="create-trip-form" onSubmit={handleSubmit}>
           <section className="create-trip-card">
             <TextInput

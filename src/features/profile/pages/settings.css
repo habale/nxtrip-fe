@@ -1,3 +1,13 @@
+.settings-ion-header {
+  box-shadow: none;
+}
+
+.settings-toolbar {
+  --min-height: 4rem;
+  --border-color: var(--color-border);
+  --border-width: 0 0 1px;
+}
+
 .settings-page {
   min-height: 100%;
   background: var(--color-canvas);
@@ -6,15 +16,11 @@
 
 .settings-header {
   display: grid;
+  width: 100%;
   min-height: 4rem;
   grid-template-columns: 3.5rem 1fr 3.5rem;
   align-items: center;
-  padding: env(safe-area-inset-top) 1rem 0;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-  position: sticky;
-  z-index: 20;
-  top: 0;
+  padding: 0 1rem;
 }
 
 .settings-header .ui-button {

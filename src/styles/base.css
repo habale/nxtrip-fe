@@ -23,6 +23,11 @@ body,
   min-width: 320px;
   min-height: 100%;
   margin: 0;
+  background: var(--color-canvas);
+}
+
+ion-content {
+  --background: var(--color-canvas);
 }
 
 .app-content {
