@@ -150,6 +150,21 @@
   background: var(--color-surface);
   box-shadow: 0 2px 7px rgb(21 24 39 / 5%);
 }
+
+.ui-swipe-item .ledger-expense-card {
+  width: 100%;
+}
+
+.ledger-expense-swipe-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.ledger-expense-sliding {
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
 .ledger-expense-icon {
   display: grid;
   place-items: center;

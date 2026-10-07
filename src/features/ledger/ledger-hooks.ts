@@ -58,3 +58,29 @@ export function useRecordTripTransfer(repository?: LedgerRepository) {
     },
   });
 }
+
+export function useDeleteLedgerExpense(repository?: LedgerRepository) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ expenseId }: { expenseId: string; tripId: string }) =>
+      (repository ?? getLedgerRepository()).deleteExpense(expenseId),
+    onSuccess: async (_result, input) => {
+      await queryClient.invalidateQueries({
+        queryKey: ledgerKeys.expenses(input.tripId),
+      });
+    },
+  });
+}
+
+export function useDeleteLedgerTransfer(repository?: LedgerRepository) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ transferId }: { transferId: string; tripId: string }) =>
+      (repository ?? getLedgerRepository()).deleteTransfer(transferId),
+    onSuccess: async (_result, input) => {
+      await queryClient.invalidateQueries({
+        queryKey: ledgerKeys.expenses(input.tripId),
+      });
+    },
+  });
+}

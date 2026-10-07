@@ -410,6 +410,24 @@ export type Database = {
         };
         Returns: string;
       };
+      save_trip_transfer: {
+        Args: {
+          p_trip_id: string;
+          p_from_member_id: string;
+          p_to_member_id: string;
+          p_amount_minor: number;
+          p_currency: string;
+          p_occurred_at?: string;
+          p_note?: string;
+          p_transfer_id?: string;
+          p_request_id?: string;
+        };
+        Returns: string;
+      };
+      soft_delete_trip_transfer: {
+        Args: { p_transfer_id: string; p_request_id?: string };
+        Returns: undefined;
+      };
       set_trip_treasurer: {
         Args: {
           p_trip_id: string;

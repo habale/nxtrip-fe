@@ -6,14 +6,21 @@ import {
   ConfirmDialog,
   FabButton,
   Icon,
+  Item,
   Modal,
   Segment,
   Skeleton,
+  SwipeItem,
   SwipeStartActionItem,
 } from '../../../shared/ui';
 import type { IconName } from '../../../shared/ui/Icon';
 import type { Trip, TripDetail } from '../../trips/trip-repository';
-import { useLedgerExpenses, useRecordTripTransfer } from '../ledger-hooks';
+import {
+  useDeleteLedgerExpense,
+  useDeleteLedgerTransfer,
+  useLedgerExpenses,
+  useRecordTripTransfer,
+} from '../ledger-hooks';
 import type { LedgerRepository } from '../ledger-repository';
 import { calculateLedgerBalanceMinor } from '../ledger-balance';
 import {
@@ -130,15 +137,21 @@ function ExpenseCard({
   expense,
   locale,
   decimalPlaces,
+  canEdit,
+  onEdit,
+  onRemove,
 }: {
   expense: LedgerExpense;
   locale: string;
   decimalPlaces: number;
+  canEdit: boolean;
+  onEdit: () => void;
+  onRemove: () => void;
 }) {
   const { t } = useTranslation('common');
   const equalAmount = expense.shares[0]?.amountMinor;
   const equalSplit = expense.expense.split_method === 'equal';
-  return (
+  const card = (
     <article className="ledger-expense-card">
       <div
         className={`ledger-expense-icon ledger-expense-icon--${expenseIcon(expense)}`}
@@ -199,6 +212,19 @@ function ExpenseCard({
         </div>
       )}
     </article>
+  );
+  return canEdit ? (
+    <SwipeItem
+      className="ledger-expense-sliding"
+      editLabel={t('actions.edit')}
+      removeLabel={t('actions.remove')}
+      onEdit={onEdit}
+      onRemove={onRemove}
+    >
+      <Item className="ledger-expense-swipe-item">{card}</Item>
+    </SwipeItem>
+  ) : (
+    card
   );
 }
 
@@ -264,13 +290,19 @@ function TransferCard({
   item,
   locale,
   decimalPlaces,
+  canEdit,
+  onEdit,
+  onRemove,
 }: {
   item: LedgerTransfer;
   locale: string;
   decimalPlaces: number;
+  canEdit: boolean;
+  onEdit: () => void;
+  onRemove: () => void;
 }) {
   const { t } = useTranslation('common');
-  return (
+  const card = (
     <article className="ledger-expense-card ledger-transfer-card">
       <div className="ledger-expense-icon ledger-transfer-icon">
         <Icon name="transfer" />
@@ -294,6 +326,19 @@ function TransferCard({
         <span>{t('ledger.transferred')}</span>
       </div>
     </article>
+  );
+  return canEdit ? (
+    <SwipeItem
+      className="ledger-expense-sliding"
+      editLabel={t('actions.edit')}
+      removeLabel={t('actions.remove')}
+      onEdit={onEdit}
+      onRemove={onRemove}
+    >
+      <Item className="ledger-expense-swipe-item">{card}</Item>
+    </SwipeItem>
+  ) : (
+    card
   );
 }
 
@@ -685,6 +730,8 @@ export function LedgerPanel({
   const { t } = useTranslation('common');
   const query = useLedgerExpenses(trip.id, repository);
   const recordTransfer = useRecordTripTransfer(repository);
+  const deleteExpense = useDeleteLedgerExpense(repository);
+  const deleteTransfer = useDeleteLedgerTransfer(repository);
   const [view, setView] = useState<string | null>(null);
   const [transferMode, setTransferMode] = useState<'direct' | 'treasurer'>(
     'treasurer',
@@ -693,6 +740,17 @@ export function LedgerPanel({
     useState<TransferSuggestion | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [viewPickerOpen, setViewPickerOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<LedgerExpense | null>(
+    null,
+  );
+  const [removingExpense, setRemovingExpense] = useState<LedgerExpense | null>(
+    null,
+  );
+  const [editingTransfer, setEditingTransfer] = useState<LedgerTransfer | null>(
+    null,
+  );
+  const [removingTransfer, setRemovingTransfer] =
+    useState<LedgerTransfer | null>(null);
   const data = useMemo(() => {
     if (!query.data?.currentMemberId) return query.data;
     const currentMemberId = query.data.currentMemberId;
@@ -1199,6 +1257,9 @@ export function LedgerPanel({
                   expense={item.value}
                   locale={locale}
                   decimalPlaces={trip.currency_decimal_places}
+                  canEdit={canEdit}
+                  onEdit={() => setEditingExpense(item.value)}
+                  onRemove={() => setRemovingExpense(item.value)}
                 />
               ) : (
                 <TransferCard
@@ -1206,6 +1267,9 @@ export function LedgerPanel({
                   item={item.value}
                   locale={locale}
                   decimalPlaces={trip.currency_decimal_places}
+                  canEdit={canEdit}
+                  onEdit={() => setEditingTransfer(item.value)}
+                  onRemove={() => setRemovingTransfer(item.value)}
                 />
               ),
             )}
@@ -1214,19 +1278,31 @@ export function LedgerPanel({
       )}
       {canEdit && data && (
         <>
-          {!addOpen && !viewPickerOpen && (
-            <FabButton
-              label={t('ledger.addEntry')}
-              icon="add"
-              onClick={() => setAddOpen(true)}
-            />
-          )}
+          {!addOpen &&
+            !viewPickerOpen &&
+            !editingExpense &&
+            !editingTransfer &&
+            !removingExpense &&
+            !removingTransfer &&
+            !pendingTransfer && (
+              <FabButton
+                label={t('ledger.addEntry')}
+                icon="add"
+                onClick={() => setAddOpen(true)}
+              />
+            )}
           <AddLedgerEntryModal
-            open={addOpen}
+            open={addOpen || Boolean(editingExpense || editingTransfer)}
             trip={trip}
             data={data}
             repository={repository}
-            onDismiss={() => setAddOpen(false)}
+            editExpense={editingExpense}
+            editTransfer={editingTransfer}
+            onDismiss={() => {
+              setAddOpen(false);
+              setEditingExpense(null);
+              setEditingTransfer(null);
+            }}
           />
         </>
       )}
@@ -1263,6 +1339,49 @@ export function LedgerPanel({
               note: t('ledger.balanceTransferNote'),
             },
             { onSuccess: () => setPendingTransfer(null) },
+          );
+        }}
+      />
+      <ConfirmDialog
+        open={Boolean(removingExpense)}
+        title={t('ledger.removeExpenseTitle')}
+        message={
+          removingExpense
+            ? t('ledger.removeExpenseMessage', {
+                title: removingExpense.expense.title,
+              })
+            : ''
+        }
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('actions.remove')}
+        onCancel={() => setRemovingExpense(null)}
+        onConfirm={() => {
+          if (!removingExpense) return;
+          deleteExpense.mutate(
+            { expenseId: removingExpense.expense.id, tripId: trip.id },
+            { onSuccess: () => setRemovingExpense(null) },
+          );
+        }}
+      />
+      <ConfirmDialog
+        open={Boolean(removingTransfer)}
+        title={t('ledger.removeTransferTitle')}
+        message={
+          removingTransfer
+            ? t('ledger.removeTransferMessage', {
+                from: removingTransfer.fromMember.display_name,
+                to: removingTransfer.toMember.display_name,
+              })
+            : ''
+        }
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('actions.remove')}
+        onCancel={() => setRemovingTransfer(null)}
+        onConfirm={() => {
+          if (!removingTransfer) return;
+          deleteTransfer.mutate(
+            { transferId: removingTransfer.transfer.id, tripId: trip.id },
+            { onSuccess: () => setRemovingTransfer(null) },
           );
         }}
       />

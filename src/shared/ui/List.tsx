@@ -74,6 +74,7 @@ export function ReorderHandle({ label }: { label: string }) {
 }
 
 export type SwipeItemProps = PropsWithChildren<{
+  className?: string;
   disabled?: boolean;
   editLabel: string;
   removeLabel: string;
@@ -84,6 +85,7 @@ export type SwipeItemProps = PropsWithChildren<{
 
 export function SwipeItem({
   children,
+  className,
   disabled = false,
   editLabel,
   removeLabel,
@@ -105,7 +107,7 @@ export function SwipeItem({
   return (
     <IonItemSliding
       ref={slidingRef}
-      className="ui-swipe-item"
+      className={`ui-swipe-item${className ? ` ${className}` : ''}`}
       disabled={disabled}
     >
       {children}

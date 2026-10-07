@@ -379,6 +379,17 @@
   font-weight: 700;
 }
 
+.ui-segment ion-segment-button.segment-button-disabled,
+.ui-segment ion-segment-button[disabled] {
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.ui-skeleton {
+  overflow: hidden;
+  border-radius: var(--radius-control);
+}
+
 .ui-field-error {
   display: block;
   margin-top: 0.4rem;

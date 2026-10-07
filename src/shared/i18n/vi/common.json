@@ -171,8 +171,12 @@
     "viewAsMember": "Xem Theo",
     "groupEmptyTitle": "Chưa có thành viên",
     "groupEmptyDescription": "Số dư thành viên sẽ xuất hiện tại đây.",
-    "tipDetails": "Vuốt phải để chỉnh sữa",
+    "tipDetails": "Vuốt phải để chỉnh sửa",
     "tipActions": "Vuốt trái để xoá",
+    "removeExpenseTitle": "Xóa khoản chi?",
+    "removeExpenseMessage": "Bạn có chắc muốn xóa {{title}} không?",
+    "removeTransferTitle": "Xóa giao dịch chuyển tiền?",
+    "removeTransferMessage": "Bạn có chắc muốn xóa giao dịch từ {{from}} đến {{to}} không?",
     "today": "Hôm nay, {{date}}",
     "yesterday": "Hôm qua, {{date}}",
     "total": "Tổng: {{amount}}",
@@ -211,6 +215,11 @@
     "addEntry": "Thêm mục sổ chi tiêu",
     "modal": {
       "title": "Thêm mục sổ chi tiêu",
+      "editTitle": "Chỉnh sửa khoản chi",
+      "editTransferTitle": "Chỉnh sửa giao dịch chuyển tiền",
+      "updateExpense": "Cập nhật khoản chi",
+      "updateTransfer": "Cập nhật giao dịch",
+      "updating": "Đang cập nhật…",
       "entryType": "Loại mục",
       "expense": "Khoản chi",
       "transfer": "Chuyển tiền",
@@ -458,7 +467,9 @@
     "clear": "Xóa ngày",
     "apply": "Áp dụng",
     "retry": "Thử lại",
-    "save": "Lưu"
+    "save": "Lưu",
+    "edit": "Chỉnh sửa",
+    "remove": "Xóa"
   },
   "states": {
     "empty": "Chưa có nội dung.",

@@ -31,6 +31,7 @@ export function Segment({
       scrollable={scrollable}
       value={value}
       onIonChange={(event) => {
+        if (disabled) return;
         if (typeof event.detail.value === 'string') {
           onValueChange?.(event.detail.value);
         }
@@ -39,7 +40,7 @@ export function Segment({
       {options.map((option) => (
         <IonSegmentButton
           key={option.value}
-          disabled={option.disabled}
+          disabled={disabled || option.disabled}
           value={option.value}
         >
           <IonLabel>{option.label}</IonLabel>

@@ -59,6 +59,7 @@ export type SaveLedgerEntryInput = {
   splitMode: LedgerSplitMode;
   shares: Array<{ memberId: string; amountMinor: number }>;
   userId: string;
+  expenseId?: string;
 };
 
 export type RecordTripTransferInput = {
@@ -69,6 +70,7 @@ export type RecordTripTransferInput = {
   currency: string;
   occurredAt: string;
   note?: string;
+  transferId?: string;
 };
 
 export function formatMoney(

@@ -11,6 +11,8 @@ import type {
 export type LedgerRepository = {
   listExpenses: (tripId: string) => Promise<LedgerData>;
   saveEntry: (input: SaveLedgerEntryInput) => Promise<string>;
+  deleteExpense: (expenseId: string) => Promise<void>;
+  deleteTransfer: (transferId: string) => Promise<void>;
   recordTransfer: (input: RecordTripTransferInput) => Promise<string>;
 };
 
@@ -184,6 +186,7 @@ export function createLedgerRepository(): LedgerRepository {
           })),
           p_paid_by_member_id: input.paidByMemberId,
           p_note: input.category ? `Category: ${input.category}` : undefined,
+          p_expense_id: input.expenseId,
           p_request_id: createRequestId(),
         });
         if (error) throw mapSupabaseError(error);
@@ -202,6 +205,14 @@ export function createLedgerRepository(): LedgerRepository {
       return data;
     },
 
+    async deleteExpense(expenseId) {
+      const { error } = await client.rpc('soft_delete_expense', {
+        p_expense_id: expenseId,
+        p_request_id: createRequestId(),
+      });
+      if (error) throw mapSupabaseError(error);
+    },
+
     async recordTransfer(input) {
       if (input.fromMemberId === input.toMemberId) {
         throw new Error('A transfer requires two different members.');
@@ -210,7 +221,7 @@ export function createLedgerRepository(): LedgerRepository {
         throw new Error('A transfer amount must be greater than zero.');
       }
 
-      const { data, error } = await client.rpc('record_trip_transfer', {
+      const { data, error } = await client.rpc('save_trip_transfer', {
         p_trip_id: input.tripId,
         p_from_member_id: input.fromMemberId,
         p_to_member_id: input.toMemberId,
@@ -218,10 +229,19 @@ export function createLedgerRepository(): LedgerRepository {
         p_currency: input.currency,
         p_occurred_at: input.occurredAt,
         p_note: input.note?.trim() || undefined,
+        p_transfer_id: input.transferId,
         p_request_id: createRequestId(),
       });
       if (error) throw mapSupabaseError(error);
       return data;
+    },
+
+    async deleteTransfer(transferId) {
+      const { error } = await client.rpc('soft_delete_trip_transfer', {
+        p_transfer_id: transferId,
+        p_request_id: createRequestId(),
+      });
+      if (error) throw mapSupabaseError(error);
     },
   };
 }
