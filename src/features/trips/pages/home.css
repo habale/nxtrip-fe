@@ -97,6 +97,12 @@
   background-position: center;
   background-size: cover;
   box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+.trip-card:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
 }
 
 .trip-card__overlay {

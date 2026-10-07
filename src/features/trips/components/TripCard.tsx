@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { routes } from '../../../app/routes';
 import { Avatar, Button, Icon } from '../../../shared/ui';
@@ -12,6 +13,7 @@ type TripCardProps = {
 
 export function TripCard({ item, featured = false }: TripCardProps) {
   const { t, i18n } = useTranslation('common');
+  const navigate = useNavigate();
   const { trip, members, coverThumbnailUrl } = item;
   const dateRange = formatTripDateRange(
     trip.start_at,
@@ -27,8 +29,25 @@ export function TripCard({ item, featured = false }: TripCardProps) {
 
   return (
     <article
+      aria-label={trip.name}
       className={`trip-card trip-card--${trip.status}${featured ? ' trip-card--featured' : ''}${coverThumbnailUrl ? ' trip-card--cover' : ''}`}
+      role="link"
       style={style}
+      tabIndex={0}
+      onClick={(event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.closest('button, a, ion-button, ion-router-link')
+        ) {
+          return;
+        }
+        navigate(routes.trip(trip.id));
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        navigate(routes.trip(trip.id));
+      }}
     >
       <div className="trip-card__overlay" />
       <div className="trip-card__content">

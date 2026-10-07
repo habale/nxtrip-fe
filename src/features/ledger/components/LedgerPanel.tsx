@@ -770,6 +770,17 @@ export function LedgerPanel({
     setView(nextView);
     setViewPickerOpen(false);
   }
+
+  function selectMemberView(memberId: string) {
+    const content = document.querySelector('ion-content') as
+      (Element & { scrollToTop?: (duration?: number) => Promise<void> }) | null;
+    if (content?.scrollToTop) {
+      void content.scrollToTop(0);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    selectView(`member:${memberId}`);
+  }
   const memberGroups = useMemo(() => {
     if (!selectedMember || !data) {
       return new Map<string, MemberTimelineItem[]>();
@@ -1091,7 +1102,7 @@ export function LedgerPanel({
                 currency={trip.default_currency}
                 locale={locale}
                 decimalPlaces={trip.currency_decimal_places}
-                onSelect={() => setView(`member:${summary.member.id}`)}
+                onSelect={() => selectMemberView(summary.member.id)}
                 transferSuggestion={
                   treasurer
                     ? createTreasurerSuggestion(summary, treasurer)
