@@ -218,6 +218,10 @@ export function TripMembersPanel({
         <div className="trip-members-panel__list">
           {filteredMembers.map((target) => {
             const { member, linkedUserId, role, accessStatus } = target;
+            const displayName =
+              linkedUserId === user?.id
+                ? `${member.display_name} (${t('labels.you')})`
+                : member.display_name;
             const permissions = getMemberManagementPermissions(
               viewerRole,
               target,
@@ -230,12 +234,12 @@ export function TripMembersPanel({
               >
                 <Avatar
                   initialCount={2}
-                  name={member.display_name}
+                  name={displayName}
                   src={member.avatar_url ?? undefined}
                 />
                 <div className="trip-member-card__details">
                   <div className="trip-member-card__name">
-                    <h3>{member.display_name}</h3>
+                    <h3>{displayName}</h3>
                     {linkedUserId && accessStatus === 'active' && (
                       <span className="trip-member-card__linked-badge">
                         <Icon label={t('tripMembers.linked')} name="link" />
@@ -258,7 +262,7 @@ export function TripMembersPanel({
                   {viewerRole === 'owner' && (
                     <ContextMenu
                       label={t('tripMembers.actionsFor', {
-                        name: member.display_name,
+                        name: displayName,
                       })}
                       items={[
                         {

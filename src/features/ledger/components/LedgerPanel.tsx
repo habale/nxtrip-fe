@@ -693,13 +693,46 @@ export function LedgerPanel({
     useState<TransferSuggestion | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [viewPickerOpen, setViewPickerOpen] = useState(false);
+  const data = useMemo(() => {
+    if (!query.data?.currentMemberId) return query.data;
+    const currentMemberId = query.data.currentMemberId;
+    const annotate = (member: LedgerMember): LedgerMember =>
+      member.id === currentMemberId
+        ? {
+            ...member,
+            display_name: `${member.display_name} (${t('labels.you')})`,
+          }
+        : member;
+
+    return {
+      ...query.data,
+      members: query.data.members.map(annotate),
+      expenses: query.data.expenses.map((expense) => ({
+        ...expense,
+        payer: expense.payer ? annotate(expense.payer) : null,
+        shares: expense.shares.map((share) => ({
+          ...share,
+          member: annotate(share.member),
+        })),
+      })),
+      contributions: query.data.contributions.map((contribution) => ({
+        ...contribution,
+        member: contribution.member ? annotate(contribution.member) : null,
+      })),
+      transfers: query.data.transfers.map((transfer) => ({
+        ...transfer,
+        fromMember: annotate(transfer.fromMember),
+        toMember: annotate(transfer.toMember),
+      })),
+    };
+  }, [query.data, t]);
   const groups = useMemo(() => {
     const items: Array<{ occurredAt: string; item: AllTimelineItem }> = [
-      ...(query.data?.expenses ?? []).map((expense) => ({
+      ...(data?.expenses ?? []).map((expense) => ({
         occurredAt: expense.expense.occurred_at,
         item: { kind: 'expense', value: expense } as const,
       })),
-      ...(query.data?.transfers ?? []).map((transfer) => ({
+      ...(data?.transfers ?? []).map((transfer) => ({
         occurredAt: transfer.transfer.occurred_at,
         item: { kind: 'transfer', value: transfer } as const,
       })),
@@ -715,21 +748,21 @@ export function LedgerPanel({
       },
       new Map(),
     );
-  }, [query.data?.expenses, query.data?.transfers, trip.timezone]);
+  }, [data?.expenses, data?.transfers, trip.timezone]);
   const defaultView =
     viewerRole === 'member' &&
-    query.data?.currentMemberId &&
-    query.data.currentMemberId !== query.data.treasurerMemberId
-      ? `member:${query.data.currentMemberId}`
+    data?.currentMemberId &&
+    data.currentMemberId !== data.treasurerMemberId
+      ? `member:${data.currentMemberId}`
       : 'all';
   const activeView = view ?? defaultView;
-  const selectedMember = query.data?.members.find(
+  const selectedMember = data?.members.find(
     ({ id }) => activeView === `member:${id}`,
   );
-  const currentMember = query.data?.members.find(
-    ({ id }) => id === query.data?.currentMemberId,
+  const currentMember = data?.members.find(
+    ({ id }) => id === data?.currentMemberId,
   );
-  const otherMembers = (query.data?.members ?? []).filter(
+  const otherMembers = (data?.members ?? []).filter(
     ({ id }) => id !== currentMember?.id,
   );
 
@@ -738,12 +771,12 @@ export function LedgerPanel({
     setViewPickerOpen(false);
   }
   const memberGroups = useMemo(() => {
-    if (!selectedMember || !query.data) {
+    if (!selectedMember || !data) {
       return new Map<string, MemberTimelineItem[]>();
     }
 
     const items: Array<{ occurredAt: string; item: MemberTimelineItem }> = [
-      ...query.data.expenses.flatMap((expense) =>
+      ...data.expenses.flatMap((expense) =>
         expense.payer?.id === selectedMember.id ||
         expense.shares.some(({ member }) => member.id === selectedMember.id)
           ? [
@@ -754,7 +787,7 @@ export function LedgerPanel({
             ]
           : [],
       ),
-      ...query.data.contributions.flatMap((contribution) =>
+      ...data.contributions.flatMap((contribution) =>
         contribution.member?.id === selectedMember.id
           ? [
               {
@@ -764,7 +797,7 @@ export function LedgerPanel({
             ]
           : [],
       ),
-      ...query.data.transfers.flatMap((transfer) =>
+      ...data.transfers.flatMap((transfer) =>
         transfer.fromMember.id === selectedMember.id ||
         transfer.toMember.id === selectedMember.id
           ? [
@@ -788,26 +821,26 @@ export function LedgerPanel({
       },
       new Map(),
     );
-  }, [query.data, selectedMember, trip.timezone]);
+  }, [data, selectedMember, trip.timezone]);
   const memberTotals = useMemo(() => {
-    if (!selectedMember || !query.data) return null;
-    return calculateMemberSummary(query.data, selectedMember);
-  }, [query.data, selectedMember]);
+    if (!selectedMember || !data) return null;
+    return calculateMemberSummary(data, selectedMember);
+  }, [data, selectedMember]);
   const groupSummaries = useMemo(
     () =>
-      query.data
-        ? [...query.data.members]
+      data
+        ? [...data.members]
             .sort((left, right) =>
               left.display_name.localeCompare(right.display_name, undefined, {
                 sensitivity: 'base',
               }),
             )
-            .map((member) => calculateMemberSummary(query.data!, member))
+            .map((member) => calculateMemberSummary(data, member))
         : [],
-    [query.data],
+    [data],
   );
-  const treasurer = query.data?.members.find(
-    ({ id }) => id === query.data?.treasurerMemberId,
+  const treasurer = data?.members.find(
+    ({ id }) => id === data?.treasurerMemberId,
   );
   const directTransferSuggestions = useMemo(
     () => createDirectTransferSuggestions(groupSummaries),
@@ -1115,7 +1148,7 @@ export function LedgerPanel({
             </section>
           ))
         )
-      ) : groups.size === 0 && (query.data?.contributions.length ?? 0) === 0 ? (
+      ) : groups.size === 0 && (data?.contributions.length ?? 0) === 0 ? (
         <div className="ledger-state">
           <Icon name="wallet" size="large" />
           <h2>{t('ledger.emptyTitle')}</h2>
@@ -1168,7 +1201,7 @@ export function LedgerPanel({
           </section>
         ))
       )}
-      {canEdit && query.data && (
+      {canEdit && data && (
         <>
           {!addOpen && !viewPickerOpen && (
             <FabButton
@@ -1180,7 +1213,7 @@ export function LedgerPanel({
           <AddLedgerEntryModal
             open={addOpen}
             trip={trip}
-            data={query.data}
+            data={data}
             repository={repository}
             onDismiss={() => setAddOpen(false)}
           />

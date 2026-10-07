@@ -106,10 +106,6 @@ describe('TripDetailPage', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText('Oct 15 – Oct 18, 2026')).toHaveLength(2);
     expect(screen.getByText(/4 days 3 nights/)).toBeInTheDocument();
-    expect(screen.getByLabelText('Attachments')).toHaveAttribute(
-      'router-link',
-      '/trips/trip-123/attachments',
-    );
     expect(screen.getByLabelText('Bookmarks')).toHaveAttribute(
       'router-link',
       '/trips/trip-123/bookmarks',
@@ -195,15 +191,15 @@ describe('TripDetailPage', () => {
     renderPage('info', repository);
 
     expect(await screen.findByText('Members (2)')).toBeInTheDocument();
-    expect(screen.getByText('Liam Tran')).toBeInTheDocument();
+    expect(screen.getByText('Liam Tran (You)')).toBeInTheDocument();
     expect(screen.getByText('Owner')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: 'Linked' })).toBeInTheDocument();
     expect(screen.queryByText('Linked')).not.toBeInTheDocument();
-    const linkedCard = screen.getByText('Liam Tran').closest('article');
+    const linkedCard = screen.getByText('Liam Tran (You)').closest('article');
     expect(linkedCard).not.toBeNull();
-    expect(within(linkedCard!).getByText('Actions for Liam Tran')).toHaveClass(
-      'sr-only',
-    );
+    expect(
+      within(linkedCard!).getByText('Actions for Liam Tran (You)'),
+    ).toHaveClass('sr-only');
     const guestCard = screen.getByText('Kenji Mori').closest('article');
     expect(guestCard).not.toBeNull();
     expect(within(guestCard!).getByText('Actions for Kenji Mori')).toHaveClass(

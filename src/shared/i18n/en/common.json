@@ -2,6 +2,9 @@
   "app": {
     "name": "NxTrip"
   },
+  "labels": {
+    "you": "You"
+  },
   "auth": {
     "signIn": "Sign in",
     "description": "Keep every stop, shared expense, and trip detail in one place.",

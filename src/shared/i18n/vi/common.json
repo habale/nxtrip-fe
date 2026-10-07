@@ -2,6 +2,9 @@
   "app": {
     "name": "NxTrip"
   },
+  "labels": {
+    "you": "Bạn"
+  },
   "auth": {
     "signIn": "Đăng nhập",
     "description": "Lưu mọi điểm đến, chi phí chung và thông tin chuyến đi tại một nơi.",
