@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
 import { Button, Icon } from '../../../shared/ui';
+import { useAuth } from '../../auth/auth-context';
 import {
   useCreateTripInvite,
   useRevokeTripInvite,
@@ -22,6 +23,7 @@ export function TripInvitePanel({
   tripName,
 }: TripInvitePanelProps) {
   const { t, i18n } = useTranslation('common');
+  const { user } = useAuth();
   const inviteQuery = useTripInvite(tripId, true, repository);
   const createInvite = useCreateTripInvite(repository);
   const revokeInvite = useRevokeTripInvite(repository);
@@ -46,9 +48,15 @@ export function TripInvitePanel({
       await copyLink(currentInvite);
       return;
     }
+    const metadataName = user?.user_metadata?.full_name;
+    const ownerName =
+      (typeof metadataName === 'string' && metadataName.trim()) ||
+      user?.email ||
+      t('home.traveler');
+
     await navigator.share({
       title: tripName,
-      text: t('tripInvite.shareText', { trip: tripName }),
+      text: t('tripInvite.shareText', { ownerName, trip: tripName }),
       url: getShareUrl(currentInvite),
     });
   }

@@ -407,7 +407,7 @@
     "createViewer": "Tạo liên kết khách",
     "creating": "Đang tạo…",
     "share": "Chia sẻ",
-    "shareText": "Vui lòng tham gia {{trip}} trên NxTrip bằng liên kết này: ",
+    "shareText": "{{ownerName}} đã mời bạn tham gia {{trip}} trên NxTrip qua liên kết này: ",
     "revoke": "Thu hồi",
     "expires": "Liên kết hết hạn vào {{date}}.",
     "error": "Không thể quản lý lời mời. Vui lòng thử lại."

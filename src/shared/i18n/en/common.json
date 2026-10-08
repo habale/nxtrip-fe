@@ -410,7 +410,7 @@
     "createViewer": "Create guest link",
     "creating": "Creating invite…",
     "share": "Share",
-    "shareText": "Please join {{trip}} on NxTrip with this link: ",
+    "shareText": "{{ownerName}} invited you to join {{trip}} on NxTrip with this link: ",
     "revoke": "Revoke link",
     "expires": "Created link expires {{date}}.",
     "error": "We couldn’t manage the invitation. Please try again."
