@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
-import { Badge, Button, Icon } from '../../../shared/ui';
+import { Button, Icon } from '../../../shared/ui';
 import {
   deriveTripStatus,
   formatTripDateRange,
@@ -9,6 +9,7 @@ import {
 } from '../trip-date';
 import { getCurrencyLabel } from '../trip-options';
 import type { TripDetail } from '../trip-repository';
+import { TripStatusBadge } from './TripStatusBadge';
 
 type TripInfoPanelProps = {
   detail: TripDetail;
@@ -30,9 +31,7 @@ export function TripInfoPanel({ detail, locale }: TripInfoPanelProps) {
   return (
     <section className="trip-info-view">
       <div className="trip-info-view__topline">
-        <Badge tone={status === 'ongoing' ? 'info' : 'brand'}>
-          {t(`home.status.${status}`)}
-        </Badge>
+        <TripStatusBadge status={status} />
         {role === 'owner' && (
           <Button
             href={routes.editTrip(trip.id)}
@@ -46,17 +45,18 @@ export function TripInfoPanel({ detail, locale }: TripInfoPanelProps) {
       </div>
       <h2>{trip.name}</h2>
       {dateRange && (
-        <p className="trip-detail-date">
-          <Icon name="calendar" />
-          <span>{dateRange}</span>
+        <>
+          <p className="trip-detail-date">
+            <Icon name="calendar" />
+            <span>{dateRange}</span>
+          </p>
           {duration && (
-            <span className="trip-info-duration">
-              <span aria-hidden="true">•</span>{' '}
+            <div className="trip-info-duration">
               {t('tripInfo.dayCount', { count: duration.days })}{' '}
               {t('tripInfo.nightCount', { count: duration.nights })}
-            </span>
+            </div>
           )}
-        </p>
+        </>
       )}
       {trip.description && (
         <p className="trip-info-description">{trip.description}</p>

@@ -465,12 +465,6 @@
   box-shadow: var(--shadow-card);
 }
 
-.trip-info-view ion-badge {
-  width: max-content;
-  border-radius: var(--radius-pill);
-  text-transform: uppercase;
-}
-
 .trip-info-view h2 {
   font-size: clamp(2rem, 9vw, 3rem);
   font-weight: 600;

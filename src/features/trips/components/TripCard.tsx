@@ -9,6 +9,7 @@ import {
   getTripProgress,
 } from '../trip-date';
 import type { TripListItem } from '../trip-repository';
+import { TripStatusBadge } from './TripStatusBadge';
 
 type TripCardProps = {
   item: TripListItem;
@@ -58,7 +59,7 @@ export function TripCard({ item, featured = false }: TripCardProps) {
       <div className="trip-card__overlay" />
       <div className="trip-card__content">
         <header className="trip-card__meta">
-          <span className="trip-status">{t(`home.status.${status}`)}</span>
+          <TripStatusBadge status={status} />
           {dateRange && <time>{dateRange}</time>}
         </header>
 
