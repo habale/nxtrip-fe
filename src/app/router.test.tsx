@@ -46,10 +46,8 @@ describe('application routes', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
     expect(sessionStorage.getItem('nxtrip.auth.returnTo')).toBe('/settings');
     expect(await screen.findByLabelText('NxTrip')).toBeInTheDocument();
-    expect(screen.getByText('Access as Guest')).toHaveAttribute(
-      'router-link',
-      '/guest',
-    );
+    await userEvent.click(screen.getByText('Access as Guest'));
+    await waitFor(() => expect(window.location.pathname).toBe('/guest'));
   });
 
   it('renders guest code entry without authentication', async () => {

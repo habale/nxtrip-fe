@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { getAuthReturnTo } from '../../../app/auth-return';
+import { clearAuthReturnTo, getAuthReturnTo } from '../../../app/auth-return';
 import { routes } from '../../../app/routes';
 import { Button, Icon, LanguageSwitcher, Page } from '../../../shared/ui';
 import { useAuth } from '../auth-context';
@@ -9,14 +10,21 @@ import { useAuth } from '../auth-context';
 export function LoginPage() {
   const { t } = useTranslation('common');
   const { error, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const returnTo = getAuthReturnTo() ?? undefined;
+
+  useEffect(() => {
+    const resetSubmitting = () => setSubmitting(false);
+    window.addEventListener('pageshow', resetSubmitting);
+    return () => window.removeEventListener('pageshow', resetSubmitting);
+  }, []);
 
   async function handleGoogleSignIn() {
     setSubmitting(true);
     try {
       await signInWithGoogle(returnTo);
-    } catch {
+    } finally {
       setSubmitting(false);
     }
   }
@@ -65,9 +73,11 @@ export function LoginPage() {
               <Button
                 ariaLabel={t('auth.accessAsGuest')}
                 block
-                href={routes.guest}
-                navigationDirection="forward"
                 variant="quiet"
+                onClick={() => {
+                  clearAuthReturnTo();
+                  navigate(routes.guest);
+                }}
               >
                 {t('auth.accessAsGuest')}
               </Button>

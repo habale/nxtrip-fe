@@ -53,20 +53,19 @@ export function ConfirmDialog({
   return (
     <IonAlert
       buttons={[
-        { text: cancelLabel, role: 'cancel', handler: onCancel },
+        { text: cancelLabel, role: 'cancel' },
         {
           text: confirmLabel,
           role: destructive ? 'destructive' : 'confirm',
-          handler: onConfirm,
         },
       ]}
       header={title}
       isOpen={open}
       message={message}
       onDidDismiss={(event) => {
-        if (event.detail.role === 'backdrop') {
-          onCancel();
-        }
+        const role = event.detail.role;
+        if (role === 'confirm' || role === 'destructive') onConfirm();
+        else onCancel();
       }}
     />
   );

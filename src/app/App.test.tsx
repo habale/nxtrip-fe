@@ -67,5 +67,44 @@ describe('App', () => {
     expect(authClient.signOut).toHaveBeenCalledWith({ scope: 'local' });
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
     expect(await screen.findByLabelText('NxTrip')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Access as Guest'));
+    await waitFor(() => expect(window.location.pathname).toBe('/guest'));
+    expect(
+      await screen.findByRole('heading', { name: 'View Trip as Guest' }),
+    ).toBeInTheDocument();
+  });
+
+  it('reenables Google sign-in when the browser restores the login page', async () => {
+    const user = userEvent.setup();
+    const authClient = {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      }),
+      signInWithOAuth: vi.fn(
+        () => new Promise<{ error: Error | null }>(() => undefined),
+      ),
+      signOut: async () => ({ error: null }),
+    } satisfies AuthClient;
+    window.history.replaceState({}, '', '/login');
+
+    render(
+      <AppProviders authClient={authClient}>
+        <App />
+      </AppProviders>,
+    );
+
+    const googleButton = await screen.findByLabelText('Continue with Google');
+    await user.click(googleButton);
+    await waitFor(() => expect(googleButton).toHaveClass('button-disabled'));
+
+    window.dispatchEvent(
+      new PageTransitionEvent('pageshow', { persisted: true }),
+    );
+
+    await waitFor(() =>
+      expect(googleButton).not.toHaveClass('button-disabled'),
+    );
   });
 });

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
+import { clearAuthReturnTo } from '../../../app/auth-return';
 import {
   Button,
   Icon,
@@ -186,7 +187,12 @@ export function GuestTripPage() {
               <Button block onClick={openTrip}>
                 {t('guest.openTrip')}
               </Button>
-              <Button block href={routes.login} variant="quiet">
+              <Button
+                block
+                href={routes.login}
+                variant="quiet"
+                onClick={clearAuthReturnTo}
+              >
                 {t('guest.backToLogin')}
               </Button>
             </form>
@@ -198,7 +204,10 @@ export function GuestTripPage() {
   if (tripQuery.isPending)
     return (
       <Page hideHeader padded={false}>
-        <main className="guest-state guest-skeleton" aria-label={t('states.loading')}>
+        <main
+          className="guest-state guest-skeleton"
+          aria-label={t('states.loading')}
+        >
           <Skeleton width="100%" height="4rem" />
           <Skeleton width="100%" height="10rem" />
         </main>
@@ -213,7 +222,11 @@ export function GuestTripPage() {
           <h1>{t('guest.unavailableTitle')}</h1>
           <p>{t('guest.unavailableDescription')}</p>
           <Button onClick={exitGuestView}>{t('guest.enterAnotherCode')}</Button>
-          <Button href={routes.login} variant="quiet">
+          <Button
+            href={routes.login}
+            variant="quiet"
+            onClick={clearAuthReturnTo}
+          >
             {t('guest.backToLogin')}
           </Button>
         </main>

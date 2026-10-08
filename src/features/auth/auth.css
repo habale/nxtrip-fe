@@ -14,7 +14,7 @@
   display: grid;
   width: min(100%, 43rem);
   justify-items: stretch;
-  gap: clamp(1.25rem, 3.5vh, 2.5rem);
+  gap: clamp(1.25rem, 6vh, 3rem);
   text-align: center;
 }
 

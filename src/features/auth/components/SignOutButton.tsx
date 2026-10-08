@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { clearAuthReturnTo } from '../../../app/auth-return';
-import { routes } from '../../../app/routes';
 import { Button, ConfirmDialog } from '../../../shared/ui';
 import { useAuth } from '../auth-context';
 
 export function SignOutButton() {
   const { t } = useTranslation('common');
   const { signOut } = useAuth();
-  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +19,6 @@ export function SignOutButton() {
     try {
       await signOut();
       clearAuthReturnTo();
-      navigate(routes.login, { replace: true });
     } catch (caughtError) {
       setSubmitting(false);
       setError(

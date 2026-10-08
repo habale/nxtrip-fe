@@ -53,7 +53,7 @@ type ItineraryPanelProps = {
 const iconByKey: Record<string, IconName> = {
   accommodation: 'hotel',
   activity: 'activity',
-  bus: 'vehicle',
+  bus: 'bus',
   car: 'vehicle',
   cafe: 'cafe',
   ferry: 'ferry',
