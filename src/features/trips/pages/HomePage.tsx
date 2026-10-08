@@ -7,20 +7,14 @@ import { useAuth } from '../../auth/auth-context';
 import { useCurrentProfile } from '../../profile/profile-hooks';
 import { TripCard } from '../components/TripCard';
 import { TripListSkeleton } from '../components/TripListSkeleton';
+import { deriveTripStatus, type DerivedTripStatus } from '../trip-date';
 import { useTripList } from '../trip-hooks';
-import type { Trip } from '../trip-repository';
 
 import './home.css';
 
-type TripFilter = 'all' | Trip['status'];
+type TripFilter = 'all' | DerivedTripStatus;
 
-const filters: TripFilter[] = [
-  'all',
-  'ongoing',
-  'planning',
-  'pending_settlement',
-  'completed',
-];
+const filters: TripFilter[] = ['all', 'ongoing', 'planning', 'completed'];
 
 export function HomePage() {
   const { t } = useTranslation('common');
@@ -44,7 +38,7 @@ export function HomePage() {
   const filteredTrips =
     filter === 'all'
       ? trips
-      : trips.filter(({ trip }) => trip.status === filter);
+      : trips.filter(({ trip }) => deriveTripStatus(trip) === filter);
 
   return (
     <Page
@@ -86,7 +80,9 @@ export function HomePage() {
               const count =
                 option === 'all'
                   ? trips.length
-                  : trips.filter(({ trip }) => trip.status === option).length;
+                  : trips.filter(
+                      ({ trip }) => deriveTripStatus(trip) === option,
+                    ).length;
 
               return (
                 <Button
@@ -135,7 +131,9 @@ export function HomePage() {
             {filteredTrips.map((item, index) => (
               <TripCard
                 key={item.trip.id}
-                featured={index === 0 && item.trip.status === 'ongoing'}
+                featured={
+                  index === 0 && deriveTripStatus(item.trip) === 'ongoing'
+                }
                 item={item}
               />
             ))}

@@ -85,7 +85,7 @@
 
 .trip-list {
   display: grid;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .trip-card {
@@ -189,14 +189,60 @@
   letter-spacing: -0.055em;
 }
 
-.trip-card__description {
+.trip-card__content .trip-card__description {
   display: -webkit-box;
+  margin-top: 0.5rem;
   overflow: hidden;
   color: currentColor;
   line-height: 1.55;
   opacity: 0.75;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+.trip-progress-card {
+  display: grid;
+  gap: 1.15rem;
+  margin-top: 1.25rem;
+  padding: clamp(1.25rem, 4vw, 1.75rem);
+  border-radius: calc(var(--radius-card) / 2);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgb(255 255 255 / 78%);
+}
+
+.trip-progress-card__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: clamp(0.85rem, 3vw, 1.1rem);
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+.trip-progress-card__heading strong {
+  color: var(--color-secondary);
+  font-weight: 600;
+  font-size: clamp(1rem, 4vw, 1.65rem);
+  letter-spacing: -0.035em;
+  text-transform: none;
+}
+
+.trip-progress-card__segments {
+  display: flex;
+  gap: 5px;
+}
+
+.trip-progress-card__segments span {
+  flex: 1 1 0;
+  height: 0.7rem;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 25%);
+}
+
+.trip-progress-card__segments span.is-complete {
+  background: var(--color-secondary);
 }
 
 .trip-card__footer {

@@ -381,6 +381,8 @@
     "decimalPlaces": "Số chữ số thập phân",
     "dayCount": "{{count}} ngày",
     "nightCount": "{{count}} đêm",
+    "progressTitle": "Tiến độ chuyến đi",
+    "progressDay": "Ngày {{current}} / {{total}}",
     "saving": "Đang lưu…"
   },
   "tripInvite": {

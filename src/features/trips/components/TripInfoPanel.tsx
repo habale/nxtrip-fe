@@ -2,7 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
 import { Badge, Button, Icon } from '../../../shared/ui';
-import { formatTripDateRange, getTripDuration } from '../trip-date';
+import {
+  deriveTripStatus,
+  formatTripDateRange,
+  getTripDuration,
+} from '../trip-date';
 import { getCurrencyLabel } from '../trip-options';
 import type { TripDetail } from '../trip-repository';
 
@@ -21,12 +25,13 @@ export function TripInfoPanel({ detail, locale }: TripInfoPanelProps) {
     trip.timezone,
   );
   const duration = getTripDuration(trip.start_at, trip.end_at, trip.timezone);
+  const status = deriveTripStatus(trip);
 
   return (
     <section className="trip-info-view">
       <div className="trip-info-view__topline">
-        <Badge tone={trip.status === 'ongoing' ? 'info' : 'brand'}>
-          {t(`home.status.${trip.status}`)}
+        <Badge tone={status === 'ongoing' ? 'info' : 'brand'}>
+          {t(`home.status.${status}`)}
         </Badge>
         {role === 'owner' && (
           <Button

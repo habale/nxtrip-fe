@@ -58,6 +58,24 @@ export function tripInstantToLocalDate(
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
+export function deriveTripStatus(
+  trip: {
+    start_at: string | null;
+    end_at: string | null;
+    timezone: string;
+  },
+  now = new Date(),
+): DerivedTripStatus {
+  const today = tripInstantToLocalDate(now.toISOString(), trip.timezone);
+  const startDate = tripInstantToLocalDate(trip.start_at, trip.timezone);
+  const endDate = tripInstantToLocalDate(trip.end_at, trip.timezone);
+
+  if (startDate && today < startDate) return 'planning';
+  if (endDate && today > endDate) return 'completed';
+  if (startDate && today >= startDate) return 'ongoing';
+  return 'planning';
+}
+
 export function getTripDuration(
   startAt: string | null,
   endAt: string | null,
@@ -78,3 +96,31 @@ export function getTripDuration(
   if (nights < 0) return null;
   return { days: nights + 1, nights };
 }
+
+export function getTripProgress(
+  trip: {
+    start_at: string | null;
+    end_at: string | null;
+    timezone: string;
+  },
+  now = new Date(),
+) {
+  const duration = getTripDuration(trip.start_at, trip.end_at, trip.timezone);
+  if (!duration || !trip.start_at) return null;
+
+  const startDate = tripInstantToLocalDate(trip.start_at, trip.timezone);
+  const today = tripInstantToLocalDate(now.toISOString(), trip.timezone);
+  const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+  const [todayYear, todayMonth, todayDay] = today.split('-').map(Number);
+  const elapsedDays = Math.round(
+    (Date.UTC(todayYear, todayMonth - 1, todayDay) -
+      Date.UTC(startYear, startMonth - 1, startDay)) /
+      86_400_000,
+  );
+
+  return {
+    currentDay: Math.min(Math.max(elapsedDays + 1, 1), duration.days),
+    totalDays: duration.days,
+  };
+}
+export type DerivedTripStatus = 'planning' | 'ongoing' | 'completed';

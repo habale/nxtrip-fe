@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { routes } from '../../../app/routes';
 import { Avatar, Button, Icon } from '../../../shared/ui';
-import { formatTripDateRange } from '../trip-date';
+import {
+  deriveTripStatus,
+  formatTripDateRange,
+  getTripProgress,
+} from '../trip-date';
 import type { TripListItem } from '../trip-repository';
 
 type TripCardProps = {
@@ -15,6 +19,8 @@ export function TripCard({ item, featured = false }: TripCardProps) {
   const { t, i18n } = useTranslation('common');
   const navigate = useNavigate();
   const { trip, members, coverThumbnailUrl } = item;
+  const status = deriveTripStatus(trip);
+  const progress = status === 'ongoing' ? getTripProgress(trip) : null;
   const dateRange = formatTripDateRange(
     trip.start_at,
     trip.end_at,
@@ -30,7 +36,7 @@ export function TripCard({ item, featured = false }: TripCardProps) {
   return (
     <article
       aria-label={trip.name}
-      className={`trip-card trip-card--${trip.status}${featured ? ' trip-card--featured' : ''}${coverThumbnailUrl ? ' trip-card--cover' : ''}`}
+      className={`trip-card trip-card--${status}${featured ? ' trip-card--featured' : ''}${coverThumbnailUrl ? ' trip-card--cover' : ''}`}
       role="link"
       style={style}
       tabIndex={0}
@@ -52,7 +58,7 @@ export function TripCard({ item, featured = false }: TripCardProps) {
       <div className="trip-card__overlay" />
       <div className="trip-card__content">
         <header className="trip-card__meta">
-          <span className="trip-status">{t(`home.status.${trip.status}`)}</span>
+          <span className="trip-status">{t(`home.status.${status}`)}</span>
           {dateRange && <time>{dateRange}</time>}
         </header>
 
@@ -60,6 +66,39 @@ export function TripCard({ item, featured = false }: TripCardProps) {
           <h2>{trip.name}</h2>
           {trip.description && (
             <p className="trip-card__description">{trip.description}</p>
+          )}
+          {progress && (
+            <section className="trip-progress-card">
+              <div className="trip-progress-card__heading">
+                <span>{t('tripInfo.progressTitle')}</span>
+                <strong>
+                  {t('tripInfo.progressDay', {
+                    current: progress.currentDay,
+                    total: progress.totalDays,
+                  })}
+                </strong>
+              </div>
+              <div
+                aria-label={t('tripInfo.progressDay', {
+                  current: progress.currentDay,
+                  total: progress.totalDays,
+                })}
+                aria-valuemax={progress.totalDays}
+                aria-valuemin={1}
+                aria-valuenow={progress.currentDay}
+                className="trip-progress-card__segments"
+                role="progressbar"
+              >
+                {Array.from({ length: progress.totalDays }, (_, index) => (
+                  <span
+                    key={index}
+                    className={
+                      index < progress.currentDay ? 'is-complete' : undefined
+                    }
+                  />
+                ))}
+              </div>
+            </section>
           )}
         </div>
 
@@ -91,7 +130,7 @@ export function TripCard({ item, featured = false }: TripCardProps) {
             variant={featured ? 'secondary' : 'quiet'}
           >
             <span className="trip-card__action">
-              {trip.status === 'completed'
+              {status === 'completed'
                 ? t('home.viewRecap')
                 : t('home.openTrip')}
               <Icon name="forward" />

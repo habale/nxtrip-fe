@@ -17,6 +17,7 @@ import {
   IconButton,
 } from '../../../shared/ui';
 import type { Trip } from '../../trips/trip-repository';
+import { deriveTripStatus } from '../../trips/trip-date';
 import { ItineraryNodeEditor } from './ItineraryNodeEditor';
 import { getItineraryCategory } from '../itinerary-category';
 import {
@@ -320,6 +321,7 @@ export function ItineraryPanel({
   const removeNode = useRemoveItineraryNode(repository);
   const reorderNode = useReorderItineraryNode(window, repository);
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
+  const tripStatus = deriveTripStatus(trip);
   const tripBounds = useMemo(
     () => getTripItineraryBounds(trip, selectedDate),
     [selectedDate, trip],
@@ -375,13 +377,13 @@ export function ItineraryPanel({
   }, [trip]);
 
   useEffect(() => {
-    if (autoFocusStarted.current || trip.status !== 'ongoing') {
+    if (autoFocusStarted.current || tripStatus !== 'ongoing') {
       return;
     }
 
     autoFocusStarted.current = true;
     goToNow();
-  }, [goToNow, trip.status]);
+  }, [goToNow, tripStatus]);
 
   useEffect(() => {
     if (
@@ -728,7 +730,7 @@ export function ItineraryPanel({
             icon="edit"
             label={t('itinerary.editor.actionsMenu')}
             actions={[
-              ...(trip.status === 'ongoing'
+              ...(tripStatus === 'ongoing'
                 ? [
                     {
                       icon: 'today' as const,
@@ -751,7 +753,7 @@ export function ItineraryPanel({
           />
         )}
       {!canEdit &&
-        trip.status === 'ongoing' &&
+        tripStatus === 'ongoing' &&
         !query.isPending &&
         !query.isError && (
           <FabButton

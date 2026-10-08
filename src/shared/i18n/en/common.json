@@ -384,6 +384,8 @@
     "dayCount_other": "{{count}} days",
     "nightCount_one": "{{count}} night",
     "nightCount_other": "{{count}} nights",
+    "progressTitle": "Trip progression",
+    "progressDay": "Day {{current}} of {{total}}",
     "saving": "Saving…"
   },
   "tripInvite": {

@@ -3,6 +3,7 @@ import type { Database } from '../../shared/api/database.types';
 import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { createRequestId } from '../../shared/api/request-id';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
+import { deriveTripStatus, type DerivedTripStatus } from './trip-date';
 
 export type Trip = Database['public']['Tables']['trips']['Row'];
 export type TripMember = Pick<
@@ -623,12 +624,12 @@ export function createTripRepository(): TripRepository {
         membersByTrip.set(member.trip_id, tripMembers);
       });
 
-      const statusOrder: Record<Trip['status'], number> = {
+      const statusOrder: Record<DerivedTripStatus, number> = {
         ongoing: 0,
         planning: 1,
-        pending_settlement: 2,
-        completed: 3,
+        completed: 2,
       };
+      const now = new Date();
 
       return tripsResult.data
         .map((trip) => ({
@@ -640,7 +641,8 @@ export function createTripRepository(): TripRepository {
         }))
         .sort(
           (left, right) =>
-            statusOrder[left.trip.status] - statusOrder[right.trip.status],
+            statusOrder[deriveTripStatus(left.trip, now)] -
+            statusOrder[deriveTripStatus(right.trip, now)],
         );
     },
   };
