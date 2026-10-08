@@ -192,14 +192,18 @@
 }
 
 .trip-invite-panel__code {
+  display: grid;
+  gap: 0.4rem;
   padding: 1rem;
   border-radius: var(--radius-control);
   background: var(--color-surface-muted);
 }
 
-.trip-invite-panel__code > div {
-  display: grid;
-  gap: 0.2rem;
+.trip-invite-panel__code-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .trip-invite-panel__code strong {

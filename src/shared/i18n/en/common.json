@@ -53,7 +53,6 @@
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Saving language preference…",
-    "reloadApp": "Reload app",
     "changePhotoComingSoon": "Change profile photo — coming soon"
   },
   "home": {
@@ -389,10 +388,10 @@
   },
   "tripInvite": {
     "sharedAccessTitle": "Share trip",
-    "sharedAccessDescription": "Create one link for everyone. Guests receive read-only access; signed-in users become members only when their verified email matches the trip member list.",
+    "sharedAccessDescription": "Create an invitation link then send it to your friends.",
     "guestAccessTitle": "Guest access",
     "guestAccessDescription": "Anyone with this link can view trip details, itinerary, and bookmarks until it expires.",
-    "regenerate": "Create new link",
+    "regenerate": "Create new",
     "title": "Invite members",
     "description": "Create a member link for collaborators or a read-only guest link for viewing.",
     "sharedDescription": "Signed-in accounts are matched to members by email, while guests receive read-only access.",
@@ -403,15 +402,15 @@
     "noAvailableMembers": "Add an unlinked member before creating an invitation.",
     "memberTitle": "Member invitation",
     "viewerTitle": "Read-only guest invitation",
-    "code": "Trip code",
+    "codeOneTimeNotice": "Please copy or share this code now. For your security, it won’t be shown again after you leave or refresh this page.",
     "create": "Create invite link",
     "createMember": "Create member link",
     "createViewer": "Create guest link",
     "creating": "Creating invite…",
     "share": "Share",
-    "shareText": "View {{trip}} on NxTrip with this read-only guest link.",
+    "shareText": "Please join {{trip}} on NxTrip with this link: ",
     "revoke": "Revoke link",
-    "expires": "This link expires {{date}}.",
+    "expires": "Created link expires {{date}}.",
     "error": "We couldn’t manage the invitation. Please try again."
   },
   "tripCover": {

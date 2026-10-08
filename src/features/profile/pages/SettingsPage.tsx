@@ -107,13 +107,6 @@ export function SettingsPage() {
           </section>
 
           <div className="settings-logout">
-            <Button
-              block
-              variant="quiet"
-              onClick={() => window.location.reload()}
-            >
-              {t('settings.reloadApp')}
-            </Button>
             <SignOutButton />
           </div>
 

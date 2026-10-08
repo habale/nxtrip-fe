@@ -4,6 +4,12 @@
   padding: max(1.25rem, env(safe-area-inset-top)) 1rem 2rem;
 }
 
+.guest-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .guest-entry .guest-language .ui-button {
   min-height: 2rem;
   font-size: 0.75rem;
@@ -96,6 +102,7 @@
   font: inherit;
   font-weight: 700;
   padding: 0.85rem 0.7rem;
+  font-size: 0.85rem;
 }
 
 .guest-tabs button.is-selected {

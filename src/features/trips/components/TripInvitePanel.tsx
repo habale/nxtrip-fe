@@ -71,17 +71,17 @@ export function TripInvitePanel({
           <div className="trip-invite-panel__invite">
             {invite.code && (
               <div className="trip-invite-panel__code">
-                <div>
-                  <span>{t('tripInvite.code')}</span>
+                <small>{t('tripInvite.codeOneTimeNotice')}</small>
+                <div className="trip-invite-panel__code-value">
                   <strong>{invite.code}</strong>
+                  <Button
+                    size="small"
+                    variant="quiet"
+                    onClick={() => void copyLink(invite)}
+                  >
+                    <Icon size="large" name={copied ? 'check' : 'copy'} />
+                  </Button>
                 </div>
-                <Button
-                  size="small"
-                  variant="quiet"
-                  onClick={() => void copyLink(invite)}
-                >
-                  <Icon size="large" name={copied ? 'check' : 'copy'} />
-                </Button>
               </div>
             )}
             {invite.expires_at && (
@@ -95,12 +95,13 @@ export function TripInvitePanel({
             )}
             <div className="trip-invite-panel__actions">
               {invite.code ? (
-                <Button onClick={() => void shareLink(invite)}>
+                <Button size="small" onClick={() => void shareLink(invite)}>
                   <Icon name="share" />
                   {t('tripInvite.share')}
                 </Button>
               ) : (
                 <Button
+                  size="small"
                   loading={createInvite.isPending}
                   onClick={() => void createInvite.mutateAsync(tripId)}
                 >
@@ -109,6 +110,7 @@ export function TripInvitePanel({
                 </Button>
               )}
               <Button
+                size="small"
                 disabled={revokeInvite.isPending}
                 variant="danger-text"
                 onClick={() =>

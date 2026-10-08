@@ -198,8 +198,8 @@ export function GuestTripPage() {
   if (tripQuery.isPending)
     return (
       <Page hideHeader padded={false}>
-        <main className="guest-state" aria-label={t('states.loading')}>
-          <Skeleton width="60%" height="3rem" />
+        <main className="guest-state guest-skeleton" aria-label={t('states.loading')}>
+          <Skeleton width="100%" height="4rem" />
           <Skeleton width="100%" height="10rem" />
         </main>
       </Page>

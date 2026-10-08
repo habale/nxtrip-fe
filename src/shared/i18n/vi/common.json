@@ -53,7 +53,6 @@
     "englishOption": "English",
     "vietnameseOption": "Tiếng Việt",
     "savingLanguage": "Đang lưu tùy chọn ngôn ngữ…",
-    "reloadApp": "Tải lại ứng dụng",
     "changePhotoComingSoon": "Đổi ảnh hồ sơ — sắp ra mắt"
   },
   "home": {
@@ -386,7 +385,7 @@
   },
   "tripInvite": {
     "sharedAccessTitle": "Chia sẻ chuyến đi",
-    "sharedAccessDescription": "Tạo một liên kết cho tất cả mọi người. Khách chỉ có quyền xem; người dùng đã đăng nhập chỉ trở thành thành viên khi email đã xác minh khớp với danh sách thành viên.",
+    "sharedAccessDescription": "Tạo một đường dẫn và gửi cho bạn bè để thêm bạn đồng hành của chuyến đi.",
     "guestAccessTitle": "Quyền truy cập của khách",
     "guestAccessDescription": "Bất kỳ ai có liên kết này đều có thể xem thông tin, lịch trình và địa điểm đã lưu cho đến khi liên kết hết hạn.",
     "regenerate": "Tạo liên kết mới",
@@ -400,13 +399,13 @@
     "noAvailableMembers": "Hãy thêm một thành viên chưa liên kết trước khi tạo lời mời.",
     "memberTitle": "Lời mời thành viên",
     "viewerTitle": "Lời mời khách chỉ xem",
-    "code": "Mã chuyến đi",
+    "codeOneTimeNotice": "Vui lòng sao chép hoặc chia sẻ mã ngay bây giờ. Để bảo mật, mã sẽ không hiển thị lại sau khi bạn rời khỏi hoặc tải lại trang này.",
     "create": "Tạo liên kết mời",
     "createMember": "Tạo liên kết thành viên",
     "createViewer": "Tạo liên kết khách",
     "creating": "Đang tạo…",
     "share": "Chia sẻ",
-    "shareText": "Xem {{trip}} trên NxTrip bằng liên kết khách chỉ xem này.",
+    "shareText": "Vui lòng tham gia {{trip}} trên NxTrip bằng liên kết này: ",
     "revoke": "Thu hồi",
     "expires": "Liên kết hết hạn vào {{date}}.",
     "error": "Không thể quản lý lời mời. Vui lòng thử lại."
