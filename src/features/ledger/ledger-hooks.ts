@@ -21,7 +21,10 @@ export function useLedgerExpenses(
   repository?: LedgerRepository,
 ) {
   return useQuery({
-    queryKey: ledgerKeys.expenses(tripId),
+    queryKey: [
+      ...ledgerKeys.expenses(tripId),
+      repository ? 'custom' : 'default',
+    ],
     enabled: Boolean(tripId),
     queryFn: () => (repository ?? getLedgerRepository()).listExpenses(tripId),
   });

@@ -1,6 +1,7 @@
 export const ROUTE_PATHS = {
   root: '/',
   login: '/login',
+  guest: '/guest',
   home: '/home',
   bookmarks: '/bookmarks',
   addTrip: '/trips/add',
@@ -23,6 +24,7 @@ function tripPath(tripId: string, suffix = '') {
 
 export const routes = {
   login: ROUTE_PATHS.login,
+  guest: ROUTE_PATHS.guest,
   home: ROUTE_PATHS.home,
   bookmarks: ROUTE_PATHS.bookmarks,
   addTrip: ROUTE_PATHS.addTrip,

@@ -64,7 +64,7 @@ export function TextInput({
     <IonInput
       aria-invalid={Boolean(errorText)}
       autocomplete={autocomplete}
-      className="ui-input"
+      className={`ui-input${errorText ? ' ion-invalid ion-touched' : ''}`}
       disabled={disabled}
       errorText={errorText}
       fill="outline"

@@ -93,7 +93,6 @@ describe('ItineraryPanel', () => {
               status: 'ready',
               error: null,
               signInWithGoogle: vi.fn(),
-              signInAsGuest: vi.fn(),
               signOut: vi.fn(),
             } satisfies AuthContextValue
           }
@@ -157,7 +156,6 @@ describe('ItineraryPanel', () => {
               status: 'ready',
               error: null,
               signInWithGoogle: vi.fn(),
-              signInAsGuest: vi.fn(),
               signOut: vi.fn(),
             } satisfies AuthContextValue
           }

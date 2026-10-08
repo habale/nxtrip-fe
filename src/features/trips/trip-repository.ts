@@ -30,7 +30,13 @@ export type TripDetail = {
   coverThumbnailUrl: string | null;
 };
 
-export type TripInvite = Database['public']['Tables']['trip_invites']['Row'];
+export type TripInvite = {
+  id: string;
+  trip_id: string;
+  code?: string;
+  expires_at: string;
+  created_at: string;
+};
 
 export type CreateTripInput = {
   name: string;
@@ -88,7 +94,7 @@ export type TripRepository = {
   create: (input: CreateTripInput) => Promise<string>;
   joinByCode: (code: string) => Promise<string>;
   getActiveInvite: (tripId: string) => Promise<TripInvite | null>;
-  createInvite: (tripId: string, createdBy: string) => Promise<TripInvite>;
+  createInvite: (tripId: string) => Promise<TripInvite>;
   revokeInvite: (inviteId: string) => Promise<void>;
   claimMember: (tripId: string, tripMemberId: string) => Promise<string>;
   updateMetadata: (input: UpdateTripInput) => Promise<Trip>;
@@ -182,6 +188,29 @@ export function mapUpdateTripInput(input: UpdateTripInput) {
 export function createTripRepository(): TripRepository {
   const client = getSupabaseClient();
 
+  function mapGuestInvite(value: unknown): TripInvite | null {
+    if (value === null) return null;
+    if (typeof value !== 'object' || Array.isArray(value)) {
+      throw new Error('Invalid guest invitation response.');
+    }
+    const row = value as Record<string, unknown>;
+    if (
+      typeof row.id !== 'string' ||
+      typeof row.trip_id !== 'string' ||
+      typeof row.expires_at !== 'string' ||
+      typeof row.created_at !== 'string'
+    ) {
+      throw new Error('Invalid guest invitation response.');
+    }
+    return {
+      id: row.id,
+      trip_id: row.trip_id,
+      expires_at: row.expires_at,
+      created_at: row.created_at,
+      ...(typeof row.code === 'string' ? { code: row.code } : {}),
+    };
+  }
+
   async function setTripTreasurer(
     tripId: string,
     treasurerMemberId: string | null,
@@ -197,7 +226,7 @@ export function createTripRepository(): TripRepository {
   return {
     async joinByCode(code) {
       const requestId = createRequestId();
-      const { data, error } = await client.rpc('join_trip_by_code', {
+      const { data, error } = await client.rpc('join_member_by_code', {
         p_code: code.trim(),
         p_request_id: requestId,
       });
@@ -207,57 +236,35 @@ export function createTripRepository(): TripRepository {
     },
 
     async getActiveInvite(tripId) {
-      const { data, error } = await client
-        .from('trip_invites')
-        .select('*')
-        .eq('trip_id', tripId)
-        .is('trip_member_id', null)
-        .eq('is_active', true)
-        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const { data, error } = await client.rpc('get_active_guest_invite', {
+        p_trip_id: tripId,
+      });
 
       if (error) throw mapSupabaseError(error);
-      return data;
+      return mapGuestInvite(data);
     },
 
-    async createInvite(tripId, createdBy) {
-      const random = new Uint8Array(8);
-      crypto.getRandomValues(random);
-      const code = Array.from(random, (value) =>
-        value.toString(16).padStart(2, '0'),
-      )
-        .join('')
-        .toUpperCase();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7);
+    async createInvite(tripId) {
+      const requestId = createRequestId();
+      const { data, error } = await client.rpc('create_guest_invite', {
+        p_trip_id: tripId,
+        p_request_id: requestId,
+      });
 
-      const { data, error } = await client
-        .from('trip_invites')
-        .insert({
-          trip_id: tripId,
-          trip_member_id: null,
-          code,
-          role: 'viewer',
-          created_by: createdBy,
-          expires_at: expiresAt.toISOString(),
-          max_uses: null,
-        })
-        .select('*')
-        .single();
-
-      if (error) throw mapSupabaseError(error);
-      return data;
+      if (error) throw mapSupabaseError(error, requestId);
+      const invite = mapGuestInvite(data);
+      if (!invite?.code) throw new Error('Guest invitation code is missing.');
+      return invite;
     },
 
     async revokeInvite(inviteId) {
-      const { error } = await client
-        .from('trip_invites')
-        .update({ is_active: false })
-        .eq('id', inviteId);
+      const requestId = createRequestId();
+      const { error } = await client.rpc('revoke_guest_invite', {
+        p_invite_id: inviteId,
+        p_request_id: requestId,
+      });
 
-      if (error) throw mapSupabaseError(error);
+      if (error) throw mapSupabaseError(error, requestId);
     },
 
     async claimMember(tripId, tripMemberId) {

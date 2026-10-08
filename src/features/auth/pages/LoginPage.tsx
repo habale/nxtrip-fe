@@ -2,19 +2,15 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getAuthReturnTo } from '../../../app/auth-return';
+import { routes } from '../../../app/routes';
 import { Button, Icon, LanguageSwitcher, Page } from '../../../shared/ui';
 import { useAuth } from '../auth-context';
 
 export function LoginPage() {
   const { t } = useTranslation('common');
-  const { error, signInAsGuest, signInWithGoogle } = useAuth();
+  const { error, signInWithGoogle } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const returnTo = getAuthReturnTo() ?? undefined;
-  const guestInvite = (() => {
-    if (!returnTo?.startsWith('/')) return false;
-    const query = returnTo.split('?')[1] ?? '';
-    return new URLSearchParams(query).get('guest') === '1';
-  })();
 
   async function handleGoogleSignIn() {
     setSubmitting(true);
@@ -25,20 +21,11 @@ export function LoginPage() {
     }
   }
 
-  async function handleGuestSignIn() {
-    setSubmitting(true);
-    try {
-      await signInAsGuest();
-    } catch {
-      setSubmitting(false);
-    }
-  }
-
   return (
     <Page hideHeader padded={false}>
       <main className="auth-page">
         <div className="auth-language">
-          <LanguageSwitcher />
+          <LanguageSwitcher variant="primary" />
         </div>
 
         <div className="auth-layout">
@@ -49,7 +36,7 @@ export function LoginPage() {
           <img
             alt=""
             className="auth-illustration"
-            src="/assets/login-travelers.png"
+            src="/assets/login-graphic.webp"
           />
 
           <div className="auth-login-actions">
@@ -78,9 +65,9 @@ export function LoginPage() {
               <Button
                 ariaLabel={t('auth.accessAsGuest')}
                 block
-                disabled={!guestInvite || submitting}
+                href={routes.guest}
+                navigationDirection="forward"
                 variant="quiet"
-                onClick={() => void handleGuestSignIn()}
               >
                 {t('auth.accessAsGuest')}
               </Button>

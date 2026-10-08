@@ -186,7 +186,6 @@ export function TripDetailPage({
           <main className="trip-detail-content">
             {section === 'info' ? (
               <>
-                {/*<TripCover detail={detail} repository={repository} />*/}
                 <TripInfoPanel detail={detail} locale={locale} />
                 {detail.role === 'owner' && (
                   <TripInvitePanel

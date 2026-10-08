@@ -1,7 +1,6 @@
 import { IonApp } from '@ionic/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { StrictMode } from 'react';
 
 import { AppProviders } from './providers/AppProviders';
 import { AppRouter } from './router';
@@ -47,19 +46,23 @@ describe('application routes', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/login'));
     expect(sessionStorage.getItem('nxtrip.auth.returnTo')).toBe('/settings');
     expect(await screen.findByLabelText('NxTrip')).toBeInTheDocument();
-    expect(screen.getByText('Access as Guest')).toBeInTheDocument();
+    expect(screen.getByText('Access as Guest')).toHaveAttribute(
+      'router-link',
+      '/guest',
+    );
   });
 
-  it('preserves a guest invitation and enables guest access', async () => {
-    renderRoute('/trips/add?code=VIEW123&guest=1', false);
+  it('renders guest code entry without authentication', async () => {
+    renderRoute('/guest', false);
 
-    await waitFor(() => expect(window.location.pathname).toBe('/login'));
-    expect(sessionStorage.getItem('nxtrip.auth.returnTo')).toBe(
-      '/trips/add?code=VIEW123&guest=1',
-    );
     expect(
-      (await screen.findByText('Access as Guest')).closest('ion-button'),
-    ).not.toHaveAttribute('disabled');
+      await screen.findByRole('heading', { name: 'View Trip as Guest' }),
+    ).toBeInTheDocument();
+    expect(window.location.pathname).toBe('/guest');
+    expect(screen.getByText('Back to Login')).toHaveAttribute(
+      'router-link',
+      '/login',
+    );
   });
 
   it('redirects authenticated users away from login', async () => {
@@ -72,38 +75,6 @@ describe('application routes', () => {
         name: 'Hi, Traveler!',
       }),
     ).toBeInTheDocument();
-  });
-
-  it('returns an authenticated guest to the preserved invitation', async () => {
-    sessionStorage.setItem(
-      'nxtrip.auth.returnTo',
-      '/trips/add?code=VIEW123&guest=1',
-    );
-    renderRoute('/login', true);
-
-    await waitFor(() => expect(window.location.pathname).toBe('/trips/add'));
-    expect(window.location.search).toBe('?code=VIEW123&guest=1');
-  });
-
-  it('keeps the guest invitation destination across repeated renders', async () => {
-    sessionStorage.setItem(
-      'nxtrip.auth.returnTo',
-      '/trips/add?code=VIEW123&guest=1',
-    );
-    window.history.replaceState({}, '', '/login');
-
-    render(
-      <StrictMode>
-        <AppProviders>
-          <IonApp>
-            <AppRouter isAuthenticated />
-          </IonApp>
-        </AppProviders>
-      </StrictMode>,
-    );
-
-    await waitFor(() => expect(window.location.pathname).toBe('/trips/add'));
-    expect(window.location.search).toBe('?code=VIEW123&guest=1');
   });
 
   it('links the home avatar to profile and settings', async () => {

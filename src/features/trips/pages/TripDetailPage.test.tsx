@@ -67,7 +67,6 @@ function renderPage(
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
-    signInAsGuest: vi.fn(),
     signOut: vi.fn(),
   };
 
@@ -118,6 +117,9 @@ describe('TripDetailPage', () => {
       'router-link',
       '/trips/trip-123/edit',
     );
+    expect(
+      screen.getByRole('heading', { name: 'Share trip' }),
+    ).toBeInTheDocument();
   });
 
   it('keeps metadata editing hidden from non-owners', async () => {

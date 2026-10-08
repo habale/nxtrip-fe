@@ -30,7 +30,10 @@ export function useItineraryWindow(
   repository?: ItineraryRepository,
 ) {
   return useQuery({
-    queryKey: itineraryKeys.window(window),
+    queryKey: [
+      ...itineraryKeys.window(window),
+      repository ? 'custom' : 'default',
+    ],
     enabled: Boolean(window.tripId && window.startDate && window.endDate),
     queryFn: () =>
       (repository ?? getItineraryRepository()).getDateWindow(window),
@@ -47,7 +50,10 @@ export function usePrefetchItineraryWindows(
     const itineraryRepository = repository ?? getItineraryRepository();
     windows.forEach((window) => {
       void queryClient.prefetchQuery({
-        queryKey: itineraryKeys.window(window),
+        queryKey: [
+          ...itineraryKeys.window(window),
+          repository ? 'custom' : 'default',
+        ],
         queryFn: () => itineraryRepository.getDateWindow(window),
       });
     });

@@ -23,7 +23,6 @@ describe('App', () => {
         data: { subscription: { unsubscribe: vi.fn() } },
       }),
       signInWithOAuth: async () => ({ error: null }),
-      signInAnonymously: async () => ({ error: null }),
       signOut: async () => ({ error: null }),
     } satisfies AuthClient;
 
@@ -52,7 +51,6 @@ describe('App', () => {
         data: { subscription: { unsubscribe: vi.fn() } },
       }),
       signInWithOAuth: async () => ({ error: null }),
-      signInAnonymously: async () => ({ error: null }),
       signOut: vi.fn(async () => ({ error: null })),
     } satisfies AuthClient;
     window.history.replaceState({}, '', '/settings');

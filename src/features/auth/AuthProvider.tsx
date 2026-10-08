@@ -130,19 +130,6 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
     setSession(null);
   }, [authClient, error]);
 
-  const signInAsGuest = useCallback(async () => {
-    if (!authClient) {
-      throw error ?? new Error('Authentication is not configured.');
-    }
-
-    setError(null);
-    const { error: signInError } = await authClient.signInAnonymously();
-    if (signInError) {
-      setError(signInError);
-      throw signInError;
-    }
-  }, [authClient, error]);
-
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -150,10 +137,9 @@ export function AuthProvider({ client, children }: AuthProviderProps) {
       status,
       error,
       signInWithGoogle,
-      signInAsGuest,
       signOut,
     }),
-    [error, session, signInAsGuest, signInWithGoogle, signOut, status],
+    [error, session, signInWithGoogle, signOut, status],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

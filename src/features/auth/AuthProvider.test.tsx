@@ -41,7 +41,6 @@ function createAuthClient(initialSession: Session | null) {
       return { data: { subscription: { unsubscribe: vi.fn() } } };
     }),
     signInWithOAuth: vi.fn(async () => ({ error: null })),
-    signInAnonymously: vi.fn(async () => ({ error: null })),
     signOut: vi.fn(async () => ({ error: null })),
   } satisfies AuthClient;
 
@@ -54,8 +53,7 @@ function createAuthClient(initialSession: Session | null) {
 }
 
 function AuthProbe() {
-  const { session, status, signInAsGuest, signInWithGoogle, signOut } =
-    useAuth();
+  const { session, status, signInWithGoogle, signOut } = useAuth();
 
   return (
     <div>
@@ -63,9 +61,6 @@ function AuthProbe() {
       <span>{session?.user.id ?? 'signed-out'}</span>
       <button type="button" onClick={() => void signInWithGoogle()}>
         Google
-      </button>
-      <button type="button" onClick={() => void signInAsGuest()}>
-        Guest
       </button>
       <button type="button" onClick={() => void signOut()}>
         Sign out
@@ -114,21 +109,6 @@ describe('AuthProvider', () => {
     expect(sessionStorage.getItem(PENDING_SIGNUP_LANGUAGE_KEY)).toBe(
       detectDeviceLanguage(),
     );
-  });
-
-  it('starts an anonymous guest session', async () => {
-    const user = userEvent.setup();
-    const auth = createAuthClient(null);
-
-    render(
-      <AuthProvider client={auth.client}>
-        <AuthProbe />
-      </AuthProvider>,
-    );
-    await screen.findByText('ready');
-    await user.click(screen.getByRole('button', { name: 'Guest' }));
-
-    expect(auth.client.signInAnonymously).toHaveBeenCalledOnce();
   });
 
   it('signs out locally and clears the current session', async () => {

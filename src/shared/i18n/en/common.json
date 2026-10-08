@@ -18,6 +18,27 @@
     "signOutDescription": "You’ll need to sign in again to access your trips.",
     "unexpectedError": "An unexpected authentication error occurred."
   },
+  "guest": {
+    "enterTitle": "View Trip as Guest",
+    "enterDescription": "Enter the private trip code shared by the trip owner.",
+    "codeLabel": "Trip code",
+    "pasteCode": "Paste Code",
+    "invalidCode": "Enter a valid trip code.",
+    "openTrip": "View trip",
+    "navigation": "Guest trip sections",
+    "exit": "Exit",
+    "unavailableTitle": "Guest access unavailable",
+    "unavailableDescription": "This link may be invalid, expired, or revoked.",
+    "enterAnotherCode": "Enter another code",
+    "backToLogin": "Back to Login",
+    "loadError": "We couldn’t load this section. Please try again.",
+    "unscheduled": "Unscheduled",
+    "memberAccessTitle": "Already a trip member?",
+    "memberAccessDescription": "Sign in with your email listed to join this trip.",
+    "signInToJoin": "Sign in to join",
+    "joinAsMember": "Join as member",
+    "memberMatchError": "Your verified email does not match an available member in this trip. You can continue viewing as a guest."
+  },
   "language": {
     "label": "Interface language",
     "english": "English",
@@ -367,6 +388,11 @@
     "saving": "Saving…"
   },
   "tripInvite": {
+    "sharedAccessTitle": "Share trip",
+    "sharedAccessDescription": "Create one link for everyone. Guests receive read-only access; signed-in users become members only when their verified email matches the trip member list.",
+    "guestAccessTitle": "Guest access",
+    "guestAccessDescription": "Anyone with this link can view trip details, itinerary, and bookmarks until it expires.",
+    "regenerate": "Create new link",
     "title": "Invite members",
     "description": "Create a member link for collaborators or a read-only guest link for viewing.",
     "sharedDescription": "Signed-in accounts are matched to members by email, while guests receive read-only access.",
@@ -383,7 +409,7 @@
     "createViewer": "Create guest link",
     "creating": "Creating invite…",
     "share": "Share",
-    "shareText": "{{name}}, join my {{trip}} trip on NxTrip.",
+    "shareText": "View {{trip}} on NxTrip with this read-only guest link.",
     "revoke": "Revoke link",
     "expires": "This link expires {{date}}.",
     "error": "We couldn’t manage the invitation. Please try again."

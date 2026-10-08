@@ -17,8 +17,8 @@ export function useTripBookmarks(
 ) {
   const { user } = useAuth();
   return useQuery({
-    queryKey: bookmarkKeys.trip(tripId),
-    enabled: Boolean(tripId && user),
+    queryKey: [...bookmarkKeys.trip(tripId), repository ? 'custom' : 'default'],
+    enabled: Boolean(tripId && (user || repository)),
     queryFn: () => (repository ?? getBookmarkRepository()).listForTrip(tripId),
   });
 }

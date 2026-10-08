@@ -18,6 +18,27 @@
     "signOutDescription": "Bạn sẽ cần đăng nhập lại để truy cập các chuyến đi.",
     "unexpectedError": "Đã xảy ra lỗi xác thực không mong muốn."
   },
+  "guest": {
+    "enterTitle": "Xem chuyến đi với tư cách khách",
+    "enterDescription": "Nhập mã do chủ chuyến đi chia sẻ.",
+    "codeLabel": "Mã chuyến đi",
+    "pasteCode": "Dán mã",
+    "invalidCode": "Nhập mã chuyến đi hợp lệ.",
+    "openTrip": "Xem chuyến đi",
+    "navigation": "Các mục chuyến đi dành cho khách",
+    "exit": "Thoát",
+    "unavailableTitle": "Không thể truy cập với tư cách khách",
+    "unavailableDescription": "Liên kết này có thể không hợp lệ, đã hết hạn hoặc bị thu hồi.",
+    "enterAnotherCode": "Nhập mã khác",
+    "backToLogin": "Quay lại đăng nhập",
+    "loadError": "Không thể tải mục này. Vui lòng thử lại.",
+    "unscheduled": "Chưa lên lịch",
+    "memberAccessTitle": "Bạn đã là thành viên chuyến đi?",
+    "memberAccessDescription": "Đăng nhập bằng email của bạn để tham gia chuyến đi này.",
+    "signInToJoin": "Đăng nhập để tham gia",
+    "joinAsMember": "Tham gia với tư cách thành viên",
+    "memberMatchError": "Email đã xác minh của bạn không khớp với thành viên khả dụng trong chuyến đi. Bạn vẫn có thể tiếp tục xem với tư cách khách."
+  },
   "language": {
     "label": "Ngôn ngữ giao diện",
     "english": "English",
@@ -364,6 +385,11 @@
     "saving": "Đang lưu…"
   },
   "tripInvite": {
+    "sharedAccessTitle": "Chia sẻ chuyến đi",
+    "sharedAccessDescription": "Tạo một liên kết cho tất cả mọi người. Khách chỉ có quyền xem; người dùng đã đăng nhập chỉ trở thành thành viên khi email đã xác minh khớp với danh sách thành viên.",
+    "guestAccessTitle": "Quyền truy cập của khách",
+    "guestAccessDescription": "Bất kỳ ai có liên kết này đều có thể xem thông tin, lịch trình và địa điểm đã lưu cho đến khi liên kết hết hạn.",
+    "regenerate": "Tạo liên kết mới",
     "title": "Mời thành viên",
     "description": "Tạo liên kết thành viên để cộng tác hoặc liên kết khách chỉ xem.",
     "sharedDescription": "Tài khoản đăng nhập sẽ được ghép với thành viên theo email. Trong khi khách chỉ có quyền xem.",
@@ -380,7 +406,7 @@
     "createViewer": "Tạo liên kết khách",
     "creating": "Đang tạo…",
     "share": "Chia sẻ",
-    "shareText": "{{name}}, hãy tham gia chuyến đi {{trip}} của tôi trên NxTrip.",
+    "shareText": "Xem {{trip}} trên NxTrip bằng liên kết khách chỉ xem này.",
     "revoke": "Thu hồi",
     "expires": "Liên kết hết hạn vào {{date}}.",
     "error": "Không thể quản lý lời mời. Vui lòng thử lại."

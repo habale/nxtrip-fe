@@ -12,10 +12,7 @@ export function App() {
       {status === 'loading' ? (
         <AuthLoadingPage />
       ) : (
-        <AppRouter
-          isAuthenticated={Boolean(session)}
-          isGuest={session?.user.is_anonymous ?? false}
-        />
+        <AppRouter isAuthenticated={Boolean(session)} />
       )}
     </IonApp>
   );

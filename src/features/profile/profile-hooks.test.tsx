@@ -34,7 +34,6 @@ function createWrapper(user: User = { id: profile.id } as User) {
     status: 'ready',
     error: null,
     signInWithGoogle: vi.fn(),
-    signInAsGuest: vi.fn(),
     signOut: vi.fn(),
   };
 

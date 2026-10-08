@@ -79,7 +79,8 @@ type TripInviteRow = {
   id: string;
   trip_id: string;
   trip_member_id: string | null;
-  code: string;
+  code: string | null;
+  code_hash: string | null;
   role: Database['public']['Enums']['access_role'];
   created_by: string | null;
   expires_at: string | null;
@@ -310,7 +311,7 @@ export type Database = {
         TripAccessMembershipRow,
         'trip_id' | 'user_id'
       >;
-      trip_invites: DatabaseTable<TripInviteRow, 'trip_id' | 'code'>;
+      trip_invites: DatabaseTable<TripInviteRow, 'trip_id'>;
       itinerary_nodes: DatabaseTable<
         ItineraryNodeRow,
         'trip_id' | 'node_type' | 'sort_key'
@@ -385,6 +386,43 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      create_guest_invite: {
+        Args: { p_trip_id: string; p_request_id?: string };
+        Returns: Json;
+      };
+      get_active_guest_invite: {
+        Args: { p_trip_id: string };
+        Returns: Json;
+      };
+      get_guest_trip: {
+        Args: { p_code: string; p_request_id?: string };
+        Returns: Json;
+      };
+      get_guest_itinerary: {
+        Args: {
+          p_code: string;
+          p_start_date: string;
+          p_end_date: string;
+          p_request_id?: string;
+        };
+        Returns: Json;
+      };
+      get_guest_bookmarks: {
+        Args: { p_code: string; p_request_id?: string };
+        Returns: Json;
+      };
+      get_guest_ledger: {
+        Args: { p_code: string; p_request_id?: string };
+        Returns: Json;
+      };
+      authorize_guest_files: {
+        Args: { p_code: string; p_paths: string[]; p_request_id?: string };
+        Returns: string[];
+      };
+      revoke_guest_invite: {
+        Args: { p_invite_id: string; p_request_id?: string };
+        Returns: undefined;
+      };
       claim_trip_member: {
         Args: {
           p_trip_id: string;
@@ -394,6 +432,10 @@ export type Database = {
         Returns: string;
       };
       join_trip_by_code: {
+        Args: { p_code: string; p_request_id?: string };
+        Returns: string;
+      };
+      join_member_by_code: {
         Args: { p_code: string; p_request_id?: string };
         Returns: string;
       };

@@ -113,7 +113,7 @@ export function UiShowcasePage() {
           <p>
             Edit the theme or a shared adapter and compare every component here.
           </p>
-          <LanguageSwitcher />
+          <LanguageSwitcher variant="primary" />
         </header>
 
         <section className="showcase-section" aria-labelledby="type-heading">

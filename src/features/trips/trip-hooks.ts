@@ -35,14 +35,11 @@ export function useTripInvite(
 }
 
 export function useCreateTripInvite(repository?: TripRepository) {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (tripId: string) => {
-      if (!user) throw new Error('Authentication is required.');
-      return (repository ?? getTripRepository()).createInvite(tripId, user.id);
-    },
+    mutationFn: (tripId: string) =>
+      (repository ?? getTripRepository()).createInvite(tripId),
     onSuccess: (invite) => {
       queryClient.setQueryData(tripKeys.invite(invite.trip_id), invite);
     },

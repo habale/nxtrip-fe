@@ -1,0 +1,131 @@
+.guest-entry,
+.guest-state {
+  min-height: 100%;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1rem 2rem;
+}
+
+.guest-entry .guest-language .ui-button {
+  min-height: 2rem;
+  font-size: 0.75rem;
+  --background: transparent;
+  --background-activated: rgb(255 255 255 / 16%);
+  --background-hover: rgb(255 255 255 / 12%);
+  --color: var(--color-surface);
+  --padding-start: 0.65rem;
+  --padding-end: 0.65rem;
+}
+
+.guest-entry__topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.guest-entry__card,
+.guest-state--message {
+  display: grid;
+  gap: 1rem;
+  margin: 12vh auto 0;
+  max-width: 28rem;
+  text-align: center;
+}
+
+.guest-entry__card h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+}
+
+.guest-entry__card form {
+  display: grid;
+  gap: 1rem;
+  text-align: left;
+}
+
+.guest-entry__description {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.guest-entry__description p {
+  margin: 0;
+}
+
+.guest-entry__description .ui-button {
+  flex: 0 0 auto;
+}
+
+.guest-wordmark {
+  color: var(--color-primary);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.guest-header,
+.guest-tabs {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0 1rem;
+}
+
+.guest-view-badge {
+  background: var(--color-soft);
+  border-radius: var(--radius-pill);
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  padding: 0.35rem 0.65rem;
+}
+
+.guest-tabs {
+  justify-content: flex-start;
+  overflow-x: auto;
+}
+
+.guest-tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.85rem 0.7rem;
+}
+
+.guest-tabs button.is-selected {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.guest-member-access {
+  align-items: center;
+  background: var(--color-soft);
+  border-radius: var(--radius-control);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.guest-member-access p {
+  color: var(--color-ink-muted);
+  margin: 0.25rem 0 0;
+}
+
+.guest-join-error {
+  color: var(--color-danger);
+  margin: 0;
+}
+
+@media (max-width: 36rem) {
+  .guest-member-access {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
