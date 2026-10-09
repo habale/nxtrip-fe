@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
+import { captureTelemetryEvent } from '../../../shared/telemetry/faro';
 import { Button, Icon } from '../../../shared/ui';
 import { useAuth } from '../../auth/auth-context';
 import {
@@ -39,6 +40,7 @@ export function TripInvitePanel({
 
   async function copyLink(currentInvite: TripInvite) {
     await navigator.clipboard.writeText(getShareUrl(currentInvite));
+    captureTelemetryEvent('trip_invite_shared', { share_method: 'copy' });
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   }
@@ -59,6 +61,7 @@ export function TripInvitePanel({
       text: t('tripInvite.shareText', { ownerName, trip: tripName }),
       url: getShareUrl(currentInvite),
     });
+    captureTelemetryEvent('trip_invite_shared', { share_method: 'native' });
   }
 
   const error = inviteQuery.error ?? createInvite.error ?? revokeInvite.error;

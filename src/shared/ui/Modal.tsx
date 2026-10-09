@@ -1,15 +1,17 @@
 import {
   IonContent,
+  IonFooter,
   IonHeader,
   IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 
 export type ModalProps = PropsWithChildren<{
   open: boolean;
   title: string;
+  footer?: ReactNode;
   dismissible?: boolean;
   onDismiss: () => void;
 }>;
@@ -17,6 +19,7 @@ export type ModalProps = PropsWithChildren<{
 export function Modal({
   open,
   title,
+  footer,
   dismissible = true,
   onDismiss,
   children,
@@ -34,6 +37,13 @@ export function Modal({
         </IonToolbar>
       </IonHeader>
       <IonContent className="ui-modal__content">{children}</IonContent>
+      {footer && (
+        <IonFooter>
+          <IonToolbar>
+            <div className="ui-modal__footer">{footer}</div>
+          </IonToolbar>
+        </IonFooter>
+      )}
     </IonModal>
   );
 }

@@ -15,6 +15,7 @@ import { ROUTE_PATHS } from './routes';
 import { NotFoundPage, PlaceholderPage } from './shell/PlaceholderPage';
 import { ProtectedRoute } from './shell/ProtectedRoute';
 import { PublicRouteShell } from './shell/PublicRouteShell';
+import { AppTelemetry } from './telemetry/AppTelemetry';
 
 type RouterProps = {
   isAuthenticated: boolean;
@@ -129,6 +130,7 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
 export function AppRouter({ isAuthenticated }: RouterProps) {
   return (
     <IonReactRouter>
+      <AppTelemetry />
       <AppRoutes isAuthenticated={isAuthenticated} />
     </IonReactRouter>
   );

@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { AppError } from '../../shared/api/app-error';
+import { captureTelemetryEvent } from '../../shared/telemetry/faro';
 import { useAuth } from '../auth/auth-context';
 import {
   getTripRepository,
@@ -42,6 +44,9 @@ export function useCreateTripInvite(repository?: TripRepository) {
       (repository ?? getTripRepository()).createInvite(tripId),
     onSuccess: (invite) => {
       queryClient.setQueryData(tripKeys.invite(invite.trip_id), invite);
+      captureTelemetryEvent('trip_invite_created', {
+        expiration_enabled: Boolean(invite.expires_at),
+      });
     },
   });
 }
@@ -54,6 +59,7 @@ export function useRevokeTripInvite(repository?: TripRepository) {
       (repository ?? getTripRepository()).revokeInvite(inviteId),
     onSuccess: (_result, { tripId }) => {
       queryClient.setQueryData(tripKeys.invite(tripId), null);
+      captureTelemetryEvent('trip_invite_revoked');
     },
   });
 }
@@ -235,7 +241,10 @@ export function useCreateTrip(repository?: TripRepository) {
         createdBy: user.id,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (_tripId, input) => {
+      captureTelemetryEvent('trip_created', {
+        currency: input.defaultCurrency,
+      });
       await queryClient.invalidateQueries({ queryKey: tripKeys.all });
     },
   });
@@ -247,8 +256,17 @@ export function useJoinTrip(repository?: TripRepository) {
   return useMutation({
     mutationFn: (code: string) =>
       (repository ?? getTripRepository()).joinByCode(code),
+    onMutate: () => {
+      captureTelemetryEvent('trip_join_attempted');
+    },
     onSuccess: async () => {
+      captureTelemetryEvent('trip_join_succeeded');
       await queryClient.invalidateQueries({ queryKey: tripKeys.all });
+    },
+    onError: (error) => {
+      captureTelemetryEvent('trip_join_failed', {
+        error_code: error instanceof AppError ? error.code : 'UNKNOWN',
+      });
     },
   });
 }

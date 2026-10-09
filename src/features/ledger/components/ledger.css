@@ -738,11 +738,7 @@
 .ledger-split-members {
   display: grid;
   gap: 0.65rem;
-  max-height: 23rem;
-  overflow-y: auto;
   padding-right: 0.25rem;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
   padding-top: 0.25rem;
 }
 
@@ -793,12 +789,6 @@
   margin: 0;
   color: var(--color-negative);
   font-size: 0.9rem;
-}
-
-.ledger-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
 }
 
 @media (max-width: 320px) {

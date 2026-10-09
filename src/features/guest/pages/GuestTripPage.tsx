@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { routes } from '../../../app/routes';
 import { clearAuthReturnTo } from '../../../app/auth-return';
+import { captureTelemetryEvent } from '../../../shared/telemetry/faro';
 import {
   Button,
   Icon,
@@ -46,6 +47,7 @@ export function GuestTripPage() {
   const queryClient = useQueryClient();
   const joinTrip = useJoinTrip();
   const joinAttemptRef = useRef('');
+  const viewedGuestTripRef = useRef('');
   const [code, setCode] = useState(() => consumeGuestCodeFromUrl());
   const [draftCode, setDraftCode] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -92,6 +94,12 @@ export function GuestTripPage() {
     () => createGuestLedgerRepository(code),
     [code],
   );
+
+  useEffect(() => {
+    if (!guestTrip || viewedGuestTripRef.current === guestTrip.id) return;
+    viewedGuestTripRef.current = guestTrip.id;
+    captureTelemetryEvent('guest_trip_opened');
+  }, [guestTrip]);
 
   useEffect(() => {
     if (!user || !code) return;

@@ -387,8 +387,7 @@
 }
 
 .itinerary-editor__queued-files li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--color-primary);

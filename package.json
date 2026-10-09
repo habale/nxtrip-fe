@@ -15,6 +15,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@grafana/faro-instrumentation-replay": "2.12.1",
+    "@grafana/faro-web-sdk": "2.12.1",
     "@ionic/react": "^9.0.6",
     "@ionic/react-router": "^9.0.6",
     "@supabase/supabase-js": "^2.117.2",

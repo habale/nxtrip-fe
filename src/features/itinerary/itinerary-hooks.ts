@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
+import { captureTelemetryEvent } from '../../shared/telemetry/faro';
 import { useAuth } from '../auth/auth-context';
 import {
   getItineraryRepository,
@@ -88,8 +89,16 @@ export function useCreateItineraryNode(repository?: ItineraryRepository) {
         userId: user.id,
       });
     },
-    onSuccess: (node) =>
-      invalidateItineraryDay(queryClient, node.tripId, node.localDate ?? ''),
+    onSuccess: (node) => {
+      captureTelemetryEvent('itinerary_item_added', {
+        item_type: node.nodeType,
+      });
+      return invalidateItineraryDay(
+        queryClient,
+        node.tripId,
+        node.localDate ?? '',
+      );
+    },
   });
 }
 

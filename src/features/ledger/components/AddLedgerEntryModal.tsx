@@ -296,6 +296,35 @@ export function AddLedgerEntryModal({
             : 'ledger.modal.title',
       )}
       onDismiss={resetAndDismiss}
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="quiet"
+            disabled={isPending}
+            onClick={resetAndDismiss}
+          >
+            {t('actions.cancel')}
+          </Button>
+          <Button disabled={!canSave || isPending} onClick={() => void save()}>
+            {isPending
+              ? t(
+                  editExpense || editTransfer
+                    ? 'ledger.modal.updating'
+                    : 'ledger.modal.saving',
+                )
+              : editExpense || editTransfer
+                ? t(
+                    editExpense
+                      ? 'ledger.modal.updateExpense'
+                      : 'ledger.modal.updateTransfer',
+                  )
+                : t('ledger.modal.add', {
+                    type: t(`ledger.modal.${type}`),
+                  })}
+          </Button>
+        </>
+      }
     >
       <form
         className="ledger-entry-form"
@@ -611,33 +640,6 @@ export function AddLedgerEntryModal({
               : tError('generic')}
           </p>
         )}
-        <div className="ledger-form-actions">
-          <Button
-            type="button"
-            variant="quiet"
-            disabled={isPending}
-            onClick={resetAndDismiss}
-          >
-            {t('actions.cancel')}
-          </Button>
-          <Button type="submit" disabled={!canSave || isPending}>
-            {isPending
-              ? t(
-                  editExpense || editTransfer
-                    ? 'ledger.modal.updating'
-                    : 'ledger.modal.saving',
-                )
-              : editExpense || editTransfer
-                ? t(
-                    editExpense
-                      ? 'ledger.modal.updateExpense'
-                      : 'ledger.modal.updateTransfer',
-                  )
-                : t('ledger.modal.add', {
-                    type: t(`ledger.modal.${type}`),
-                  })}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

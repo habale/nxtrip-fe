@@ -12,8 +12,10 @@ import './features/auth/auth.css';
 
 import { App } from './app/App';
 import { AppProviders } from './app/providers/AppProviders';
+import { initializeTelemetry } from './shared/telemetry/faro';
 
 setupIonicReact();
+initializeTelemetry();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

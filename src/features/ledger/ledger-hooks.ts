@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { captureTelemetryEvent } from '../../shared/telemetry/faro';
 import { useAuth } from '../auth/auth-context';
 import {
   getLedgerRepository,
@@ -42,6 +43,9 @@ export function useSaveLedgerEntry(repository?: LedgerRepository) {
       });
     },
     onSuccess: async (_id, input) => {
+      if (!input.expenseId) {
+        captureTelemetryEvent('expense_added', { currency: input.currency });
+      }
       await queryClient.invalidateQueries({
         queryKey: ledgerKeys.expenses(input.tripId),
       });
