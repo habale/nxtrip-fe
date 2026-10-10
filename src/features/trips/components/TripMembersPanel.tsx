@@ -23,6 +23,12 @@ import {
 } from '../guest-member-form';
 import { getMemberManagementPermissions } from '../member-permissions';
 import {
+  defaultMemberPermissions,
+  normalizeTripPermissions,
+  tripPermissions,
+  type TripPermission,
+} from '../trip-permissions';
+import {
   useAddGuestMember,
   useClaimTripMember,
   useDeactivateGuestMember,
@@ -43,7 +49,54 @@ const emptyValues: GuestMemberFormValues = {
   email: '',
   note: '',
   isTreasurer: false,
+  permissions: [...defaultMemberPermissions],
 };
+
+function MemberPermissionFields({
+  permissions,
+  disabled,
+  onChange,
+}: {
+  permissions: TripPermission[];
+  disabled: boolean;
+  onChange: (permissions: TripPermission[]) => void;
+}) {
+  const { t } = useTranslation('common');
+
+  return (
+    <fieldset className="trip-member-permissions">
+      <legend>{t('tripMembers.permissions.title')}</legend>
+      {tripPermissions.map((permission) => {
+        const checked = permissions.includes(permission);
+        const translationKey = permission.split('.')[0];
+        return (
+          <label key={permission}>
+            <Checkbox
+              ariaLabel={t(`tripMembers.permissions.${translationKey}.title`)}
+              checked={checked}
+              disabled={disabled}
+              onCheckedChange={(next) =>
+                onChange(
+                  next
+                    ? [...new Set([...permissions, permission])]
+                    : permissions.filter((value) => value !== permission),
+                )
+              }
+            />
+            <span>
+              <strong>
+                {t(`tripMembers.permissions.${translationKey}.title`)}
+              </strong>
+              <small>
+                {t(`tripMembers.permissions.${translationKey}.description`)}
+              </small>
+            </span>
+          </label>
+        );
+      })}
+    </fieldset>
+  );
+}
 
 export function TripMembersPanel({
   tripId,
@@ -100,6 +153,7 @@ export function TripMembersPanel({
       email: target.member.email ?? '',
       note: target.member.note ?? '',
       isTreasurer: target.member.id === treasurerMemberId,
+      permissions: normalizeTripPermissions(target.member.permissions),
     });
     updateGuest.reset();
   }
@@ -340,16 +394,24 @@ export function TripMembersPanel({
             value={values.note}
             onValueChange={(value) => update('note', value)}
           />
+          <MemberPermissionFields
+            disabled={addGuest.isPending}
+            permissions={values.permissions}
+            onChange={(permissions) => update('permissions', permissions)}
+          />
           {viewerRole === 'owner' && (
-            <label className="trip-member-form__checkbox">
-              <Checkbox
-                ariaLabel={t('tripMembers.makeTreasurer')}
-                checked={values.isTreasurer}
-                disabled={addGuest.isPending}
-                onCheckedChange={(checked) => update('isTreasurer', checked)}
-              />
-              <span>{t('tripMembers.makeTreasurer')}</span>
-            </label>
+            <fieldset className="trip-member-permissions">
+              <legend>{t('tripMembers.roles')}</legend>
+              <label className="trip-member-form__checkbox">
+                <Checkbox
+                  ariaLabel={t('tripMembers.makeTreasurer')}
+                  checked={values.isTreasurer}
+                  disabled={addGuest.isPending}
+                  onCheckedChange={(checked) => update('isTreasurer', checked)}
+                />
+                <span>{t('tripMembers.makeTreasurer')}</span>
+              </label>
+            </fieldset>
           )}
           {addGuest.error && (
             <p className="trip-member-form__error" role="alert">
@@ -412,18 +474,28 @@ export function TripMembersPanel({
             value={editValues.note}
             onValueChange={(value) => updateEdit('note', value)}
           />
+          {editTarget?.role !== 'owner' && (
+            <MemberPermissionFields
+              disabled={updateGuest.isPending}
+              permissions={editValues.permissions}
+              onChange={(permissions) => updateEdit('permissions', permissions)}
+            />
+          )}
           {viewerRole === 'owner' && (
-            <label className="trip-member-form__checkbox">
-              <Checkbox
-                ariaLabel={t('tripMembers.makeTreasurer')}
-                checked={editValues.isTreasurer}
-                disabled={updateGuest.isPending}
-                onCheckedChange={(checked) =>
-                  updateEdit('isTreasurer', checked)
-                }
-              />
-              <span>{t('tripMembers.makeTreasurer')}</span>
-            </label>
+            <fieldset className="trip-member-permissions">
+              <legend>{t('tripMembers.roles')}</legend>
+              <label className="trip-member-form__checkbox">
+                <Checkbox
+                  ariaLabel={t('tripMembers.makeTreasurer')}
+                  checked={editValues.isTreasurer}
+                  disabled={updateGuest.isPending}
+                  onCheckedChange={(checked) =>
+                    updateEdit('isTreasurer', checked)
+                  }
+                />
+                <span>{t('tripMembers.makeTreasurer')}</span>
+              </label>
+            </fieldset>
           )}
           {updateGuest.error && (
             <p className="trip-member-form__error" role="alert">

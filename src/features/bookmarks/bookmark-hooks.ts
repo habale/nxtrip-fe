@@ -5,6 +5,8 @@ import {
   getBookmarkRepository,
   type BookmarkRepository,
   type CreateBookmarkInput,
+  type RemoveBookmarkInput,
+  type UpdateBookmarkInput,
 } from './bookmark-repository';
 
 export const bookmarkKeys = {
@@ -34,6 +36,30 @@ export function useCreateBookmark(repository?: BookmarkRepository) {
         ownerUserId: user.id,
       });
     },
+    onSuccess: (bookmark) =>
+      queryClient.invalidateQueries({
+        queryKey: bookmarkKeys.trip(bookmark.source_trip_id ?? ''),
+      }),
+  });
+}
+
+export function useUpdateBookmark(repository?: BookmarkRepository) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateBookmarkInput) =>
+      (repository ?? getBookmarkRepository()).update(input),
+    onSuccess: (bookmark) =>
+      queryClient.invalidateQueries({
+        queryKey: bookmarkKeys.trip(bookmark.source_trip_id ?? ''),
+      }),
+  });
+}
+
+export function useRemoveBookmark(repository?: BookmarkRepository) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RemoveBookmarkInput) =>
+      (repository ?? getBookmarkRepository()).remove(input),
     onSuccess: (bookmark) =>
       queryClient.invalidateQueries({
         queryKey: bookmarkKeys.trip(bookmark.source_trip_id ?? ''),

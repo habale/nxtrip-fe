@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Button,
+  ConfirmDialog,
+  ContextMenu,
   Icon,
   Skeleton,
   TextArea,
@@ -10,7 +12,12 @@ import {
   type IconName,
 } from '../../../shared/ui';
 import type { Trip } from '../../trips/trip-repository';
-import { useCreateBookmark, useTripBookmarks } from '../bookmark-hooks';
+import {
+  useCreateBookmark,
+  useRemoveBookmark,
+  useTripBookmarks,
+  useUpdateBookmark,
+} from '../bookmark-hooks';
 import type { Bookmark, BookmarkRepository } from '../bookmark-repository';
 
 import './bookmarks.css';
@@ -38,29 +45,50 @@ function bookmarkMetadata(bookmark: Bookmark) {
 
 type Props = {
   trip: Trip;
-  canAdd?: boolean;
+  canManage?: boolean;
   repository?: BookmarkRepository;
 };
 
-export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
+export function BookmarksPanel({ trip, canManage = false, repository }: Props) {
   const { t } = useTranslation('common');
   const bookmarks = useTripBookmarks(trip.id, repository);
   const createBookmark = useCreateBookmark(repository);
-  const [adding, setAdding] = useState(false);
+  const updateBookmark = useUpdateBookmark(repository);
+  const removeBookmark = useRemoveBookmark(repository);
+  const [editor, setEditor] = useState<'new' | Bookmark | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<Bookmark | null>(null);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
   const [category, setCategory] = useState(categories[0]);
   const [submitted, setSubmitted] = useState(false);
+  const isPending = createBookmark.isPending || updateBookmark.isPending;
 
-  const close = () => {
-    setAdding(false);
+  const resetEditor = () => {
+    setEditor(null);
     setTitle('');
     setNotes('');
     setSourceUrl('');
     setCategory(categories[0]);
     setSubmitted(false);
     createBookmark.reset();
+    updateBookmark.reset();
+  };
+
+  const openCreate = () => {
+    resetEditor();
+    setEditor('new');
+  };
+
+  const openEdit = (bookmark: Bookmark) => {
+    setEditor(bookmark);
+    setTitle(bookmark.title);
+    setNotes(bookmark.notes ?? '');
+    setSourceUrl(bookmark.source_url ?? '');
+    setCategory(bookmarkMetadata(bookmark));
+    setSubmitted(false);
+    createBookmark.reset();
+    updateBookmark.reset();
   };
 
   const save = async () => {
@@ -74,30 +102,58 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
         return;
       }
     }
-    const result = await createBookmark
+
+    const values = {
+      tripId: trip.id,
+      title,
+      notes,
+      sourceUrl,
+      category: category.category,
+      iconKey: category.iconKey,
+    };
+    const result =
+      editor === 'new'
+        ? await createBookmark.mutateAsync(values).catch(() => undefined)
+        : editor
+          ? await updateBookmark
+              .mutateAsync({
+                ...values,
+                bookmarkId: editor.id,
+                version: editor.version,
+              })
+              .catch(() => undefined)
+          : undefined;
+    if (result) resetEditor();
+  };
+
+  const remove = async () => {
+    if (!removeTarget) return;
+    const target = removeTarget;
+    setRemoveTarget(null);
+    await removeBookmark
       .mutateAsync({
         tripId: trip.id,
-        title,
-        notes,
-        sourceUrl,
-        category: category.category,
-        iconKey: category.iconKey,
+        bookmarkId: target.id,
+        version: target.version,
       })
       .catch(() => undefined);
-    if (result) close();
   };
 
   return (
     <section className="bookmarks-panel">
-      {canAdd && !adding ? (
-        <Button variant="quiet" onClick={() => setAdding(true)}>
+      {canManage && !editor && (
+        <Button variant="quiet" onClick={openCreate}>
           {t('bookmarks.add')}
         </Button>
-      ) : canAdd && adding ? (
+      )}
+
+      {canManage && editor && (
         <section
           className={`bookmark-editor itinerary-category--${category.category}`}
         >
-          <h2>{t('bookmarks.addTitle')}</h2>
+          <h2>
+            {t(editor === 'new' ? 'bookmarks.addTitle' : 'bookmarks.editTitle')}
+          </h2>
           <div className="bookmark-editor__card">
             <div
               className="bookmark-editor__icons"
@@ -108,7 +164,7 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
                   key={option.iconKey}
                   aria-pressed={option.iconKey === category.iconKey}
                   className={`itinerary-category--${option.category}`}
-                  disabled={createBookmark.isPending}
+                  disabled={isPending}
                   type="button"
                   onClick={() => setCategory(option)}
                 >
@@ -118,7 +174,7 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
             </div>
             <TextInput
               required
-              disabled={createBookmark.isPending}
+              disabled={isPending}
               errorText={
                 submitted && !title.trim()
                   ? t('bookmarks.titleRequired')
@@ -130,39 +186,39 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
               onValueChange={setTitle}
             />
             <TextArea
-              disabled={createBookmark.isPending}
+              disabled={isPending}
               label={t('bookmarks.notes')}
               rows={3}
               value={notes}
               onValueChange={setNotes}
             />
             <TextInput
-              disabled={createBookmark.isPending}
+              disabled={isPending}
               label={t('bookmarks.mapsUrl')}
               type="url"
               value={sourceUrl}
               onValueChange={setSourceUrl}
             />
           </div>
-          {createBookmark.error && <p role="alert">{t('errors:generic')}</p>}
+          {(createBookmark.error || updateBookmark.error) && (
+            <p role="alert">{t('errors:generic')}</p>
+          )}
           <div className="bookmark-editor__actions">
-            <Button
-              disabled={createBookmark.isPending}
-              variant="quiet"
-              onClick={close}
-            >
+            <Button disabled={isPending} variant="quiet" onClick={resetEditor}>
               {t('actions.cancel')}
             </Button>
             <Button
-              loading={createBookmark.isPending}
-              disabled={createBookmark.isPending}
+              loading={isPending}
+              disabled={isPending}
               onClick={() => void save()}
             >
               {t('actions.save')}
             </Button>
           </div>
         </section>
-      ) : null}
+      )}
+
+      {removeBookmark.error && <p role="alert">{t('errors:generic')}</p>}
 
       {bookmarks.isPending ? (
         <div className="bookmarks-list">
@@ -183,7 +239,7 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
                 <span className="bookmark-card__icon">
                   <Icon name={metadata.icon} size="large" />
                 </span>
-                <div>
+                <div className="bookmark-card__content">
                   <h2>{bookmark.title}</h2>
                   {bookmark.notes && <p>{bookmark.notes}</p>}
                   {bookmark.source_url && (
@@ -196,6 +252,26 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
                     </a>
                   )}
                 </div>
+                {canManage && (
+                  <ContextMenu
+                    label={t('bookmarks.actionsFor', {
+                      title: bookmark.title,
+                    })}
+                    items={[
+                      {
+                        label: t('actions.edit'),
+                        icon: 'edit',
+                        onSelect: () => openEdit(bookmark),
+                      },
+                      {
+                        label: t('actions.remove'),
+                        icon: 'trash',
+                        destructive: true,
+                        onSelect: () => setRemoveTarget(bookmark),
+                      },
+                    ]}
+                  />
+                )}
               </article>
             );
           })}
@@ -206,6 +282,19 @@ export function BookmarksPanel({ trip, canAdd = false, repository }: Props) {
           <p>{t('tripDetail.placeholders.bookmarks')}</p>
         </div>
       )}
+
+      <ConfirmDialog
+        destructive
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('actions.remove')}
+        message={t('bookmarks.removeDescription', {
+          title: removeTarget?.title ?? '',
+        })}
+        open={Boolean(removeTarget)}
+        title={t('bookmarks.removeTitle')}
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={() => void remove()}
+      />
     </section>
   );
 }

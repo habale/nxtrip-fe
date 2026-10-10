@@ -15,6 +15,7 @@ import { TripMembersPanel } from '../components/TripMembersPanel';
 import { TripInvitePanel } from '../components/TripInvitePanel';
 import { formatTripDateRange } from '../trip-date';
 import { tripKeys, useTripDetail } from '../trip-hooks';
+import { hasTripPermission } from '../trip-permissions';
 import type { TripRepository } from '../trip-repository';
 
 import './trip-detail.css';
@@ -61,6 +62,15 @@ export function TripDetailPage({
   const tripQuery = useTripDetail(tripId, repository);
   const detail = tripQuery.data;
   const trip = detail?.trip;
+  const canEditItinerary = Boolean(
+    detail && hasTripPermission(detail, 'itinerary.manage'),
+  );
+  const canManageLedger = Boolean(
+    detail && hasTripPermission(detail, 'ledger.manage'),
+  );
+  const canManageBookmarks = Boolean(
+    detail && hasTripPermission(detail, 'bookmarks.manage'),
+  );
   const locale = i18n.resolvedLanguage === 'vi' ? 'vi-VN' : 'en-US';
   const sections: TripSection[] = ['info', 'itinerary', 'ledger', 'bookmarks'];
 
@@ -203,20 +213,20 @@ export function TripDetailPage({
               </>
             ) : section === 'itinerary' ? (
               <ItineraryPanel
-                canEdit={detail.role === 'owner'}
+                canEdit={canEditItinerary}
                 repository={itineraryRepository}
                 trip={trip}
               />
             ) : section === 'ledger' ? (
               <LedgerPanel
-                canEdit={detail.role !== 'viewer'}
+                canEdit={canManageLedger}
                 repository={ledgerRepository}
                 trip={trip}
                 locale={locale}
                 viewerRole={detail.role}
               />
             ) : section === 'bookmarks' ? (
-              <BookmarksPanel canAdd={detail.role === 'owner'} trip={trip} />
+              <BookmarksPanel canManage={canManageBookmarks} trip={trip} />
             ) : (
               <section className="trip-detail-placeholder">
                 <Icon name={sectionIcons[section]} size="large" />

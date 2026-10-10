@@ -429,6 +429,7 @@
     }
   },
   "tripMembers": {
+    "roles": "Roles",
     "title": "Members ({{count}})",
     "search": "Search members",
     "searchPlaceholder": "Search members…",
@@ -456,6 +457,21 @@
     "makeTreasurer": "Set as trip treasurer",
     "linked": "Linked",
     "linkedEmailLocked": "Email is managed by the linked account.",
+    "permissions": {
+      "title": "Permissions",
+      "itinerary": {
+        "title": "Manage itinerary",
+        "description": "Add, edit, remove, and rearrange itinerary items."
+      },
+      "ledger": {
+        "title": "Manage ledger entries",
+        "description": "Add, edit, and remove expenses and transfers."
+      },
+      "bookmarks": {
+        "title": "Manage bookmarks",
+        "description": "Add, edit, and remove trip bookmarks."
+      }
+    },
     "guest": "Guest",
     "inactive": "Inactive",
     "empty": "No trip members yet.",
@@ -470,6 +486,10 @@
   "bookmarks": {
     "add": "+ Add bookmark",
     "addTitle": "Add bookmark",
+    "editTitle": "Edit bookmark",
+    "actionsFor": "Actions for {{title}}",
+    "removeTitle": "Remove bookmark?",
+    "removeDescription": "{{title}} will be removed from this trip.",
     "chooseIcon": "Choose an icon",
     "title": "Title",
     "titleRequired": "Title is required.",

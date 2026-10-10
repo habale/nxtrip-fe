@@ -11,6 +11,7 @@ function member(overrides: Partial<TripMemberDetail>): TripMemberDetail {
       avatar_url: null,
       note: null,
       is_active: true,
+      permissions: ['ledger.manage'],
       created_by: 'user-1',
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-01T00:00:00.000Z',

@@ -455,5 +455,7 @@ export function createGuestBookmarkRepository(
       }));
     },
     create: () => readonlyGuestMutation(),
+    update: () => readonlyGuestMutation(),
+    remove: () => readonlyGuestMutation(),
   };
 }

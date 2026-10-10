@@ -57,6 +57,7 @@ type TripMemberRow = {
   avatar_url: string | null;
   note: string | null;
   is_active: boolean;
+  permissions: string[];
   created_by: string | null;
   created_at: string;
   updated_at: string;

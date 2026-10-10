@@ -76,6 +76,7 @@ export function GuestTripPage() {
         ? {
             trip,
             role: 'viewer',
+            permissions: [],
             coverImageUrl: guestTrip?.coverImageUrl ?? null,
             coverThumbnailUrl: guestTrip?.coverThumbnailUrl ?? null,
           }
@@ -323,7 +324,7 @@ export function GuestTripPage() {
               />
             ) : (
               <BookmarksPanel
-                canAdd={false}
+                canManage={false}
                 repository={bookmarkRepository}
                 trip={trip}
               />

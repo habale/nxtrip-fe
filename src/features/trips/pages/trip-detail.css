@@ -419,6 +419,39 @@
   font-weight: 600;
 }
 
+.trip-member-permissions {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.trip-member-permissions legend {
+  padding: 0 0.35rem;
+  font-weight: 750;
+}
+
+.trip-member-permissions label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.trip-member-permissions span,
+.trip-member-permissions small {
+  display: block;
+}
+
+.trip-member-permissions small {
+  margin-top: 0.2rem;
+  color: var(--color-ink-muted);
+  line-height: 1.4;
+}
+
 .trip-member-form__actions {
   display: flex;
   justify-content: flex-end;

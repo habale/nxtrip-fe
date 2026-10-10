@@ -56,9 +56,12 @@
 }
 .bookmark-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 1rem;
   padding: 1rem;
+}
+.bookmark-card__content {
+  min-width: 0;
 }
 .bookmark-card__icon {
   align-items: center;

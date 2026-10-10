@@ -426,6 +426,7 @@
     }
   },
   "tripMembers": {
+    "roles": "Vai trò",
     "title": "Thành viên ({{count}})",
     "search": "Tìm thành viên",
     "searchPlaceholder": "Tìm thành viên…",
@@ -453,6 +454,21 @@
     "makeTreasurer": "Đặt làm thủ quỹ chuyến đi",
     "linked": "Đã liên kết",
     "linkedEmailLocked": "Email được quản lý bởi tài khoản đã liên kết.",
+    "permissions": {
+      "title": "Quyền hạn",
+      "itinerary": {
+        "title": "Quản lý lịch trình",
+        "description": "Thêm, chỉnh sửa, xóa và sắp xếp lại các mục lịch trình."
+      },
+      "ledger": {
+        "title": "Quản lý sổ chi tiêu",
+        "description": "Thêm, chỉnh sửa và xóa các khoản chi và giao dịch."
+      },
+      "bookmarks": {
+        "title": "Quản lý địa điểm đã lưu",
+        "description": "Thêm, chỉnh sửa và xóa địa điểm đã lưu của chuyến đi."
+      }
+    },
     "guest": "Khách",
     "inactive": "Không hoạt động",
     "empty": "Chưa có thành viên chuyến đi.",
@@ -467,6 +483,10 @@
   "bookmarks": {
     "add": "+ Thêm dấu trang",
     "addTitle": "Thêm dấu trang",
+    "editTitle": "Chỉnh sửa dấu trang",
+    "actionsFor": "Thao tác cho {{title}}",
+    "removeTitle": "Xóa dấu trang?",
+    "removeDescription": "{{title}} sẽ bị xóa khỏi chuyến đi này.",
     "chooseIcon": "Chọn biểu tượng",
     "title": "Tiêu đề",
     "titleRequired": "Tiêu đề là bắt buộc.",

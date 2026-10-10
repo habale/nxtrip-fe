@@ -8,6 +8,7 @@ describe('guest member validation', () => {
         email: '',
         note: '',
         isTreasurer: false,
+        permissions: ['ledger.manage'],
       }),
     ).toEqual({});
   });
@@ -19,6 +20,7 @@ describe('guest member validation', () => {
         email: '',
         note: '',
         isTreasurer: false,
+        permissions: ['ledger.manage'],
       }),
     ).toMatchObject({ displayName: 'required' });
   });
@@ -30,6 +32,7 @@ describe('guest member validation', () => {
         email: 'not-an-email',
         note: '',
         isTreasurer: false,
+        permissions: ['ledger.manage'],
       }),
     ).toMatchObject({ email: 'invalidEmail' });
   });

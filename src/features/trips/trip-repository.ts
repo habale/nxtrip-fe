@@ -4,6 +4,10 @@ import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { createRequestId } from '../../shared/api/request-id';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
 import { deriveTripStatus, type DerivedTripStatus } from './trip-date';
+import {
+  normalizeTripPermissions,
+  type TripPermission,
+} from './trip-permissions';
 
 export type Trip = Database['public']['Tables']['trips']['Row'];
 export type TripMember = Pick<
@@ -27,6 +31,7 @@ export type TripListItem = {
 export type TripDetail = {
   trip: Trip;
   role: Database['public']['Enums']['access_role'];
+  permissions: TripPermission[];
   coverImageUrl: string | null;
   coverThumbnailUrl: string | null;
 };
@@ -75,6 +80,7 @@ export type AddGuestMemberInput = {
   email: string;
   note: string;
   isTreasurer: boolean;
+  permissions: TripPermission[];
   createdBy: string;
 };
 
@@ -331,6 +337,7 @@ export function createTripRepository(): TripRepository {
           display_name: input.displayName.trim(),
           email: input.email.trim() || null,
           note: input.note.trim() || null,
+          permissions: input.permissions,
           created_by: input.createdBy,
         })
         .select('*')
@@ -355,6 +362,7 @@ export function createTripRepository(): TripRepository {
           display_name: input.displayName.trim(),
           email: input.email.trim() || null,
           note: input.note.trim() || null,
+          permissions: input.permissions,
         })
         .eq('trip_id', input.tripId)
         .eq('id', input.memberId)
@@ -403,7 +411,7 @@ export function createTripRepository(): TripRepository {
     async getAccessibleById(tripId, userId) {
       const { data: membership, error: membershipError } = await client
         .from('trip_access_memberships')
-        .select('role')
+        .select('role, trip_member_id')
         .eq('trip_id', tripId)
         .eq('user_id', userId)
         .eq('status', 'active')
@@ -412,18 +420,33 @@ export function createTripRepository(): TripRepository {
       if (membershipError) throw mapSupabaseError(membershipError);
       if (!membership) throw new AppError('TRIP_NOT_FOUND');
 
-      const { data, error } = await client
-        .from('trips')
-        .select('*')
-        .eq('id', tripId)
-        .is('deleted_at', null)
-        .maybeSingle();
+      const permissionsPromise = membership.trip_member_id
+        ? client
+            .from('trip_members')
+            .select('permissions')
+            .eq('trip_id', tripId)
+            .eq('id', membership.trip_member_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null });
+
+      const [{ data, error }, permissionsResult] = await Promise.all([
+        client
+          .from('trips')
+          .select('*')
+          .eq('id', tripId)
+          .is('deleted_at', null)
+          .maybeSingle(),
+        permissionsPromise,
+      ]);
 
       if (error) {
         if (error.code === '42501') throw new AppError('TRIP_ACCESS_DENIED');
         throw mapSupabaseError(error);
       }
       if (!data) throw new AppError('TRIP_NOT_FOUND');
+      if (permissionsResult.error) {
+        throw mapSupabaseError(permissionsResult.error);
+      }
 
       const coverPaths = [
         data.cover_image_path,
@@ -446,6 +469,12 @@ export function createTripRepository(): TripRepository {
       return {
         trip: data,
         role: membership.role,
+        permissions:
+          membership.role === 'member'
+            ? normalizeTripPermissions(
+                permissionsResult.data?.permissions ?? [],
+              )
+            : [],
         coverImageUrl: data.cover_image_path
           ? (signedUrlByPath.get(data.cover_image_path) ?? null)
           : null,

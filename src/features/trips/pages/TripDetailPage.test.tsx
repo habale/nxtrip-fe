@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { User } from '@supabase/supabase-js';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { AppError } from '../../../shared/api/app-error';
@@ -11,6 +12,7 @@ import type {
   TripMemberDetail,
   TripRepository,
 } from '../trip-repository';
+import type { TripPermission } from '../trip-permissions';
 
 const trip: Trip = {
   id: 'trip-123',
@@ -94,6 +96,7 @@ describe('TripDetailPage', () => {
       vi.fn(async () => ({
         trip,
         role: 'owner' as const,
+        permissions: [],
         coverImageUrl: null,
         coverThumbnailUrl: null,
       })),
@@ -127,6 +130,7 @@ describe('TripDetailPage', () => {
       vi.fn(async () => ({
         trip,
         role: 'member' as const,
+        permissions: ['ledger.manage'] as TripPermission[],
         coverImageUrl: null,
         coverThumbnailUrl: null,
       })),
@@ -145,6 +149,7 @@ describe('TripDetailPage', () => {
       vi.fn(async () => ({
         trip,
         role: 'owner' as const,
+        permissions: [],
         coverImageUrl: null,
         coverThumbnailUrl: null,
       })),
@@ -159,6 +164,7 @@ describe('TripDetailPage', () => {
           avatar_url: null,
           note: null,
           is_active: true,
+          permissions: ['ledger.manage'],
           created_by: 'user-123',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
@@ -178,6 +184,7 @@ describe('TripDetailPage', () => {
           avatar_url: null,
           note: 'Vegetarian',
           is_active: false,
+          permissions: ['ledger.manage'],
           created_by: 'user-123',
           created_at: '2026-01-02T00:00:00.000Z',
           updated_at: '2026-01-02T00:00:00.000Z',
@@ -208,6 +215,26 @@ describe('TripDetailPage', () => {
       'sr-only',
     );
     expect(screen.getByText('Inactive')).toBeInTheDocument();
+  });
+
+  it('lets owners configure permissions when adding a member', async () => {
+    const user = userEvent.setup();
+    const repository = createRepository(
+      vi.fn(async () => ({
+        trip,
+        role: 'owner' as const,
+        permissions: [],
+        coverImageUrl: null,
+        coverThumbnailUrl: null,
+      })),
+    );
+    renderPage('info', repository);
+
+    await user.click(await screen.findByText('Add member'));
+
+    expect(screen.getByLabelText('Edit itinerary')).toBeInTheDocument();
+    expect(screen.getByLabelText('Manage ledger entries')).toBeInTheDocument();
+    expect(screen.getByLabelText('Manage bookmarks')).toBeInTheDocument();
   });
 
   it('renders the not-found state without exposing protected trip data', async () => {

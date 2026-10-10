@@ -1,8 +1,11 @@
+import type { TripPermission } from './trip-permissions';
+
 export type GuestMemberFormValues = {
   displayName: string;
   email: string;
   note: string;
   isTreasurer: boolean;
+  permissions: TripPermission[];
 };
 
 export type GuestMemberFormErrors = Partial<
