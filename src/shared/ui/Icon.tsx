@@ -10,6 +10,7 @@ export type IconName =
   | 'camera'
   | 'cafe'
   | 'check'
+  | 'checklist'
   | 'close'
   | 'copy'
   | 'document'
@@ -66,6 +67,7 @@ const materialSymbolByName: Record<IconName, string> = {
   camera: 'photo_camera',
   cafe: 'local_cafe',
   check: 'check',
+  checklist: 'checklist',
   close: 'close',
   copy: 'content_copy',
   document: 'description',

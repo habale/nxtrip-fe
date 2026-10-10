@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { User } from '@supabase/supabase-js';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 
 import { i18n } from '../../../shared/i18n';
@@ -63,6 +64,15 @@ const baseNode = {
       },
     },
   ],
+  checklists: [
+    {
+      linkId: 'checklist-link-1',
+      id: 'checklist-1',
+      title: 'Arrival checklist',
+      itemCount: 4,
+      completedCount: 2,
+    },
+  ],
   version: 1,
 } satisfies ItineraryNode;
 
@@ -98,17 +108,21 @@ describe('ItineraryPanel', () => {
           }
         >
           <QueryClientProvider client={queryClient}>
-            <ItineraryPanel
-              canEdit={false}
-              repository={repository}
-              trip={trip}
-            />
+            <MemoryRouter>
+              <ItineraryPanel
+                canEdit={false}
+                repository={repository}
+                trip={trip}
+              />
+            </MemoryRouter>
           </QueryClientProvider>
         </AuthContext.Provider>
       </I18nextProvider>,
     );
 
     expect(await screen.findByText('Temple visit')).toBeInTheDocument();
+    expect(screen.getByText('Arrival checklist')).toBeInTheDocument();
+    expect(screen.getByText('2 / 4 completed')).toBeInTheDocument();
     expect(screen.queryByText('Itinerary actions')).not.toBeInTheDocument();
     expect(document.querySelector('ion-reorder')).not.toBeInTheDocument();
     expect(document.querySelector('.ui-icon-button')).not.toBeInTheDocument();
@@ -161,7 +175,9 @@ describe('ItineraryPanel', () => {
           }
         >
           <QueryClientProvider client={queryClient}>
-            <ItineraryPanel repository={repository} trip={trip} />
+            <MemoryRouter>
+              <ItineraryPanel repository={repository} trip={trip} />
+            </MemoryRouter>
           </QueryClientProvider>
         </AuthContext.Provider>
       </I18nextProvider>,
@@ -222,6 +238,20 @@ describe('ItineraryPanel', () => {
     await user.click(betweenAddButtons[1]);
     expect(screen.getByText('Add itinerary item')).toBeInTheDocument();
     await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
+
+    await user.click(
+      screen.getByText('Actions for Temple visit').closest('ion-button')!,
+    );
+    const editMenuItem = screen
+      .getAllByText('Edit')
+      .map((element) => element.closest('ion-item'))
+      .find(Boolean);
+    await user.click(editMenuItem!);
+    expect(screen.getByText('Edit itinerary item')).toBeInTheDocument();
+    expect(
+      screen.getByText('Add checklist').closest('.itinerary-editor__tools'),
+    ).toBeInTheDocument();
+    await user.click(screen.getByText('Cancel', { selector: 'ion-button' }));
     await user.click(screen.getByRole('button', { name: 'Done' }));
 
     await user.click(
@@ -233,5 +263,26 @@ describe('ItineraryPanel', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Rearrange Itinerary');
     expect(document.querySelectorAll('ion-reorder')).toHaveLength(nodes.length);
     expect(document.querySelectorAll('.ui-icon-button--large')).toHaveLength(0);
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    await user.click(
+      screen.getByText('Itinerary actions').closest('ion-fab-button')!,
+    );
+    await user.click(
+      screen.getByText('Edit Itinerary').closest('ion-fab-button')!,
+    );
+    await user.click(
+      screen.getByText('Actions for Temple visit').closest('ion-button')!,
+    );
+    const secondEditMenuItem = screen
+      .getAllByText('Edit')
+      .map((element) => element.closest('ion-item'))
+      .filter(Boolean)
+      .at(-1);
+    await user.click(secondEditMenuItem!);
+    await user.click(screen.getByText('Add checklist').closest('ion-button')!);
+    expect(
+      document.querySelector('.itinerary-mode-bar'),
+    ).not.toBeInTheDocument();
   });
 });

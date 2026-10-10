@@ -1,10 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
 
+import { routes } from '../../../app/routes';
 import {
   Button,
   ConfirmDialog,
+  ContextMenu,
   FabButton,
   FabMenu,
   Icon,
@@ -32,6 +35,7 @@ import type {
   MoveNode,
   NodeAttachment,
 } from '../itinerary-types';
+import type { NodeChecklistSummary } from '../../checklists/checklist-types';
 import { generateSortKeyBetween } from '../itinerary-sort-key';
 import {
   getInitialItineraryWindow,
@@ -48,6 +52,7 @@ type ItineraryPanelProps = {
   trip: Trip;
   canEdit?: boolean;
   repository?: ItineraryRepository;
+  checklistHref?: (checklistId: string) => string;
 };
 
 const iconByKey: Record<string, IconName> = {
@@ -138,6 +143,36 @@ function AttachmentLinks({ attachments }: { attachments: NodeAttachment[] }) {
   );
 }
 
+function ChecklistLinks({
+  checklists,
+  href,
+}: {
+  checklists: NodeChecklistSummary[];
+  href: (checklistId: string) => string;
+}) {
+  const { t } = useTranslation('common');
+  if (checklists.length === 0) return null;
+
+  return (
+    <ul className="itinerary-node__checklists">
+      {checklists.map((checklist) => (
+        <li key={checklist.linkId}>
+          <Link to={href(checklist.id)}>
+            <Icon name="checklist" />
+            <span className="itinerary-node__checklists__title">{checklist.title}</span>
+            <small>
+              {t('checklists.progress', {
+                completed: checklist.completedCount,
+                total: checklist.itemCount,
+              })}
+            </small>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function formatNodeTime(
   node: ItineraryNode,
   locale: string,
@@ -156,10 +191,12 @@ const MoveConnector = memo(function MoveConnector({
   node,
   locale,
   timeZone,
+  checklistHref,
 }: {
   node: MoveNode;
   locale: string;
   timeZone: string;
+  checklistHref: (checklistId: string) => string;
 }) {
   const { t } = useTranslation('common');
   const time = formatNodeTime(node, locale, timeZone);
@@ -188,6 +225,7 @@ const MoveConnector = memo(function MoveConnector({
             </div>
           )}
           <AttachmentLinks attachments={node.attachments} />
+          <ChecklistLinks checklists={node.checklists} href={checklistHref} />
           <DirectionsLink url={node.googleMapsUrl} />
         </div>
       </div>
@@ -199,10 +237,12 @@ const StopCard = memo(function StopCard({
   node,
   locale,
   timeZone,
+  checklistHref,
 }: {
   node: ItineraryNode;
   locale: string;
   timeZone: string;
+  checklistHref: (checklistId: string) => string;
 }) {
   const { t } = useTranslation('common');
   const time = formatNodeTime(node, locale, timeZone);
@@ -248,6 +288,7 @@ const StopCard = memo(function StopCard({
               </div>
             )}
             <AttachmentLinks attachments={node.attachments} />
+            <ChecklistLinks checklists={node.checklists} href={checklistHref} />
             <DirectionsLink url={node.googleMapsUrl} />
           </div>
         </div>
@@ -264,6 +305,7 @@ const StopCard = memo(function StopCard({
           </div>
           {(node.additionalLines.length > 0 ||
             node.attachments.length > 0 ||
+            node.checklists.length > 0 ||
             node.googleMapsUrl) && (
             <div className="itinerary-stop__body">
               {node.additionalLines.length > 0 && (
@@ -274,6 +316,10 @@ const StopCard = memo(function StopCard({
                 </div>
               )}
               <AttachmentLinks attachments={node.attachments} />
+              <ChecklistLinks
+                checklists={node.checklists}
+                href={checklistHref}
+              />
               <DirectionsLink url={node.googleMapsUrl} />
             </div>
           )}
@@ -287,8 +333,13 @@ export function ItineraryPanel({
   trip,
   canEdit = true,
   repository,
+  checklistHref,
 }: ItineraryPanelProps) {
   const { t, i18n } = useTranslation('common');
+  const location = useLocation();
+  const checklistLink =
+    checklistHref ??
+    ((checklistId: string) => routes.tripChecklist(trip.id, checklistId));
   const initial = useMemo(() => getInitialItineraryWindow(trip), [trip]);
   const [selectedDate, setSelectedDate] = useState(initial.selectedDate);
   const window = useMemo(
@@ -492,6 +543,7 @@ export function ItineraryPanel({
       {canEdit &&
         activeMode !== 'view' &&
         !iconPickerOpen &&
+        !location.pathname.includes('/checklists/') &&
         createPortal(
           <div className="itinerary-mode-bar" role="status">
             <strong>
@@ -607,6 +659,29 @@ export function ItineraryPanel({
                       : ''
                   }`}
                 >
+                  {activeMode === 'edit' && editor === null && (
+                    <div className="itinerary-node-context__menu">
+                      <ContextMenu
+                        label={t('itinerary.editor.nodeActions', {
+                          title:
+                            node.title || t('itinerary.editor.untitledNode'),
+                        })}
+                        items={[
+                          {
+                            icon: 'edit',
+                            label: t('itinerary.editor.editNode'),
+                            onSelect: () => setEditor({ type: 'edit', node }),
+                          },
+                          {
+                            icon: 'trash',
+                            label: t('itinerary.editor.removeNode'),
+                            destructive: true,
+                            onSelect: () => setNodePendingRemoval(node),
+                          },
+                        ]}
+                      />
+                    </div>
+                  )}
                   {activeMode === 'reorder' && (
                     <div className="itinerary-reorder-anchor">
                       <ReorderHandle
@@ -627,12 +702,14 @@ export function ItineraryPanel({
                   >
                     {node.nodeType === 'move' ? (
                       <MoveConnector
+                        checklistHref={checklistLink}
                         locale={locale}
                         node={node}
                         timeZone={trip.timezone}
                       />
                     ) : (
                       <StopCard
+                        checklistHref={checklistLink}
                         locale={locale}
                         node={node}
                         timeZone={trip.timezone}

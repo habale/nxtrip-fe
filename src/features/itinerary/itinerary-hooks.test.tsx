@@ -40,6 +40,7 @@ function node(id: string, sortKey: string): ItineraryNode {
     additionalData: {},
     additionalLines: [],
     attachments: [],
+    checklists: [],
     version: 1,
   };
 }

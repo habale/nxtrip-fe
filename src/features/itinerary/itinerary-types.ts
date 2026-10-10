@@ -1,4 +1,5 @@
 import type { Database, Json } from '../../shared/api/database.types';
+import type { NodeChecklistSummary } from '../checklists/checklist-types';
 
 export type ItineraryNodeRow =
   Database['public']['Tables']['itinerary_nodes']['Row'];
@@ -37,6 +38,7 @@ type ItineraryNodeBase = {
   additionalData: Record<string, Json | undefined>;
   additionalLines: AdditionalInfoLine[];
   attachments: NodeAttachment[];
+  checklists: NodeChecklistSummary[];
   version: number;
 };
 
@@ -92,6 +94,7 @@ export function readAdditionalLines(value: Json): AdditionalInfoLine[] {
 export function mapItineraryNode(
   row: ItineraryNodeRow,
   attachments: NodeAttachment[] = [],
+  checklists: NodeChecklistSummary[] = [],
 ): ItineraryNode {
   const additionalData = isJsonObject(row.additional_data)
     ? row.additional_data
@@ -112,6 +115,7 @@ export function mapItineraryNode(
     additionalData,
     additionalLines: readAdditionalLines(row.additional_data),
     attachments,
+    checklists,
     version: row.version,
   };
 

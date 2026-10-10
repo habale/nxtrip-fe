@@ -3,6 +3,8 @@ import type { Json } from '../../shared/api/database.types';
 import { createRequestId } from '../../shared/api/request-id';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
 import type { BookmarkRepository } from '../bookmarks/bookmark-repository';
+import type { Checklist } from '../checklists/checklist-types';
+import type { NodeChecklistSummary } from '../checklists/checklist-types';
 import type { ItineraryRepository } from '../itinerary/itinerary-repository';
 import {
   mapItineraryNode,
@@ -42,7 +44,10 @@ export type GuestItineraryNode = {
   google_maps_url: string | null;
   icon_key: string | null;
   attachments: GuestAttachment[];
+  checklists: NodeChecklistSummary[];
 };
+
+type GuestNodeChecklist = NodeChecklistSummary & { nodeId: string };
 
 type GuestAttachment = {
   id: string;
@@ -85,6 +90,7 @@ export type GuestRepository = {
   ) => Promise<GuestItineraryNode[]>;
   getBookmarks: (code: string) => Promise<GuestBookmark[]>;
   getLedger: (code: string) => Promise<LedgerData>;
+  getChecklist: (code: string, checklistId: string) => Promise<Checklist>;
 };
 
 function isRecord(value: Json): value is Record<string, Json | undefined> {
@@ -200,7 +206,27 @@ function mapGuestAttachment(value: Json): GuestAttachment {
   };
 }
 
-function mapItinerary(value: Json): GuestItineraryNode[] {
+function mapGuestNodeChecklists(value: Json): GuestNodeChecklist[] {
+  return requireArray(value, 'guest node checklists').map((item) => {
+    const row = requireRecord(item, 'guest node checklist');
+    return {
+      linkId: requireString(row.link_id, 'checklist link id'),
+      nodeId: requireString(row.node_id, 'checklist node id'),
+      id: requireString(row.id, 'checklist id'),
+      title: requireString(row.title, 'checklist title'),
+      completedCount: requireNumber(
+        row.completed_count,
+        'completed checklist count',
+      ),
+      itemCount: requireNumber(row.item_count, 'checklist item count'),
+    };
+  });
+}
+
+function mapItinerary(
+  value: Json,
+  nodeChecklists: GuestNodeChecklist[] = [],
+): GuestItineraryNode[] {
   if (!Array.isArray(value))
     throw new Error('Invalid guest itinerary response.');
   return value.map((item) => {
@@ -224,8 +250,61 @@ function mapItinerary(value: Json): GuestItineraryNode[] {
         row.attachments,
         'guest itinerary attachments',
       ).map(mapGuestAttachment),
+      checklists: nodeChecklists
+        .filter(
+          (checklist) =>
+            checklist.nodeId === requireString(row.id, 'itinerary id'),
+        )
+        .map((checklist) => ({
+          linkId: checklist.linkId,
+          id: checklist.id,
+          title: checklist.title,
+          completedCount: checklist.completedCount,
+          itemCount: checklist.itemCount,
+        })),
     };
   });
+}
+
+function mapGuestChecklist(value: Json): Checklist {
+  const row = requireRecord(value, 'guest checklist');
+  const tripId = requireString(row.trip_id, 'checklist trip id');
+  const checklistId = requireString(row.id, 'checklist id');
+  return {
+    resource: {
+      id: checklistId,
+      trip_id: tripId,
+      app_type: 'checklist',
+      title: requireString(row.title, 'checklist title'),
+      description: nullableString(row.description),
+      metadata: {},
+      created_by: null,
+      updated_by: null,
+      created_at: '',
+      updated_at: '',
+      version: requireNumber(row.version, 'checklist version'),
+      deleted_at: null,
+    },
+    items: requireArray(row.items, 'guest checklist items').map((value) => {
+      const item = requireRecord(value, 'guest checklist item');
+      return {
+        id: requireString(item.id, 'checklist item id'),
+        trip_id: tripId,
+        app_resource_id: checklistId,
+        label: requireString(item.label, 'checklist item label'),
+        sort_key: requireString(item.sort_key, 'checklist item order'),
+        is_checked: item.is_checked === true,
+        checked_by: null,
+        checked_at: nullableString(item.checked_at),
+        created_by: null,
+        updated_by: null,
+        created_at: '',
+        updated_at: '',
+        version: requireNumber(item.version, 'checklist item version'),
+        deleted_at: null,
+      };
+    }),
+  };
 }
 
 function mapBookmarks(value: Json): GuestBookmark[] {
@@ -276,14 +355,30 @@ export function createGuestRepository(): GuestRepository {
     },
     async getItinerary(code, startDate, endDate) {
       const requestId = createRequestId();
-      const { data, error } = await client.rpc('get_guest_itinerary', {
-        p_code: code,
-        p_start_date: startDate,
-        p_end_date: endDate,
-        p_request_id: requestId,
-      });
-      if (error) throw mapSupabaseError(error, requestId);
-      const itinerary = mapItinerary(data);
+      const [itineraryResult, checklistsResult] = await Promise.all([
+        client.rpc('get_guest_itinerary', {
+          p_code: code,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_request_id: requestId,
+        }),
+        client.rpc('get_guest_node_checklists', {
+          p_code: code,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_request_id: requestId,
+        }),
+      ]);
+      if (itineraryResult.error) {
+        throw mapSupabaseError(itineraryResult.error, requestId);
+      }
+      if (checklistsResult.error) {
+        throw mapSupabaseError(checklistsResult.error, requestId);
+      }
+      const itinerary = mapItinerary(
+        itineraryResult.data,
+        mapGuestNodeChecklists(checklistsResult.data),
+      );
       const paths = itinerary.flatMap((node) =>
         node.attachments.flatMap((attachment) => [
           attachment.storage_path,
@@ -329,6 +424,16 @@ export function createGuestRepository(): GuestRepository {
         requireArray(ledger[key], `guest ledger ${key}`);
       }
       return ledger as unknown as LedgerData;
+    },
+    async getChecklist(code, checklistId) {
+      const requestId = createRequestId();
+      const { data, error } = await client.rpc('get_guest_checklist', {
+        p_code: code,
+        p_checklist_id: checklistId,
+        p_request_id: requestId,
+      });
+      if (error) throw mapSupabaseError(error, requestId);
+      return mapGuestChecklist(data);
     },
   };
 }
@@ -399,6 +504,7 @@ export function createGuestItineraryRepository(
               deleted_at: null,
             },
             attachments,
+            node.checklists,
           );
         }),
       };

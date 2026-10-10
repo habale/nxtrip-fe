@@ -34,6 +34,7 @@ export function createLongItineraryFixture(dayCount = 70, nodesPerDay = 6) {
         additionalData: {},
         additionalLines: [{ type: 'text', text: 'Benchmark fixture note' }],
         attachments: [],
+        checklists: [],
         version: 1,
         ...(nodeIndex % 3 === 2
           ? { transportMode: 'rail', operator: null }

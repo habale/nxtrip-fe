@@ -322,6 +322,7 @@
       "addAtEnd": "Thêm ở cuối",
       "addBetween": "Thêm mục lịch trình",
       "editNode": "Chỉnh sửa",
+      "nodeActions": "Thao tác cho {{title}}",
       "removeNode": "Xóa",
       "dragNode": "Kéo để sắp xếp lại {{title}}",
       "reorderError": "Không thể lưu thứ tự lịch trình mới.",
@@ -493,6 +494,29 @@
     "notes": "Ghi chú",
     "mapsUrl": "Liên kết Google Maps",
     "openLink": "Chỉ đường"
+  },
+  "checklists": {
+    "title": "Danh sách kiểm tra",
+    "add": "Thêm danh sách kiểm tra",
+    "create": "Tạo danh sách",
+    "createTitle": "Danh sách kiểm tra mới",
+    "editTitle": "Sửa danh sách kiểm tra",
+    "name": "Tên danh sách",
+    "description": "Mô tả",
+    "items": "Các mục",
+    "addItem": "Thêm mục",
+    "empty": "Danh sách này chưa có mục nào.",
+    "emptyEditor": "Thêm mục đầu tiên vào danh sách.",
+    "progress": "Đã hoàn thành {{completed}} / {{total}}",
+    "itemLabel": "Mục {{item}}",
+    "reorderItem": "Sắp xếp lại mục {{item}}",
+    "removeItem": "Xóa mục {{item}}",
+    "notFoundTitle": "Không tìm thấy danh sách",
+    "notFoundDescription": "Danh sách này không tồn tại hoặc bạn không còn quyền truy cập.",
+    "validation": {
+      "titleRequired": "Nhập tên danh sách.",
+      "itemRequired": "Nhập nội dung hoặc xóa dòng này."
+    }
   },
   "dateRange": {
     "placeholder": "Chọn ngày chuyến đi",

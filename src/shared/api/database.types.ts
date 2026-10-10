@@ -167,6 +167,46 @@ type ItineraryNodeAttachmentRow = {
   version: number;
   deleted_at: string | null;
 };
+type TripAppResourceRow = {
+  id: string;
+  trip_id: string;
+  app_type: string;
+  title: string;
+  description: string | null;
+  metadata: Json;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+  version: number;
+  deleted_at: string | null;
+};
+type ItineraryNodeAppLinkRow = {
+  id: string;
+  trip_id: string;
+  node_id: string;
+  app_resource_id: string;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  deleted_at: string | null;
+};
+type ChecklistItemRow = {
+  id: string;
+  trip_id: string;
+  app_resource_id: string;
+  label: string;
+  sort_key: string;
+  is_checked: boolean;
+  checked_by: string | null;
+  checked_at: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+  version: number;
+  deleted_at: string | null;
+};
 type TripFundRow = {
   id: string;
   trip_id: string;
@@ -329,6 +369,18 @@ export type Database = {
         ItineraryNodeAttachmentRow,
         'trip_id' | 'node_id' | 'attachment_id'
       >;
+      trip_app_resources: DatabaseTable<
+        TripAppResourceRow,
+        'trip_id' | 'app_type' | 'title'
+      >;
+      itinerary_node_app_links: DatabaseTable<
+        ItineraryNodeAppLinkRow,
+        'trip_id' | 'node_id' | 'app_resource_id'
+      >;
+      checklist_items: DatabaseTable<
+        ChecklistItemRow,
+        'id' | 'trip_id' | 'app_resource_id' | 'label' | 'sort_key'
+      >;
       trip_funds: DatabaseTable<TripFundRow, 'trip_id' | 'name' | 'currency'>;
       expenses: DatabaseTable<
         ExpenseRow,
@@ -419,6 +471,55 @@ export type Database = {
       authorize_guest_files: {
         Args: { p_code: string; p_paths: string[]; p_request_id?: string };
         Returns: string[];
+      };
+      create_node_checklist: {
+        Args: {
+          p_trip_id: string;
+          p_node_id: string;
+          p_title: string;
+          p_description: string;
+          p_items: Json;
+          p_request_id?: string;
+        };
+        Returns: string;
+      };
+      update_node_checklist: {
+        Args: {
+          p_trip_id: string;
+          p_checklist_id: string;
+          p_version: number;
+          p_title: string;
+          p_description: string;
+          p_items: Json;
+          p_request_id?: string;
+        };
+        Returns: string;
+      };
+      set_checklist_item_checked: {
+        Args: {
+          p_trip_id: string;
+          p_item_id: string;
+          p_checked: boolean;
+          p_request_id?: string;
+        };
+        Returns: Json;
+      };
+      get_guest_node_checklists: {
+        Args: {
+          p_code: string;
+          p_start_date: string;
+          p_end_date: string;
+          p_request_id?: string;
+        };
+        Returns: Json;
+      };
+      get_guest_checklist: {
+        Args: {
+          p_code: string;
+          p_checklist_id: string;
+          p_request_id?: string;
+        };
+        Returns: Json;
       };
       revoke_guest_invite: {
         Args: { p_invite_id: string; p_request_id?: string };

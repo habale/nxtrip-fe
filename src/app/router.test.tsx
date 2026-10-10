@@ -122,5 +122,11 @@ describe('application routes', () => {
     expect(routes.tripInfo('trip with spaces')).toBe(
       '/trips/trip%20with%20spaces/info',
     );
+    expect(routes.newNodeChecklist('trip 1', 'node 2')).toBe(
+      '/trips/trip%201/itinerary/node%202/checklists/new',
+    );
+    expect(routes.tripChecklist('trip 1', 'checklist 3')).toBe(
+      '/trips/trip%201/checklists/checklist%203',
+    );
   });
 });

@@ -14,6 +14,10 @@ export const ROUTE_PATHS = {
   tripLedger: '/trips/:tripId/ledger',
   tripAttachments: '/trips/:tripId/attachments',
   tripBookmarks: '/trips/:tripId/bookmarks',
+  newNodeChecklist: '/trips/:tripId/itinerary/:nodeId/checklists/new',
+  tripChecklist: '/trips/:tripId/checklists/:checklistId',
+  editTripChecklist: '/trips/:tripId/checklists/:checklistId/edit',
+  guestChecklist: '/guest/checklists/:checklistId',
   settings: '/settings',
   uiKit: '/ui-kit',
 } as const;
@@ -38,4 +42,12 @@ export const routes = {
   tripLedger: (tripId: string) => tripPath(tripId, '/ledger'),
   tripAttachments: (tripId: string) => tripPath(tripId, '/attachments'),
   tripBookmarks: (tripId: string) => tripPath(tripId, '/bookmarks'),
+  newNodeChecklist: (tripId: string, nodeId: string) =>
+    tripPath(tripId, `/itinerary/${encodeURIComponent(nodeId)}/checklists/new`),
+  tripChecklist: (tripId: string, checklistId: string) =>
+    tripPath(tripId, `/checklists/${encodeURIComponent(checklistId)}`),
+  editTripChecklist: (tripId: string, checklistId: string) =>
+    tripPath(tripId, `/checklists/${encodeURIComponent(checklistId)}/edit`),
+  guestChecklist: (checklistId: string) =>
+    `/guest/checklists/${encodeURIComponent(checklistId)}`,
 } as const;

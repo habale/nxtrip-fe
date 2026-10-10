@@ -1,6 +1,7 @@
 import { mapSupabaseError } from '../../shared/api/error-mapper';
 import { getSupabaseClient } from '../../shared/api/supabase-client';
 import { convertImageToWebp } from '../../shared/images/image-conversion';
+import type { NodeChecklistSummary } from '../checklists/checklist-types';
 import {
   type ItineraryDateWindow,
   type ItineraryNode,
@@ -285,14 +286,23 @@ export function createItineraryRepository(): ItineraryRepository {
       if (nodeRows.length === 0) return { ...window, nodes: [] };
 
       const nodeIds = nodeRows.map(({ id }) => id);
-      const linksResult = await client
-        .from('itinerary_node_attachments')
-        .select('*')
-        .in('node_id', nodeIds)
-        .is('deleted_at', null)
-        .order('sort_order', { ascending: true });
+      const [linksResult, appLinksResult] = await Promise.all([
+        client
+          .from('itinerary_node_attachments')
+          .select('*')
+          .in('node_id', nodeIds)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: true }),
+        client
+          .from('itinerary_node_app_links')
+          .select('*')
+          .in('node_id', nodeIds)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: true }),
+      ]);
 
       if (linksResult.error) throw mapSupabaseError(linksResult.error);
+      if (appLinksResult.error) throw mapSupabaseError(appLinksResult.error);
 
       const attachmentIds = [
         ...new Set(linksResult.data.map(({ attachment_id }) => attachment_id)),
@@ -349,10 +359,76 @@ export function createItineraryRepository(): ItineraryRepository {
         attachmentsByNode.set(link.node_id, nodeAttachments);
       });
 
+      const resourceIds = [
+        ...new Set(
+          appLinksResult.data.map(({ app_resource_id }) => app_resource_id),
+        ),
+      ];
+      const [resourcesResult, checklistItemsResult] = resourceIds.length
+        ? await Promise.all([
+            client
+              .from('trip_app_resources')
+              .select('*')
+              .in('id', resourceIds)
+              .eq('app_type', 'checklist')
+              .is('deleted_at', null),
+            client
+              .from('checklist_items')
+              .select('app_resource_id, is_checked')
+              .in('app_resource_id', resourceIds)
+              .is('deleted_at', null),
+          ])
+        : [
+            { data: [], error: null },
+            { data: [], error: null },
+          ];
+      if (resourcesResult.error) throw mapSupabaseError(resourcesResult.error);
+      if (checklistItemsResult.error) {
+        throw mapSupabaseError(checklistItemsResult.error);
+      }
+
+      const resourceById = new Map(
+        resourcesResult.data.map((resource) => [resource.id, resource]),
+      );
+      const countsByResource = new Map<
+        string,
+        { itemCount: number; completedCount: number }
+      >();
+      checklistItemsResult.data.forEach((item) => {
+        const counts = countsByResource.get(item.app_resource_id) ?? {
+          itemCount: 0,
+          completedCount: 0,
+        };
+        counts.itemCount += 1;
+        if (item.is_checked) counts.completedCount += 1;
+        countsByResource.set(item.app_resource_id, counts);
+      });
+      const checklistsByNode = new Map<string, NodeChecklistSummary[]>();
+      appLinksResult.data.forEach((link) => {
+        const resource = resourceById.get(link.app_resource_id);
+        if (!resource) return;
+        const counts = countsByResource.get(resource.id) ?? {
+          itemCount: 0,
+          completedCount: 0,
+        };
+        const nodeChecklists = checklistsByNode.get(link.node_id) ?? [];
+        nodeChecklists.push({
+          linkId: link.id,
+          id: resource.id,
+          title: resource.title,
+          ...counts,
+        });
+        checklistsByNode.set(link.node_id, nodeChecklists);
+      });
+
       return {
         ...window,
         nodes: nodeRows.map((row) =>
-          mapItineraryNode(row, attachmentsByNode.get(row.id)),
+          mapItineraryNode(
+            row,
+            attachmentsByNode.get(row.id),
+            checklistsByNode.get(row.id),
+          ),
         ),
       };
     },

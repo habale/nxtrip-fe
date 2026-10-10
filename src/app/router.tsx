@@ -4,6 +4,9 @@ import type { ReactNode } from 'react';
 import { Navigate, Route } from 'react-router-dom';
 
 import { LoginPage } from '../features/auth/pages/LoginPage';
+import { ChecklistEditorPage } from '../features/checklists/pages/ChecklistEditorPage';
+import { ChecklistPage } from '../features/checklists/pages/ChecklistPage';
+import { GuestChecklistPage } from '../features/checklists/pages/GuestChecklistPage';
 import { GuestTripPage } from '../features/guest/pages/GuestTripPage';
 import { SettingsPage } from '../features/profile/pages/SettingsPage';
 import { CreateTripPage } from '../features/trips/pages/CreateTripPage';
@@ -54,6 +57,34 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         }
       />
       <Route path={ROUTE_PATHS.guest} element={<GuestTripPage />} />
+      <Route
+        path={ROUTE_PATHS.guestChecklist}
+        element={<GuestChecklistPage />}
+      />
+      <Route
+        path={ROUTE_PATHS.newNodeChecklist}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ChecklistEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTE_PATHS.editTripChecklist}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ChecklistEditorPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTE_PATHS.tripChecklist}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <ChecklistPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path={ROUTE_PATHS.home}
         element={

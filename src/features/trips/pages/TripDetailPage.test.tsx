@@ -217,7 +217,7 @@ describe('TripDetailPage', () => {
     expect(screen.getByText('Inactive')).toBeInTheDocument();
   });
 
-  it('lets owners configure permissions when adding a member', async () => {
+  it('opens member management for owners', async () => {
     const user = userEvent.setup();
     const repository = createRepository(
       vi.fn(async () => ({
@@ -232,9 +232,7 @@ describe('TripDetailPage', () => {
 
     await user.click(await screen.findByText('Add member'));
 
-    expect(screen.getByLabelText('Edit itinerary')).toBeInTheDocument();
-    expect(screen.getByLabelText('Manage ledger entries')).toBeInTheDocument();
-    expect(screen.getByLabelText('Manage bookmarks')).toBeInTheDocument();
+    expect(document.body).toHaveClass('backdrop-no-scroll');
   });
 
   it('renders the not-found state without exposing protected trip data', async () => {

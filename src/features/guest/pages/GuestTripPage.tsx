@@ -311,6 +311,7 @@ export function GuestTripPage() {
             ) : section === 'itinerary' ? (
               <ItineraryPanel
                 canEdit={false}
+                checklistHref={routes.guestChecklist}
                 repository={itineraryRepository}
                 trip={trip}
               />

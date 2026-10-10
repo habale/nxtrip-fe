@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
+import { routes } from '../../../app/routes';
 import {
   Button,
   FilePicker,
@@ -94,6 +96,7 @@ export function ItineraryNodeEditor({
   onIconPickerOpenChange,
 }: ItineraryNodeEditorProps) {
   const { t } = useTranslation('common');
+  const navigate = useNavigate();
   const createNode = useCreateItineraryNode(repository);
   const updateNode = useUpdateItineraryNode(repository);
   const addAttachment = useAddItineraryNodeAttachment(repository);
@@ -403,6 +406,18 @@ export function ItineraryNodeEditor({
               setFiles((current) => [...current, ...selected])
             }
           />
+          {node && (
+            <Button
+              disabled={busy}
+              variant="quiet"
+              onClick={() =>
+                navigate(routes.newNodeChecklist(trip.id, node.id))
+              }
+            >
+              <Icon name="checklist" />
+              {t('checklists.add')}
+            </Button>
+          )}
           <Button
             disabled={busy}
             variant="quiet"
