@@ -34,6 +34,7 @@ import {
   normalizeGuestCode,
   saveGuestCode,
 } from '../guest-session';
+import { GuestContactsCard } from '../components/GuestContactsCard';
 
 import './guest.css';
 import '../../trips/pages/trip-detail.css';
@@ -307,7 +308,10 @@ export function GuestTripPage() {
               </p>
             )}
             {section === 'info' ? (
-              <TripInfoPanel detail={detail} locale={locale} />
+              <>
+                <TripInfoPanel detail={detail} locale={locale} />
+                <GuestContactsCard contacts={guestTrip?.contacts ?? []} />
+              </>
             ) : section === 'itinerary' ? (
               <ItineraryPanel
                 canEdit={false}

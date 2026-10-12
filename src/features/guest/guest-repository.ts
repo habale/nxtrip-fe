@@ -27,6 +27,14 @@ export type GuestTrip = {
   cover_thumbnail_path: string | null;
   coverImageUrl: string | null;
   coverThumbnailUrl: string | null;
+  contacts: GuestContact[];
+};
+
+export type GuestContact = {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
 };
 
 export type GuestItineraryNode = {
@@ -180,6 +188,15 @@ function mapTrip(value: Json): GuestTrip {
     cover_thumbnail_path: nullableString(row.cover_thumbnail_path),
     coverImageUrl: null,
     coverThumbnailUrl: null,
+    contacts: (Array.isArray(row.contacts) ? row.contacts : []).map((value) => {
+      const contact = requireRecord(value, 'guest trip contact');
+      return {
+        id: requireString(contact.id, 'contact id'),
+        name: requireString(contact.name, 'contact name'),
+        phone: nullableString(contact.phone),
+        email: nullableString(contact.email),
+      };
+    }),
   };
 }
 
