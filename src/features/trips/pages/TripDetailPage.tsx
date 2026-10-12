@@ -13,6 +13,7 @@ import type { LedgerRepository } from '../../ledger/ledger-repository';
 import { TripInfoPanel } from '../components/TripInfoPanel';
 import { TripMembersPanel } from '../components/TripMembersPanel';
 import { TripInvitePanel } from '../components/TripInvitePanel';
+import { TripContactsCard } from '../components/TripContactsCard';
 import { formatTripDateRange } from '../trip-date';
 import { tripKeys, useTripDetail } from '../trip-hooks';
 import { hasTripPermission } from '../trip-permissions';
@@ -197,6 +198,10 @@ export function TripDetailPage({
             {section === 'info' ? (
               <>
                 <TripInfoPanel detail={detail} locale={locale} />
+                <TripContactsCard
+                  canEdit={detail.role === 'owner'}
+                  tripId={trip.id}
+                />
                 {detail.role === 'owner' && (
                   <TripInvitePanel
                     repository={repository}

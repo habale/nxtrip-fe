@@ -92,6 +92,17 @@ type TripInviteRow = {
   updated_at: string;
   version: number;
 };
+type TripContactRow = {
+  id: string;
+  trip_id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
 type ItineraryNodeRow = {
   id: string;
   trip_id: string;
@@ -353,6 +364,7 @@ export type Database = {
         'trip_id' | 'user_id'
       >;
       trip_invites: DatabaseTable<TripInviteRow, 'trip_id'>;
+      trip_contacts: DatabaseTable<TripContactRow, 'trip_id' | 'name'>;
       itinerary_nodes: DatabaseTable<
         ItineraryNodeRow,
         'trip_id' | 'node_type' | 'sort_key'
@@ -578,6 +590,10 @@ export type Database = {
           p_treasurer_member_id: string | null;
           p_request_id?: string;
         };
+        Returns: undefined;
+      };
+      replace_trip_contacts: {
+        Args: { p_trip_id: string; p_contacts: Json };
         Returns: undefined;
       };
       save_expense: {

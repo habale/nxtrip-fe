@@ -389,6 +389,25 @@
     "progressDay": "Day {{current}} of {{total}}",
     "saving": "Saving…"
   },
+  "tripContacts": {
+    "title": "Contacts",
+    "edit": "Edit contact details",
+    "editTitle": "Edit contacts",
+    "editDescription": "Add the people and services travelers may need to reach during this trip.",
+    "empty": "No contact details have been added.",
+    "emptyOwner": "Add a contact so travelers can quickly call or email them.",
+    "loadError": "We couldn’t load contact details.",
+    "call": "Call {{name}}",
+    "emailContact": "Email {{name}}",
+    "contactNumber": "Contact {{count}}",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "add": "Add contact",
+    "remove": "Remove contact {{name}}",
+    "nameRequired": "Enter a contact name.",
+    "emailInvalid": "Enter a valid email address."
+  },
   "tripInvite": {
     "sharedAccessTitle": "Share trip",
     "sharedAccessDescription": "Create an invitation link then send it to your friends.",

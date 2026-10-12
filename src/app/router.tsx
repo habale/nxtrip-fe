@@ -13,6 +13,7 @@ import { CreateTripPage } from '../features/trips/pages/CreateTripPage';
 import { AddTripPage } from '../features/trips/pages/AddTripPage';
 import { HomePage } from '../features/trips/pages/HomePage';
 import { TripDetailPage } from '../features/trips/pages/TripDetailPage';
+import { EditTripContactsPage } from '../features/trips/pages/EditTripContactsPage';
 import { UiShowcasePage } from '../features/ui-showcase/pages/UiShowcasePage';
 import { ROUTE_PATHS } from './routes';
 import { NotFoundPage, PlaceholderPage } from './shell/PlaceholderPage';
@@ -114,6 +115,14 @@ export function AppRoutes({ isAuthenticated }: RouterProps) {
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <CreateTripPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTE_PATHS.editTripContacts}
+        element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <EditTripContactsPage />
           </ProtectedRoute>
         }
       />

@@ -125,6 +125,94 @@
   padding: 1.25rem 1rem max(3rem, env(safe-area-inset-bottom));
 }
 
+.trip-contacts-card {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.5rem, 6vw, 2.5rem);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.trip-contacts-card__heading,
+.trip-contact-row,
+.trip-contact-row__actions {
+  display: flex;
+  align-items: center;
+}
+
+.trip-contacts-card__heading,
+.trip-contact-row {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.trip-contacts-card__heading h2,
+.trip-contacts-card__heading p,
+.trip-contacts-card__empty {
+  margin: 0;
+}
+
+.trip-contacts-card__heading p {
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trip-contacts-card__heading h2 {
+  margin-top: 0.2rem;
+  font-size: 1.25rem;
+}
+
+.trip-contacts-card__list,
+.trip-contacts-card__loading {
+  display: grid;
+}
+
+.trip-contact-row {
+  min-height: 3.5rem;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.trip-contact-row__name {
+  min-width: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.trip-contact-row__actions {
+  flex: 0 0 auto;
+  gap: 0.25rem;
+}
+
+.trip-contact-row__action,
+.trip-contacts-card__heading > .ui-button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  --padding-start: 0.5rem;
+  --padding-end: 0.5rem;
+}
+
+.trip-contact-row__action {
+  display: grid;
+  border-radius: 999px;
+  color: var(--color-primary);
+  place-items: center;
+  text-decoration: none;
+}
+
+.trip-contact-row__action:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.trip-contacts-card__empty {
+  color: var(--color-ink-muted);
+}
+
 .trip-invite-panel {
   display: grid;
   gap: 1rem;

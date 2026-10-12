@@ -386,6 +386,25 @@
     "progressDay": "Ngày {{current}} / {{total}}",
     "saving": "Đang lưu…"
   },
+  "tripContacts": {
+    "title": "Liên hệ",
+    "edit": "Chỉnh sửa thông tin liên hệ",
+    "editTitle": "Chỉnh sửa liên hệ",
+    "editDescription": "Thêm người hoặc dịch vụ mà thành viên có thể cần liên hệ trong chuyến đi.",
+    "empty": "Chưa có thông tin liên hệ.",
+    "emptyOwner": "Thêm liên hệ để thành viên có thể gọi điện hoặc gửi email nhanh chóng.",
+    "loadError": "Không thể tải thông tin liên hệ.",
+    "call": "Gọi {{name}}",
+    "emailContact": "Gửi email cho {{name}}",
+    "contactNumber": "Liên hệ {{count}}",
+    "name": "Tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "add": "Thêm liên hệ",
+    "remove": "Xóa liên hệ {{name}}",
+    "nameRequired": "Nhập tên liên hệ.",
+    "emailInvalid": "Nhập địa chỉ email hợp lệ."
+  },
   "tripInvite": {
     "sharedAccessTitle": "Chia sẻ chuyến đi",
     "sharedAccessDescription": "Tạo một đường dẫn và gửi cho bạn bè để thêm bạn đồng hành của chuyến đi.",

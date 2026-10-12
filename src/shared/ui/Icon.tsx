@@ -23,11 +23,13 @@ export type IconName =
   | 'home'
   | 'hotel'
   | 'link'
+  | 'mail'
   | 'location'
   | 'menu'
   | 'misc'
   | 'more'
   | 'person'
+  | 'phone'
   | 'paste'
   | 'previous'
   | 'refresh'
@@ -80,11 +82,13 @@ const materialSymbolByName: Record<IconName, string> = {
   home: 'home',
   hotel: 'hotel',
   link: 'link',
+  mail: 'mail',
   location: 'location_on',
   menu: 'menu',
   misc: 'category',
   more: 'more_horiz',
   person: 'person',
+  phone: 'call',
   paste: 'content_paste',
   previous: 'chevron_left',
   refresh: 'refresh',

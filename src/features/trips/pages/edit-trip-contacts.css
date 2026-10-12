@@ -1,0 +1,68 @@
+.edit-contacts-page {
+  min-height: 100%;
+  padding: 1.5rem 1rem max(3rem, env(safe-area-inset-bottom));
+  background: var(--color-canvas);
+}
+
+.edit-contacts-header {
+  display: grid;
+  width: 100%;
+  min-height: 5rem;
+  grid-template-columns: 3.5rem 1fr;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.edit-contacts-header h1,
+.edit-contacts-header p,
+.edit-contacts-intro h2,
+.edit-contacts-intro p,
+.edit-contact-card h3,
+.edit-contacts-error {
+  margin: 0;
+}
+
+.edit-contacts-header h1 {
+  font-size: 1.4rem;
+}
+.edit-contacts-header p,
+.edit-contacts-intro p {
+  color: var(--color-ink-muted);
+}
+
+.edit-contacts-form {
+  display: grid;
+  width: min(100%, 46rem);
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.edit-contacts-intro,
+.edit-contact-card {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.edit-contact-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.edit-contacts-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 0.75rem;
+}
+
+.edit-contacts-actions .ui-button {
+  min-height: 3.5rem;
+}
+.edit-contacts-error {
+  color: var(--color-negative);
+}
