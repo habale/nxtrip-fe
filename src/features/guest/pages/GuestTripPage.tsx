@@ -248,14 +248,6 @@ export function GuestTripPage() {
       padded={false}
       secondaryToolbarClassName="trip-detail-nav-toolbar"
       headerContent={
-        <div className="guest-header">
-          <span className="guest-wordmark">NxTrip</span>
-          <Button size="small" variant="quiet" onClick={exitGuestView}>
-            {t('guest.exit')}
-          </Button>
-        </div>
-      }
-      secondaryHeaderContent={
         <nav className="guest-tabs" aria-label={t('guest.navigation')}>
           {(['info', 'itinerary', 'ledger', 'bookmarks'] as const).map(
             (item) => (
