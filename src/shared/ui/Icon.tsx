@@ -18,6 +18,7 @@ export type IconName =
   | 'directions'
   | 'edit'
   | 'ferry'
+  | 'filter'
   | 'flight'
   | 'forward'
   | 'home'
@@ -77,6 +78,7 @@ const materialSymbolByName: Record<IconName, string> = {
   directions: 'near_me',
   edit: 'edit',
   ferry: 'directions_boat',
+  filter: 'filter_alt',
   flight: 'flight',
   forward: 'chevron_right',
   home: 'home',

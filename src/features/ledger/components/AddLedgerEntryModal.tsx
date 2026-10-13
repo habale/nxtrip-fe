@@ -99,6 +99,7 @@ export function AddLedgerEntryModal({
   const [total, setTotal] = useState('');
   const [splitMode, setSplitMode] = useState<LedgerSplitMode>('equal');
   const [memberSearch, setMemberSearch] = useState('');
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
   const [direction, setDirection] = useState<
@@ -175,9 +176,10 @@ export function AddLedgerEntryModal({
   );
   const normalizedMemberSearch = memberSearch.trim().toLocaleLowerCase();
   const visibleMembers = sortedMembers.filter(
-    ({ display_name }) =>
-      !normalizedMemberSearch ||
-      display_name.toLocaleLowerCase().includes(normalizedMemberSearch),
+    ({ id, display_name }) =>
+      (!showSelectedOnly || selectedIds.includes(id)) &&
+      (!normalizedMemberSearch ||
+        display_name.toLocaleLowerCase().includes(normalizedMemberSearch)),
   );
   const allVisibleMembersSelected =
     visibleMembers.length > 0 &&
@@ -249,6 +251,7 @@ export function AddLedgerEntryModal({
     setTotal('');
     setSplitMode('equal');
     setMemberSearch('');
+    setShowSelectedOnly(false);
     setSelectedIds([]);
     setValues({});
     setDirection('total-to-split');
@@ -559,6 +562,22 @@ export function AddLedgerEntryModal({
                   disabled={isPending}
                   onValueChange={setMemberSearch}
                 />
+                <Button
+                  type="button"
+                  variant="filter"
+                  selected={showSelectedOnly}
+                  disabled={isPending}
+                  ariaLabel={t(
+                    showSelectedOnly
+                      ? 'ledger.modal.showAllMembers'
+                      : 'ledger.modal.showSelectedMembers',
+                    { count: selectedIds.length },
+                  )}
+                  onClick={() => setShowSelectedOnly((current) => !current)}
+                >
+                  <Icon name="filter" />
+                  <span>{selectedIds.length}</span>
+                </Button>
               </div>
 
               <div className="ledger-split-members">

@@ -269,6 +269,8 @@
       "includeMember": "Include {{name}}",
       "searchMembers": "Search members",
       "searchMembersPlaceholder": "Search members…",
+      "showSelectedMembers": "Show {{count}} selected members",
+      "showAllMembers": "Show all members",
       "noMemberResults": "No members match your search.",
       "selectAll": "Select all",
       "deselectAll": "Deselect all",

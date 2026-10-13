@@ -744,7 +744,7 @@
 
 .ledger-split-members__toolbar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.65rem;
 }
@@ -752,6 +752,17 @@
 .ledger-split-members__toolbar .ui-search {
   min-height: 2.75rem;
   padding: 0;
+}
+
+.ledger-split-members__toolbar .ui-button {
+  min-width: 3rem;
+  min-height: 2rem;
+  margin: 0;
+  --border-radius: 16px;
+  --padding-end: 0.5rem;
+  --padding-start: 0.3rem;
+  --padding-top: 0.15rem;
+  --padding-bottom: 0.15rem;
 }
 
 .ledger-split-members__empty {
