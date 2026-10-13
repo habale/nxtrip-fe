@@ -28,8 +28,12 @@ export type TripListItem = {
   coverThumbnailUrl: string | null;
 };
 
+export type TripCurrency =
+  Database['public']['Tables']['trip_currencies']['Row'];
+
 export type TripDetail = {
   trip: Trip;
+  currencies: TripCurrency[];
   role: Database['public']['Enums']['access_role'];
   permissions: TripPermission[];
   coverImageUrl: string | null;
@@ -52,6 +56,11 @@ export type CreateTripInput = {
   timezone: string;
   defaultCurrency: string;
   currencyDecimalPlaces: number;
+  currencies?: Array<{
+    currency: string;
+    decimalPlaces: number;
+    rateToPrimary: number;
+  }>;
   createdBy: string;
 };
 
@@ -190,6 +199,28 @@ export function mapUpdateTripInput(input: UpdateTripInput) {
   void _createdBy;
   void _currencyDecimalPlaces;
   return metadata;
+}
+
+function mapTripCurrencies(
+  input: Pick<
+    CreateTripInput,
+    'currencies' | 'defaultCurrency' | 'currencyDecimalPlaces'
+  >,
+) {
+  const currencies = input.currencies ?? [
+    {
+      currency: input.defaultCurrency,
+      decimalPlaces: input.currencyDecimalPlaces,
+      rateToPrimary: 1,
+    },
+  ];
+  return currencies.map((currency, index) => ({
+    currency: currency.currency.toUpperCase(),
+    decimal_places: currency.decimalPlaces,
+    rate_to_primary: index === 0 ? 1 : currency.rateToPrimary,
+    is_primary: index === 0,
+    sort_order: index,
+  }));
 }
 
 export function createTripRepository(): TripRepository {
@@ -429,15 +460,21 @@ export function createTripRepository(): TripRepository {
             .maybeSingle()
         : Promise.resolve({ data: null, error: null });
 
-      const [{ data, error }, permissionsResult] = await Promise.all([
-        client
-          .from('trips')
-          .select('*')
-          .eq('id', tripId)
-          .is('deleted_at', null)
-          .maybeSingle(),
-        permissionsPromise,
-      ]);
+      const [{ data, error }, permissionsResult, currenciesResult] =
+        await Promise.all([
+          client
+            .from('trips')
+            .select('*')
+            .eq('id', tripId)
+            .is('deleted_at', null)
+            .maybeSingle(),
+          permissionsPromise,
+          client
+            .from('trip_currencies')
+            .select('*')
+            .eq('trip_id', tripId)
+            .order('sort_order', { ascending: true }),
+        ]);
 
       if (error) {
         if (error.code === '42501') throw new AppError('TRIP_ACCESS_DENIED');
@@ -446,6 +483,9 @@ export function createTripRepository(): TripRepository {
       if (!data) throw new AppError('TRIP_NOT_FOUND');
       if (permissionsResult.error) {
         throw mapSupabaseError(permissionsResult.error);
+      }
+      if (currenciesResult.error) {
+        throw mapSupabaseError(currenciesResult.error);
       }
 
       const coverPaths = [
@@ -468,6 +508,21 @@ export function createTripRepository(): TripRepository {
 
       return {
         trip: data,
+        currencies:
+          currenciesResult.data.length > 0
+            ? currenciesResult.data
+            : [
+                {
+                  trip_id: data.id,
+                  currency: data.default_currency,
+                  decimal_places: data.currency_decimal_places,
+                  rate_to_primary: 1,
+                  is_primary: true,
+                  sort_order: 0,
+                  created_at: data.created_at,
+                  updated_at: data.updated_at,
+                },
+              ],
         role: membership.role,
         permissions:
           membership.role === 'member'
@@ -498,6 +553,15 @@ export function createTripRepository(): TripRepository {
         throw mapSupabaseError(error);
       }
       if (!data) throw new AppError('UNKNOWN');
+
+      const { error: currenciesError } = await client.rpc(
+        'replace_trip_currencies',
+        {
+          p_trip_id: input.tripId,
+          p_currencies: mapTripCurrencies(input),
+        },
+      );
+      if (currenciesError) throw mapSupabaseError(currenciesError);
 
       return data;
     },
@@ -595,6 +659,14 @@ export function createTripRepository(): TripRepository {
         .insert({ id: tripId, ...mapCreateTripInput(input) });
 
       if (error) throw mapSupabaseError(error);
+      const { error: currenciesError } = await client.rpc(
+        'replace_trip_currencies',
+        {
+          p_trip_id: tripId,
+          p_currencies: mapTripCurrencies(input),
+        },
+      );
+      if (currenciesError) throw mapSupabaseError(currenciesError);
       return tripId;
     },
 

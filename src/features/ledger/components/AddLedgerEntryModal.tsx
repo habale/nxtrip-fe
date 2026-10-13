@@ -96,6 +96,7 @@ export function AddLedgerEntryModal({
   const [category, setCategory] = useState('misc');
   const [payerId, setPayerId] = useState('');
   const [receiverId, setReceiverId] = useState('');
+  const [currency, setCurrency] = useState(trip.default_currency);
   const [total, setTotal] = useState('');
   const [splitMode, setSplitMode] = useState<LedgerSplitMode>('equal');
   const [memberSearch, setMemberSearch] = useState('');
@@ -105,9 +106,24 @@ export function AddLedgerEntryModal({
   const [direction, setDirection] = useState<
     'total-to-split' | 'split-to-total'
   >('total-to-split');
-  const decimalPlaces = trip.currency_decimal_places;
+  const configuredCurrencies = data.currencies.length
+    ? data.currencies
+    : [
+        {
+          currency: trip.default_currency,
+          decimal_places: trip.currency_decimal_places,
+          rate_to_primary: 1,
+          is_primary: true,
+          sort_order: 0,
+        },
+      ];
+  const currencyConfig = configuredCurrencies.find(
+    (item) => item.currency === currency,
+  );
+  const decimalPlaces =
+    currencyConfig?.decimal_places ?? trip.currency_decimal_places;
   const currencySymbol = getCurrencySymbol(
-    trip.default_currency,
+    currency,
     i18n.resolvedLanguage ?? i18n.language,
   );
   const locale = i18n.resolvedLanguage ?? i18n.language;
@@ -121,30 +137,39 @@ export function AddLedgerEntryModal({
       setDate(editTransfer.transfer.occurred_at.slice(0, 10));
       setPayerId(editTransfer.fromMember.id);
       setReceiverId(editTransfer.toMember.id);
+      setCurrency(trip.default_currency);
       setTotal(
-        formatAmountInput(editTransfer.transfer.amount_minor, decimalPlaces),
+        formatAmountInput(
+          editTransfer.transfer.amount_minor,
+          trip.currency_decimal_places,
+        ),
       );
     } else if (editExpense) {
       const expense = editExpense.expense;
+      const expenseDecimalPlaces =
+        data.currencies.find((item) => item.currency === expense.currency)
+          ?.decimal_places ?? trip.currency_decimal_places;
       const categoryMatch = expense.note?.match(/^Category: ([a-z]+)$/i)?.[1];
       setType('expense');
       setDate(expense.occurred_at.slice(0, 10));
       setTitle(expense.title);
       setCategory(categoryMatch ?? 'misc');
       setPayerId(expense.paid_by_member_id ?? defaultPayerId);
-      setTotal(formatAmountInput(expense.amount_minor, decimalPlaces));
+      setCurrency(expense.currency);
+      setTotal(formatAmountInput(expense.amount_minor, expenseDecimalPlaces));
       setSplitMode(expense.split_method === 'equal' ? 'equal' : 'amount');
       setSelectedIds(editExpense.shares.map(({ member }) => member.id));
       setValues(
         Object.fromEntries(
           editExpense.shares.map(({ member, amountMinor }) => [
             member.id,
-            formatAmountInput(amountMinor, decimalPlaces),
+            formatAmountInput(amountMinor, expenseDecimalPlaces),
           ]),
         ),
       );
       setDirection('total-to-split');
     } else {
+      setCurrency(trip.default_currency);
       setPayerId((current) => current || defaultPayerId);
     }
     if (!editTransfer) {
@@ -163,12 +188,14 @@ export function AddLedgerEntryModal({
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     data.currentMemberId,
+    data.currencies,
     data.members,
     data.treasurerMemberId,
-    decimalPlaces,
     editExpense,
     editTransfer,
     open,
+    trip.currency_decimal_places,
+    trip.default_currency,
   ]);
 
   const activeMembers = sortedMembers.filter(({ id }) =>
@@ -248,6 +275,7 @@ export function AddLedgerEntryModal({
     setCategory('misc');
     setPayerId('');
     setReceiverId('');
+    setCurrency(trip.default_currency);
     setTotal('');
     setSplitMode('equal');
     setMemberSearch('');
@@ -281,7 +309,7 @@ export function AddLedgerEntryModal({
         category,
         occurredAt,
         amountMinor: totalMinor,
-        currency: trip.default_currency,
+        currency,
         paidByMemberId: payerId,
         splitMode,
         shares: computedShares,
@@ -451,6 +479,22 @@ export function AddLedgerEntryModal({
               ? t('ledger.modal.totalAndSplit')
               : t('ledger.modal.amount')}
           </legend>
+          {type === 'expense' && (
+            <Select
+              label={t('ledger.modal.currency')}
+              value={currency}
+              disabled={isPending}
+              options={configuredCurrencies.map((item) => ({
+                value: item.currency,
+                label: item.currency,
+              }))}
+              onValueChange={(value) => {
+                setCurrency(String(value));
+                setTotal('');
+                setValues({});
+              }}
+            />
+          )}
           <AmountInput
             label={t('ledger.modal.totalCurrency', {
               currency: currencySymbol,
@@ -615,7 +659,7 @@ export function AddLedgerEntryModal({
                         <strong>
                           {formatMoney(
                             computed?.amountMinor ?? 0,
-                            trip.default_currency,
+                            currency,
                             locale,
                             decimalPlaces,
                           )}

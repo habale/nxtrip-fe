@@ -129,6 +129,13 @@
     "currencyDecimalPlaces": "Số chữ số thập phân",
     "currencyDecimalPlacesHelp": "Chọn từ 0 đến 4 chữ số thập phân. Không thể thay đổi sau này.",
     "currencyDecimalPlacesLocked": "Không thể thay đổi số chữ số thập phân sau khi tạo chuyến đi.",
+    "currenciesTitle": "Tiền tệ chuyến đi",
+    "currenciesDescription": "Tiền tệ đầu tiên là tiền tệ chính. Tỷ giá quy đổi một đơn vị tiền tệ bổ sung sang tiền tệ chính.",
+    "primaryCurrency": "Tiền tệ chính",
+    "additionalCurrency": "Tiền tệ bổ sung",
+    "exchangeRate": "1 {{currency}} bằng bao nhiêu {{primary}}?",
+    "addCurrency": "Thêm tiền tệ",
+    "removeCurrency": "Xóa {{currency}}",
     "submit": "Tạo chuyến đi",
     "creating": "Đang tạo chuyến đi…",
     "validation": {
@@ -137,7 +144,8 @@
       "endBeforeStart": "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.",
       "invalidTimezone": "Nhập múi giờ IANA hợp lệ.",
       "invalidCurrency": "Nhập mã tiền tệ gồm ba chữ cái hợp lệ.",
-      "invalidDecimalPlaces": "Chọn một số nguyên từ 0 đến 4."
+      "invalidDecimalPlaces": "Chọn một số nguyên từ 0 đến 4.",
+      "invalidCurrencies": "Thiết lập từ một đến ba loại tiền tệ riêng biệt với tỷ giá hợp lệ."
     }
   },
   "tripDetail": {
@@ -206,6 +214,7 @@
     "splitEqually_one": "Chia đều cho {{count}} người",
     "splitEqually_other": "Chia đều cho {{count}} người",
     "customSplit": "Chia tùy chỉnh",
+    "convertedAmount": "≈ {{amount}}",
     "each": "{{amount}} / người",
     "peopleJoined_one": "{{count}} người tham gia",
     "peopleJoined_other": "{{count}} người tham gia",
@@ -256,6 +265,7 @@
       "member": "Thành viên",
       "totalAndSplit": "Tổng và phân chia",
       "amount": "Số tiền",
+      "currency": "Tiền tệ",
       "useSuggestedAmount": "Dùng {{amount}}",
       "totalCurrency": "Tổng ({{currency}})",
       "calculateFromMembers": "Tính tổng từ số tiền của thành viên",

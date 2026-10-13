@@ -76,6 +76,18 @@ export function GuestTripPage() {
       trip
         ? {
             trip,
+            currencies: [
+              {
+                trip_id: trip.id,
+                currency: trip.default_currency,
+                decimal_places: trip.currency_decimal_places,
+                rate_to_primary: 1,
+                is_primary: true,
+                sort_order: 0,
+                created_at: '',
+                updated_at: '',
+              },
+            ],
             role: 'viewer',
             permissions: [],
             coverImageUrl: guestTrip?.coverImageUrl ?? null,

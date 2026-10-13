@@ -293,6 +293,12 @@
   font-weight: 600;
 }
 
+.ledger-expense-amount small {
+  color: var(--color-ink-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
 .ledger-member-summary {
   display: grid;
   gap: 1.25rem;

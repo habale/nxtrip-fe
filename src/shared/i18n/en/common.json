@@ -130,6 +130,13 @@
     "currencyDecimalPlaces": "Currency decimal places",
     "currencyDecimalPlacesHelp": "Choose between 0 and 4 decimal places. This cannot be changed later.",
     "currencyDecimalPlacesLocked": "Decimal places cannot be changed after the trip is created.",
+    "currenciesTitle": "Trip currencies",
+    "currenciesDescription": "The first currency is primary. Exchange rates convert one unit of each additional currency into the primary currency.",
+    "primaryCurrency": "Primary currency",
+    "additionalCurrency": "Additional currency",
+    "exchangeRate": "1 {{currency}} equals how many {{primary}}?",
+    "addCurrency": "Add currency",
+    "removeCurrency": "Remove {{currency}}",
     "submit": "Create trip",
     "creating": "Creating trip…",
     "validation": {
@@ -138,7 +145,8 @@
       "endBeforeStart": "End date must be on or after the start date.",
       "invalidTimezone": "Enter a valid IANA timezone.",
       "invalidCurrency": "Enter a valid three-letter currency code.",
-      "invalidDecimalPlaces": "Choose a whole number from 0 to 4."
+      "invalidDecimalPlaces": "Choose a whole number from 0 to 4.",
+      "invalidCurrencies": "Configure one to three unique currencies with valid exchange rates."
     }
   },
   "tripDetail": {
@@ -207,6 +215,7 @@
     "splitEqually_one": "{{count}} split equally",
     "splitEqually_other": "{{count}} split equally",
     "customSplit": "Custom Split",
+    "convertedAmount": "≈ {{amount}}",
     "each": "{{amount}} / each",
     "peopleJoined_one": "{{count}} person joined",
     "peopleJoined_other": "{{count}} people joined",
@@ -257,6 +266,7 @@
       "member": "Member",
       "totalAndSplit": "Total & split",
       "amount": "Amount",
+      "currency": "Currency",
       "useSuggestedAmount": "Use {{amount}}",
       "totalCurrency": "Total ({{currency}})",
       "calculateFromMembers": "Calculate total from member amounts",

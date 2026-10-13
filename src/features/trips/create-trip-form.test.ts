@@ -8,6 +8,7 @@ const validValues = {
   timezone: 'Asia/Tokyo',
   defaultCurrency: 'JPY',
   currencyDecimalPlaces: 0,
+  currencies: [{ currency: 'JPY', decimalPlaces: 0, rateToPrimary: 1 }],
 };
 
 describe('create trip form validation', () => {
@@ -38,5 +39,29 @@ describe('create trip form validation', () => {
         endDate: '2026-10-03',
       }),
     ).toMatchObject({ endDate: 'endBeforeStart' });
+  });
+
+  it('accepts up to three unique currencies with primary-based rates', () => {
+    expect(
+      validateCreateTripForm({
+        ...validValues,
+        currencies: [
+          { currency: 'VND', decimalPlaces: 0, rateToPrimary: 1 },
+          { currency: 'THB', decimalPlaces: 2, rateToPrimary: 750 },
+        ],
+      }),
+    ).toEqual({});
+  });
+
+  it('rejects duplicate currencies and invalid exchange rates', () => {
+    expect(
+      validateCreateTripForm({
+        ...validValues,
+        currencies: [
+          { currency: 'VND', decimalPlaces: 0, rateToPrimary: 1 },
+          { currency: 'VND', decimalPlaces: 0, rateToPrimary: 0 },
+        ],
+      }),
+    ).toMatchObject({ currencies: 'invalidCurrencies' });
   });
 });

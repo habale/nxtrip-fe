@@ -115,6 +115,43 @@
   min-height: 3.5rem;
 }
 
+.create-trip-currencies {
+  gap: 1rem;
+}
+
+.create-trip-currency-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(6rem, 0.45fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.create-trip-currency-row > .ui-button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  margin: 0;
+  --padding-end: 0;
+  --padding-start: 0;
+}
+
+@media (max-width: 520px) {
+  .create-trip-currency-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .create-trip-currency-row > .ui-input {
+    grid-column: 1;
+  }
+
+  .create-trip-currency-row > .ui-button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
 @media (min-width: 700px) {
   .create-trip-form {
     padding-top: 2.5rem;

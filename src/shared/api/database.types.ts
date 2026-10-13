@@ -49,6 +49,16 @@ type TripRow = {
   version: number;
   deleted_at: string | null;
 };
+type TripCurrencyRow = {
+  trip_id: string;
+  currency: string;
+  decimal_places: number;
+  rate_to_primary: number;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
 type TripMemberRow = {
   id: string;
   trip_id: string;
@@ -236,6 +246,9 @@ type ExpenseRow = {
   note: string | null;
   amount_minor: number;
   currency: string;
+  primary_currency: string;
+  primary_amount_minor: number;
+  exchange_rate_to_primary: number;
   payment_source: Database['public']['Enums']['payment_source'];
   paid_by_member_id: string | null;
   paid_by_fund_id: string | null;
@@ -255,6 +268,7 @@ type ExpenseShareRow = {
   expense_id: string;
   member_id: string;
   amount_minor: number;
+  primary_amount_minor: number;
   created_at: string;
   updated_at: string;
 };
@@ -358,6 +372,15 @@ export type Database = {
     Tables: {
       profiles: DatabaseTable<ProfileRow, 'id' | 'display_name'>;
       trips: DatabaseTable<TripRow, 'name'>;
+      trip_currencies: DatabaseTable<
+        TripCurrencyRow,
+        | 'trip_id'
+        | 'currency'
+        | 'decimal_places'
+        | 'rate_to_primary'
+        | 'is_primary'
+        | 'sort_order'
+      >;
       trip_members: DatabaseTable<TripMemberRow, 'trip_id' | 'display_name'>;
       trip_access_memberships: DatabaseTable<
         TripAccessMembershipRow,
@@ -594,6 +617,10 @@ export type Database = {
       };
       replace_trip_contacts: {
         Args: { p_trip_id: string; p_contacts: Json };
+        Returns: undefined;
+      };
+      replace_trip_currencies: {
+        Args: { p_trip_id: string; p_currencies: Json };
         Returns: undefined;
       };
       save_expense: {

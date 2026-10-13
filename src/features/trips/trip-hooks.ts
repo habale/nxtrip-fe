@@ -192,7 +192,10 @@ export function useUpdateTripMetadata(repository?: TripRepository) {
         tripKeys.detail(trip.id),
         (current) => (current ? { ...current, trip } : current),
       );
-      await queryClient.invalidateQueries({ queryKey: tripKeys.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: tripKeys.detail(trip.id) }),
+        queryClient.invalidateQueries({ queryKey: tripKeys.all }),
+      ]);
     },
   });
 }

@@ -34,12 +34,13 @@ export function TripInfoPanel({ detail, locale }: TripInfoPanelProps) {
         <TripStatusBadge status={status} />
         {role === 'owner' && (
           <Button
+            ariaLabel={t('tripInfo.edit')}
             href={routes.editTrip(trip.id)}
             navigationDirection="forward"
             size="small"
             variant="quiet"
           >
-            {t('tripInfo.edit')}
+            <Icon name="edit" />
           </Button>
         )}
       </div>

@@ -34,6 +34,19 @@ const trip: Trip = {
   deleted_at: null,
 };
 
+const currencies = [
+  {
+    trip_id: trip.id,
+    currency: 'THB',
+    decimal_places: 0,
+    rate_to_primary: 1,
+    is_primary: true,
+    sort_order: 0,
+    created_at: trip.created_at,
+    updated_at: trip.updated_at,
+  },
+];
+
 function createRepository(
   getAccessibleById: TripRepository['getAccessibleById'],
 ): TripRepository {
@@ -95,6 +108,7 @@ describe('TripDetailPage', () => {
     const repository = createRepository(
       vi.fn(async () => ({
         trip,
+        currencies,
         role: 'owner' as const,
         permissions: [],
         coverImageUrl: null,
@@ -129,6 +143,7 @@ describe('TripDetailPage', () => {
     const repository = createRepository(
       vi.fn(async () => ({
         trip,
+        currencies,
         role: 'member' as const,
         permissions: ['ledger.manage'] as TripPermission[],
         coverImageUrl: null,
@@ -148,6 +163,7 @@ describe('TripDetailPage', () => {
     const repository = createRepository(
       vi.fn(async () => ({
         trip,
+        currencies,
         role: 'owner' as const,
         permissions: [],
         coverImageUrl: null,
@@ -222,6 +238,7 @@ describe('TripDetailPage', () => {
     const repository = createRepository(
       vi.fn(async () => ({
         trip,
+        currencies,
         role: 'owner' as const,
         permissions: [],
         coverImageUrl: null,

@@ -25,7 +25,7 @@ import {
   useUpdateTripMetadata,
 } from '../trip-hooks';
 import { getCurrencyOptions, getTimezoneOptions } from '../trip-options';
-import type { Trip } from '../trip-repository';
+import type { TripDetail } from '../trip-repository';
 
 import './create-trip.css';
 
@@ -38,10 +38,12 @@ function getInitialValues(): CreateTripFormValues {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
     defaultCurrency: 'VND',
     currencyDecimalPlaces: 0,
+    currencies: [{ currency: 'VND', decimalPlaces: 0, rateToPrimary: 1 }],
   };
 }
 
-function getValuesFromTrip(trip: Trip): CreateTripFormValues {
+function getValuesFromTrip(detail: TripDetail): CreateTripFormValues {
+  const { trip } = detail;
   return {
     name: trip.name,
     description: trip.description ?? '',
@@ -50,6 +52,11 @@ function getValuesFromTrip(trip: Trip): CreateTripFormValues {
     timezone: trip.timezone,
     defaultCurrency: trip.default_currency,
     currencyDecimalPlaces: trip.currency_decimal_places,
+    currencies: detail.currencies.map((currency) => ({
+      currency: currency.currency,
+      decimalPlaces: currency.decimal_places,
+      rateToPrimary: currency.rate_to_primary,
+    })),
   };
 }
 
@@ -66,7 +73,9 @@ export function CreateTripPage() {
   );
   const [submitted, setSubmitted] = useState(false);
   const trip = tripQuery.data?.trip;
-  const initialValues = trip ? getValuesFromTrip(trip) : getInitialValues();
+  const initialValues = tripQuery.data
+    ? getValuesFromTrip(tripQuery.data)
+    : getInitialValues();
   const values = draftValues ?? initialValues;
   const errors = submitted ? validateCreateTripForm(values) : {};
   const mutation = editing ? updateTrip : createTrip;
@@ -122,6 +131,21 @@ export function CreateTripPage() {
   const errorText = (field: keyof CreateTripFormValues) => {
     const code = errors[field];
     return code ? t(`createTrip.validation.${code}`) : undefined;
+  };
+  const updateCurrency = (
+    index: number,
+    value: Partial<CreateTripFormValues['currencies'][number]>,
+  ) => {
+    const currencies = values.currencies.map((currency, currencyIndex) =>
+      currencyIndex === index ? { ...currency, ...value } : currency,
+    );
+    const primary = currencies[0];
+    setDraftValues((current) => ({
+      ...(current ?? initialValues),
+      currencies,
+      defaultCurrency: primary.currency,
+      currencyDecimalPlaces: primary.decimalPlaces,
+    }));
   };
 
   if (editing && tripQuery.isPending) {
@@ -207,38 +231,120 @@ export function CreateTripPage() {
               value={values.timezone}
               onValueChange={(value) => update('timezone', String(value))}
             />
-            <Select
-              required
-              disabled={editing}
-              errorText={errorText('defaultCurrency')}
-              helperText={editing ? t('createTrip.currencyLocked') : undefined}
-              label={t('createTrip.defaultCurrency')}
-              options={getCurrencyOptions(
-                values.defaultCurrency,
-                i18n.resolvedLanguage ?? i18n.language,
-              )}
-              value={values.defaultCurrency}
-              onValueChange={(value) =>
-                update('defaultCurrency', String(value).toUpperCase())
-              }
-            />
-            <TextInput
-              required
-              disabled={editing}
-              errorText={errorText('currencyDecimalPlaces')}
-              helperText={
-                editing
-                  ? t('createTrip.currencyDecimalPlacesLocked')
-                  : t('createTrip.currencyDecimalPlacesHelp')
-              }
-              inputMode="numeric"
-              label={t('createTrip.currencyDecimalPlaces')}
-              type="number"
-              value={String(values.currencyDecimalPlaces)}
-              onValueChange={(value) =>
-                update('currencyDecimalPlaces', Number(value))
-              }
-            />
+          </section>
+
+          <section className="create-trip-card create-trip-currencies">
+            <div className="create-trip-section-heading">
+              <h2>{t('createTrip.currenciesTitle')}</h2>
+              <p>{t('createTrip.currenciesDescription')}</p>
+            </div>
+            {values.currencies.map((currency, index) => (
+              <div className="create-trip-currency-row" key={index}>
+                <Select
+                  required
+                  disabled={editing && index === 0}
+                  label={t(
+                    index === 0
+                      ? 'createTrip.primaryCurrency'
+                      : 'createTrip.additionalCurrency',
+                  )}
+                  options={getCurrencyOptions(
+                    currency.currency,
+                    i18n.resolvedLanguage ?? i18n.language,
+                  ).filter(
+                    (option) =>
+                      option.value === currency.currency ||
+                      !values.currencies.some(
+                        (item) => item.currency === option.value,
+                      ),
+                  )}
+                  value={currency.currency}
+                  onValueChange={(value) =>
+                    updateCurrency(index, {
+                      currency: String(value).toUpperCase(),
+                    })
+                  }
+                />
+                <TextInput
+                  required
+                  disabled={editing && index === 0}
+                  inputMode="numeric"
+                  label={t('createTrip.currencyDecimalPlaces')}
+                  type="number"
+                  value={String(currency.decimalPlaces)}
+                  onValueChange={(value) =>
+                    updateCurrency(index, { decimalPlaces: Number(value) })
+                  }
+                />
+                {index > 0 && (
+                  <TextInput
+                    required
+                    inputMode="decimal"
+                    label={t('createTrip.exchangeRate', {
+                      currency: currency.currency,
+                      primary: values.currencies[0].currency,
+                    })}
+                    type="number"
+                    value={String(currency.rateToPrimary)}
+                    onValueChange={(value) =>
+                      updateCurrency(index, { rateToPrimary: Number(value) })
+                    }
+                  />
+                )}
+                {index > 0 && (
+                  <Button
+                    type="button"
+                    variant="danger-text"
+                    ariaLabel={t('createTrip.removeCurrency', {
+                      currency: currency.currency,
+                    })}
+                    onClick={() =>
+                      update(
+                        'currencies',
+                        values.currencies.filter(
+                          (_, currencyIndex) => currencyIndex !== index,
+                        ),
+                      )
+                    }
+                  >
+                    <Icon name="trash" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            {values.currencies.length < 3 && (
+              <Button
+                type="button"
+                variant="quiet"
+                onClick={() => {
+                  const nextCurrency = getCurrencyOptions(
+                    undefined,
+                    i18n.resolvedLanguage ?? i18n.language,
+                  ).find(
+                    (option) =>
+                      !values.currencies.some(
+                        ({ currency }) => currency === option.value,
+                      ),
+                  )?.value;
+                  if (!nextCurrency) return;
+                  update('currencies', [
+                    ...values.currencies,
+                    {
+                      currency: nextCurrency,
+                      decimalPlaces: 2,
+                      rateToPrimary: 1,
+                    },
+                  ]);
+                }}
+              >
+                <Icon name="add" /> {t('createTrip.addCurrency')}
+              </Button>
+            )}
+            {errorText('currencies') && (
+              <p className="create-trip-field-error">
+                {errorText('currencies')}
+              </p>
+            )}
           </section>
 
           {mutation.error && (

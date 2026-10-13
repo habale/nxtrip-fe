@@ -8,6 +8,7 @@ export type LedgerMember = Pick<
 export type LedgerShare = {
   member: LedgerMember;
   amountMinor: number;
+  primaryAmountMinor: number;
 };
 
 export type LedgerTransfer = {
@@ -36,6 +37,16 @@ export type LedgerData = {
   transfers: LedgerTransfer[];
   currentMemberId: string | null;
   treasurerMemberId: string | null;
+  currencies: Array<
+    Pick<
+      Database['public']['Tables']['trip_currencies']['Row'],
+      | 'currency'
+      | 'decimal_places'
+      | 'rate_to_primary'
+      | 'is_primary'
+      | 'sort_order'
+    >
+  >;
   funds: Array<
     Pick<
       Database['public']['Tables']['trip_funds']['Row'],

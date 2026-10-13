@@ -137,6 +137,8 @@ function ExpenseCard({
   expense,
   locale,
   decimalPlaces,
+  primaryCurrency,
+  primaryDecimalPlaces,
   canEdit,
   onEdit,
   onRemove,
@@ -144,6 +146,8 @@ function ExpenseCard({
   expense: LedgerExpense;
   locale: string;
   decimalPlaces: number;
+  primaryCurrency: string;
+  primaryDecimalPlaces: number;
   canEdit: boolean;
   onEdit: () => void;
   onRemove: () => void;
@@ -177,6 +181,19 @@ function ExpenseCard({
             decimalPlaces,
           )}
         </strong>
+        {expense.expense.currency !== primaryCurrency && (
+          <small>
+            {t('ledger.convertedAmount', {
+              amount: formatMoney(
+                expense.expense.primary_amount_minor ??
+                  expense.expense.amount_minor,
+                primaryCurrency,
+                locale,
+                primaryDecimalPlaces,
+              ),
+            })}
+          </small>
+        )}
         <span>
           {equalSplit && equalAmount !== undefined
             ? t('ledger.each', {
@@ -410,14 +427,20 @@ function calculateMemberSummary(
 ): MemberFinancialSummary {
   const paidMinor = data.expenses.reduce(
     (sum, item) =>
-      sum + (item.payer?.id === member.id ? item.expense.amount_minor : 0),
+      sum +
+      (item.payer?.id === member.id
+        ? (item.expense.primary_amount_minor ?? item.expense.amount_minor)
+        : 0),
     0,
   );
   const shareMinor = data.expenses.reduce(
     (sum, item) =>
       sum +
       (item.shares.find((share) => share.member.id === member.id)
-        ?.amountMinor ?? 0),
+        ?.primaryAmountMinor ??
+        item.shares.find((share) => share.member.id === member.id)
+          ?.amountMinor ??
+        0),
     0,
   );
   const depositMinor = data.contributions.reduce(
@@ -1195,7 +1218,12 @@ export function LedgerPanel({
                     expense={item.value}
                     memberId={selectedMember.id}
                     locale={locale}
-                    decimalPlaces={trip.currency_decimal_places}
+                    decimalPlaces={
+                      data?.currencies.find(
+                        ({ currency }) =>
+                          currency === item.value.expense.currency,
+                      )?.decimal_places ?? trip.currency_decimal_places
+                    }
                   />
                 ) : item.kind === 'contribution' ? (
                   <MemberContributionCard
@@ -1238,7 +1266,8 @@ export function LedgerPanel({
                         (sum, item) =>
                           sum +
                           (item.kind === 'expense'
-                            ? item.value.expense.amount_minor
+                            ? (item.value.expense.primary_amount_minor ??
+                              item.value.expense.amount_minor)
                             : 0),
                         0,
                       ),
@@ -1256,7 +1285,14 @@ export function LedgerPanel({
                   key={`expense:${item.value.expense.id}`}
                   expense={item.value}
                   locale={locale}
-                  decimalPlaces={trip.currency_decimal_places}
+                  decimalPlaces={
+                    data?.currencies.find(
+                      ({ currency }) =>
+                        currency === item.value.expense.currency,
+                    )?.decimal_places ?? trip.currency_decimal_places
+                  }
+                  primaryCurrency={trip.default_currency}
+                  primaryDecimalPlaces={trip.currency_decimal_places}
                   canEdit={canEdit}
                   onEdit={() => setEditingExpense(item.value)}
                   onRemove={() => setRemovingExpense(item.value)}

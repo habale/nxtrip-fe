@@ -32,6 +32,7 @@ export function createLedgerRepository(): LedgerRepository {
         contributionsResult,
         transfersResult,
         currentMembershipResult,
+        currenciesResult,
       ] = await Promise.all([
         client
           .from('trips')
@@ -74,6 +75,11 @@ export function createLedgerRepository(): LedgerRepository {
           .eq('user_id', authData.user.id)
           .eq('status', 'active')
           .maybeSingle(),
+        client
+          .from('trip_currencies')
+          .select('*')
+          .eq('trip_id', tripId)
+          .order('sort_order', { ascending: true }),
       ]);
 
       if (tripResult.error) throw mapSupabaseError(tripResult.error);
@@ -85,6 +91,8 @@ export function createLedgerRepository(): LedgerRepository {
       if (transfersResult.error) throw mapSupabaseError(transfersResult.error);
       if (currentMembershipResult.error)
         throw mapSupabaseError(currentMembershipResult.error);
+      if (currenciesResult.error)
+        throw mapSupabaseError(currenciesResult.error);
 
       const expenseIds = expensesResult.data.map(({ id }) => id);
       const nodeIds = expensesResult.data.flatMap(({ itinerary_node_id }) =>
@@ -127,6 +135,13 @@ export function createLedgerRepository(): LedgerRepository {
 
       return {
         members,
+        currencies: currenciesResult.data.map((currency) => ({
+          currency: currency.currency,
+          decimal_places: currency.decimal_places,
+          rate_to_primary: currency.rate_to_primary,
+          is_primary: currency.is_primary,
+          sort_order: currency.sort_order,
+        })),
         currentMemberId: currentMembershipResult.data?.trip_member_id ?? null,
         treasurerMemberId: tripResult.data.treasurer_member_id,
         transfers: transfersResult.data.flatMap((transfer) => {
@@ -158,7 +173,16 @@ export function createLedgerRepository(): LedgerRepository {
           shares: sharesResult.data.flatMap((share) => {
             if (share.expense_id !== expense.id) return [];
             const member = memberById.get(share.member_id);
-            return member ? [{ member, amountMinor: share.amount_minor }] : [];
+            return member
+              ? [
+                  {
+                    member,
+                    amountMinor: share.amount_minor,
+                    primaryAmountMinor:
+                      share.primary_amount_minor ?? share.amount_minor,
+                  },
+                ]
+              : [];
           }),
           attachmentCount: attachmentsResult.data.filter(
             (attachment) => attachment.expense_id === expense.id,
