@@ -300,6 +300,8 @@
     "emptyDayTitle": "Một ngày tự do",
     "emptyDayDescription": "Chưa có kế hoạch nào cho ngày này.",
     "endOfDay": "Kết thúc ngày",
+    "previousDay": "Ngày trước",
+    "nextDay": "Ngày tiếp theo",
     "loadErrorTitle": "Không thể tải lịch trình",
     "loadErrorDescription": "Không thể tải phần này của lịch trình.",
     "categories": {

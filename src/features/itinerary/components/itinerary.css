@@ -98,6 +98,7 @@
   justify-content: space-between;
   gap: 0.2rem;
   margin: 0 0.5rem;
+  scroll-margin-top: 1rem;
 }
 
 .itinerary-day-heading > div {
@@ -125,15 +126,39 @@
 
 .itinerary-end-of-day {
   display: grid;
-  grid-template-columns: minmax(1rem, 1fr) auto minmax(1rem, 1fr);
+  grid-template-columns: minmax(1rem, 1fr) auto auto auto minmax(1rem, 1fr);
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin: 0.4rem 0 0;
   color: var(--color-ink-muted);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.itinerary-end-of-day button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--color-primary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.itinerary-end-of-day button:disabled {
+  color: var(--color-ink-muted);
+  cursor: default;
+  opacity: 0.4;
+}
+
+.itinerary-end-of-day button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .itinerary-end-of-day::before,

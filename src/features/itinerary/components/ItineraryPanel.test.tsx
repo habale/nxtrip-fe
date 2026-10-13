@@ -125,7 +125,9 @@ describe('ItineraryPanel', () => {
     expect(screen.getByText('2 / 4 completed')).toBeInTheDocument();
     expect(screen.queryByText('Itinerary actions')).not.toBeInTheDocument();
     expect(document.querySelector('ion-reorder')).not.toBeInTheDocument();
-    expect(document.querySelector('.ui-icon-button')).not.toBeInTheDocument();
+    expect(
+      document.querySelector('.itinerary-node-context__menu'),
+    ).not.toBeInTheDocument();
   });
 
   it('renders stop and move nodes for a bounded selected day', async () => {
@@ -197,6 +199,8 @@ describe('ItineraryPanel', () => {
     );
     expect(screen.getByText('Airport transfer')).toBeInTheDocument();
     expect(screen.getByText('End of day')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Previous day' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next day' })).toBeEnabled();
     expect(screen.queryByText('Airport Rail Link')).toBeNull();
     expect(screen.queryByText('• 35 min')).toBeNull();
     expect(

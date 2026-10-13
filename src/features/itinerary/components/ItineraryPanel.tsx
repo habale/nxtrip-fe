@@ -38,6 +38,7 @@ import type {
 import type { NodeChecklistSummary } from '../../checklists/checklist-types';
 import { generateSortKeyBetween } from '../itinerary-sort-key';
 import {
+  addDays,
   getInitialItineraryWindow,
   getAdjacentItineraryWindows,
   getItineraryWindowForDate,
@@ -159,7 +160,9 @@ function ChecklistLinks({
         <li key={checklist.linkId}>
           <Link to={href(checklist.id)}>
             <Icon name="checklist" />
-            <span className="itinerary-node__checklists__title">{checklist.title}</span>
+            <span className="itinerary-node__checklists__title">
+              {checklist.title}
+            </span>
             <small>
               {t('checklists.progress', {
                 completed: checklist.completedCount,
@@ -367,6 +370,7 @@ export function ItineraryPanel({
   } | null>(null);
   const autoFocusStarted = useRef(false);
   const dayNavigation = useRef<HTMLDivElement>(null);
+  const dayHeading = useRef<HTMLElement>(null);
   const query = useItineraryWindow(window, repository);
   usePrefetchItineraryWindows(adjacentWindows, repository);
   const removeNode = useRemoveItineraryNode(repository);
@@ -411,6 +415,20 @@ export function ItineraryPanel({
     dateStyle: 'full',
     timeZone: 'UTC',
   });
+  const selectAdjacentDay = (offset: -1 | 1) => {
+    const nextDate = addDays(selectedDate, offset);
+    if (nextDate < tripBounds.startDate || nextDate > tripBounds.endDate) {
+      return;
+    }
+
+    setSelectedDate(nextDate);
+    requestAnimationFrame(() => {
+      dayHeading.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  };
 
   const goToNow = useCallback(() => {
     const now = new Date();
@@ -586,7 +604,7 @@ export function ItineraryPanel({
         </div>
       </div>
 
-      <header className="itinerary-day-heading">
+      <header ref={dayHeading} className="itinerary-day-heading">
         <div>
           <p>{t('itinerary.dayLabel', { day: tripDayNumber(selectedDate) })}</p>
           <h2>
@@ -766,7 +784,23 @@ export function ItineraryPanel({
 
           {selectedNodes.length > 0 && (
             <div className="itinerary-end-of-day" role="note">
+              <button
+                type="button"
+                aria-label={t('itinerary.previousDay')}
+                disabled={selectedDate === tripBounds.startDate}
+                onClick={() => selectAdjacentDay(-1)}
+              >
+                <Icon name="previous" />
+              </button>
               <span>{t('itinerary.endOfDay')}</span>
+              <button
+                type="button"
+                aria-label={t('itinerary.nextDay')}
+                disabled={selectedDate === tripBounds.endDate}
+                onClick={() => selectAdjacentDay(1)}
+              >
+                <Icon name="forward" />
+              </button>
             </div>
           )}
 
