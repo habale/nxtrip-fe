@@ -40,6 +40,7 @@ export type TextInputProps = {
   helperText?: string;
   errorText?: string;
   onValueChange?: (value: string) => void;
+  onFocus?: () => void;
   onBlur?: () => void;
 };
 
@@ -58,6 +59,7 @@ export function TextInput({
   helperText,
   errorText,
   onValueChange,
+  onFocus,
   onBlur,
 }: TextInputProps) {
   return (
@@ -81,6 +83,7 @@ export function TextInput({
       type={type}
       value={value}
       onIonBlur={onBlur}
+      onIonFocus={onFocus}
       onIonInput={(event) => onValueChange?.(event.detail.value ?? '')}
     />
   );

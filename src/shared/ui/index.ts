@@ -1,3 +1,4 @@
+export * from './AmountInput';
 export * from './Badge';
 export * from './Avatar';
 export * from './Button';

@@ -257,6 +257,7 @@
       "member": "Member",
       "totalAndSplit": "Total & split",
       "amount": "Amount",
+      "useSuggestedAmount": "Use {{amount}}",
       "totalCurrency": "Total ({{currency}})",
       "calculateFromMembers": "Calculate total from member amounts",
       "splitBetweenMembers": "Split total between members",

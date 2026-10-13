@@ -256,6 +256,7 @@
       "member": "Thành viên",
       "totalAndSplit": "Tổng và phân chia",
       "amount": "Số tiền",
+      "useSuggestedAmount": "Dùng {{amount}}",
       "totalCurrency": "Tổng ({{currency}})",
       "calculateFromMembers": "Tính tổng từ số tiền của thành viên",
       "splitBetweenMembers": "Chia tổng tiền giữa các thành viên",

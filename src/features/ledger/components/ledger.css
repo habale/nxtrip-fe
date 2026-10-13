@@ -785,6 +785,14 @@
   text-align: right;
 }
 
+.ledger-split-member > .ui-amount-input {
+  min-width: 5rem;
+}
+
+.ledger-split-member .ui-amount-input__suggestions {
+  max-width: 12rem;
+}
+
 .ledger-form-error {
   margin: 0;
   color: var(--color-negative);

@@ -351,6 +351,40 @@
   --highlight-color-focused: var(--color-primary);
 }
 
+.ui-amount-input {
+  min-width: 0;
+}
+
+.ui-amount-input__suggestions {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding: 0.45rem 0.1rem 0;
+  scrollbar-width: none;
+}
+
+.ui-amount-input__suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-amount-input__suggestions button {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-primary);
+  background: var(--color-soft);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ui-amount-input__suggestions button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .ui-segment {
   padding: 0.35rem;
   border-radius: var(--radius-pill);

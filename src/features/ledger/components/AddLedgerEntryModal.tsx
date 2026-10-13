@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AppError } from '../../../shared/api/app-error';
 import {
+  AmountInput,
   Avatar,
   Button,
   Checkbox,
@@ -445,16 +446,19 @@ export function AddLedgerEntryModal({
               ? t('ledger.modal.totalAndSplit')
               : t('ledger.modal.amount')}
           </legend>
-          <TextInput
+          <AmountInput
             label={t('ledger.modal.totalCurrency', {
               currency: currencySymbol,
             })}
-            type="number"
-            inputMode="decimal"
             value={displayedTotal}
+            decimalPlaces={decimalPlaces}
+            locale={locale}
             required
             disabled={derivesTotal || isPending}
             onValueChange={setTotal}
+            suggestionLabel={(amount) =>
+              t('ledger.modal.useSuggestedAmount', { amount })
+            }
           />
 
           {type === 'expense' && (
@@ -594,9 +598,9 @@ export function AddLedgerEntryModal({
                             decimalPlaces,
                           )}
                         </strong>
-                      ) : (
+                      ) : splitMode === 'percent' ? (
                         <TextInput
-                          label={splitMode === 'percent' ? '%' : currencySymbol}
+                          label="%"
                           type="number"
                           inputMode="decimal"
                           value={values[member.id] ?? ''}
@@ -606,6 +610,23 @@ export function AddLedgerEntryModal({
                               ...current,
                               [member.id]: value,
                             }))
+                          }
+                        />
+                      ) : (
+                        <AmountInput
+                          label={currencySymbol}
+                          value={values[member.id] ?? ''}
+                          decimalPlaces={decimalPlaces}
+                          locale={locale}
+                          disabled={!checked || isPending}
+                          onValueChange={(value) =>
+                            setValues((current) => ({
+                              ...current,
+                              [member.id]: value,
+                            }))
+                          }
+                          suggestionLabel={(amount) =>
+                            t('ledger.modal.useSuggestedAmount', { amount })
                           }
                         />
                       )}
