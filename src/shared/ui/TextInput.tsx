@@ -33,7 +33,8 @@ export type TextInputProps = {
     | 'postal-code'
     | 'country-name'
     | 'organization'
-    | 'cc-number';
+    | 'cc-number'
+    | 'transaction-amount';
   required?: boolean;
   disabled?: boolean;
   readonly?: boolean;

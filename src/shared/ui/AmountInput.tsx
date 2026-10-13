@@ -81,6 +81,7 @@ export function AmountInput({
         label={label}
         type="number"
         inputMode="decimal"
+        autocomplete="transaction-amount"
         value={value}
         required={required}
         disabled={disabled}
