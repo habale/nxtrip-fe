@@ -51,6 +51,8 @@ const categories = [
   { value: 'activity', icon: 'activity' },
 ] satisfies Array<{ value: string; icon: IconName }>;
 
+const amountSuggestionsEnabled = false;
+
 function todayInputValue() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -453,6 +455,7 @@ export function AddLedgerEntryModal({
             value={displayedTotal}
             decimalPlaces={decimalPlaces}
             locale={locale}
+            suggestionsEnabled={amountSuggestionsEnabled}
             required
             disabled={derivesTotal || isPending}
             onValueChange={setTotal}
@@ -618,6 +621,7 @@ export function AddLedgerEntryModal({
                           value={values[member.id] ?? ''}
                           decimalPlaces={decimalPlaces}
                           locale={locale}
+                          suggestionsEnabled={amountSuggestionsEnabled}
                           disabled={!checked || isPending}
                           onValueChange={(value) =>
                             setValues((current) => ({

@@ -11,6 +11,7 @@ export type AmountInputProps = {
   locale: string;
   disabled?: boolean;
   required?: boolean;
+  suggestionsEnabled?: boolean;
   onValueChange: (value: string) => void;
   suggestionLabel: (amount: string) => string;
 };
@@ -22,6 +23,7 @@ export function AmountInput({
   locale,
   disabled,
   required,
+  suggestionsEnabled = true,
   onValueChange,
   suggestionLabel,
 }: AmountInputProps) {
@@ -41,7 +43,7 @@ export function AmountInput({
   });
 
   useEffect(() => {
-    if (!focused) return;
+    if (!focused || !suggestionsEnabled) return;
 
     const updateKeyboardInset = () => {
       const viewport = window.visualViewport;
@@ -73,7 +75,7 @@ export function AmountInput({
       window.removeEventListener('resize', updateKeyboardInset);
       setKeyboardVisible(false);
     };
-  }, [focused]);
+  }, [focused, suggestionsEnabled]);
 
   return (
     <div className="ui-amount-input">
@@ -90,6 +92,7 @@ export function AmountInput({
         onBlur={() => setFocused(false)}
       />
       {focused &&
+        suggestionsEnabled &&
         keyboardVisible &&
         suggestions.length > 0 &&
         !disabled &&
