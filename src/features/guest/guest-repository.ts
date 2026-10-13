@@ -434,6 +434,7 @@ export function createGuestRepository(): GuestRepository {
       for (const key of [
         'members',
         'funds',
+        'currencies',
         'expenses',
         'contributions',
         'transfers',

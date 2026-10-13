@@ -1219,7 +1219,7 @@ export function LedgerPanel({
                     memberId={selectedMember.id}
                     locale={locale}
                     decimalPlaces={
-                      data?.currencies.find(
+                      data?.currencies?.find(
                         ({ currency }) =>
                           currency === item.value.expense.currency,
                       )?.decimal_places ?? trip.currency_decimal_places
@@ -1286,7 +1286,7 @@ export function LedgerPanel({
                   expense={item.value}
                   locale={locale}
                   decimalPlaces={
-                    data?.currencies.find(
+                    data?.currencies?.find(
                       ({ currency }) =>
                         currency === item.value.expense.currency,
                     )?.decimal_places ?? trip.currency_decimal_places
